@@ -8,7 +8,7 @@
 <body>
     {% for group in groups %}
         <div>
-            {{ group }}
+            <a href="{{ group.get_absolute_url }}">{{ group }}</a>
         </div>
     {% endfor %}
 </body>

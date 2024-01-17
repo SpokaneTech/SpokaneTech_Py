@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group }}</title>
+</head>
+<body>
+    <a href="{% url 'web:list_tech_groups' %}">Back</a>
+
+    <h1>{{ group }}</h1>
+    {% if group.homepage %}
+        <a href="{{ group.homepage }}">{{ group.homepage }}</a>
+    {% endif %}
+</body>
+</html>

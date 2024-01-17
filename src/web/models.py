@@ -37,4 +37,4 @@ class TechGroup(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
-        return reverse("web:detail_tech_group", kwargs={"pk": self.pk})
+        return reverse("web:get_tech_group", kwargs={"pk": self.pk})

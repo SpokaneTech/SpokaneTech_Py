@@ -15,3 +15,8 @@ def events(request: HttpRequest) -> HttpResponse:
 def list_tech_groups(request: HttpRequest) -> HttpResponse:
     groups = TechGroup.objects.all()
     return render(request, "web/list_tech_groups.html", { "groups": groups })
+
+
+def get_tech_group(request: HttpRequest, pk: int) -> HttpResponse:
+    group = TechGroup.objects.get(pk=pk)
+    return render(request, "web/get_tech_group.html", { "group": group })
