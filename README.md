@@ -20,11 +20,16 @@ pip install -r requirements.txt
 ```
 
 
-
 Run Migrations
 ```
 cd src
 python manage.py migrate
+```
+
+Create a superuser
+```
+cd src
+python manage.py createsuperuser
 ```
 
 Run locally
