@@ -39,7 +39,7 @@ else:
         ) from e
 
     DEBUG = False
-    ALLOWED_HOSTS = ["spokanetech.org"]
+    ALLOWED_HOSTS = ["spokanetech.org", "spokanetech-py.fly.dev"]
 
     # SSL Options
     # TODO: These will have to change depending on how infra-platform handles SSL termination
