@@ -5,7 +5,7 @@
 
 app = 'spokanetech-py'
 primary_region = 'sea'
-console_command = '/code/manage.py shell'
+console_command = '/code/src/manage.py shell'
 
 [build]
 
