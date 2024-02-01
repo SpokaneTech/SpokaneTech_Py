@@ -223,7 +223,7 @@ Python's optional type hints, introduced in PEP 484 and expanded in subsequent P
 
     ```python
     # Consistent style with `:`
-    def greet(name: str) -> None:
+    def greet(name: str):
         print(f"Hello, {name}!")
 
     # Consistent style with `->`
