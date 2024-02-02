@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 IS_DEVELOPMENT = bool(os.environ.get("SPOKANE_TECH_DEV", False))
 if IS_DEVELOPMENT:
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = "django-insecure-t9*!4^fdn*=pmz4%8u_we!88e!8@_!drx0)u_@6$@!nx$4svjp"
+    SECRET_KEY = "django-insecure-t9*!4^fdn*=pmz4%8u_we!88e!8@_!drx0)u_@6$@!nx$4svjp"  # nosec: Development-only key.
 
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
