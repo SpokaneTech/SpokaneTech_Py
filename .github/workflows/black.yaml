@@ -1,0 +1,12 @@
+on: [push]
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    name: "black"
+    steps:
+      - uses: davidslusser/actions_python_black@v1.0.0
+        with:
+          src: "src"
+          options: ""
+          python_version: "3.11"
