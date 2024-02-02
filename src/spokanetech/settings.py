@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
 from pathlib import Path
 
@@ -34,9 +35,7 @@ else:
     try:
         SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     except KeyError as e:
-        raise KeyError(
-            f"{e}: If running in development, set 'SPOKANE_TECH_DEV' to any value."
-        ) from e
+        raise KeyError(f"{e}: If running in development, set 'SPOKANE_TECH_DEV' to any value.") from e
 
     DEBUG = False
     ALLOWED_HOSTS = ["spokanetech.org", "spokanetech-py.fly.dev"]
