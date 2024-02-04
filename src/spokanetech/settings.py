@@ -39,6 +39,7 @@ else:
 
     DEBUG = False
     ALLOWED_HOSTS = ["spokanetech.org", "spokanetech-py.fly.dev"]
+    CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
     # SSL Options
     # TODO: These will have to change depending on how infra-platform handles SSL termination
