@@ -27,4 +27,19 @@ def test_list_tech_groups(client: Client):
 
 @pytest.mark.django_db
 def test_get_tech_group(client: Client):
-    ...
+    # Arrange
+    tech_group = TechGroup(
+        name="Get Tech Groups Test",
+        description="Get Tech Groups Test",
+        enabled=True,
+        homepage="https://spokanetech.org/",
+    )
+    tech_group.save()
+
+    # Act
+    url = reverse("web:get_tech_group", args=[tech_group.pk])
+    response = client.get(url)
+
+    # Assert
+    assert response.status_code == 200
+    assert response.context["group"].pk == tech_group.pk
