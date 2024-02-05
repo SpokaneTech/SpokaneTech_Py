@@ -5,3 +5,6 @@ exclude_dirs = [".venv", "venv", "src/*/tests"]
 [tool.ruff]
 line-length = 120
 exclude = ["src/*/migrations", "src/manage.py"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "spokanetech.settings"
