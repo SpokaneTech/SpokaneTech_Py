@@ -28,3 +28,6 @@ console_command = '/code/src/manage.py shell'
 [[statics]]
   guest_path = '/code/static'
   url_prefix = '/static/'
+
+[deploy]
+  release_command = "./scripts/post_deploy.sh"

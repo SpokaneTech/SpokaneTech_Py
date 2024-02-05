@@ -1,10 +1,13 @@
-from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 
 from web.models import Event, TechGroup
 
+
+# Create your views here.
 def index(request: HttpRequest) -> HttpResponse:
-    return HttpResponse(b"Hello spug.")
+    return render(request, "web/index.html")
+
 
 
 def events(request: HttpRequest) -> HttpResponse:

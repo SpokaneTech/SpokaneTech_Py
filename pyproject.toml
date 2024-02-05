@@ -1,0 +1,7 @@
+[tool.bandit]
+exclude_dirs = [".venv", "venv", "src/*/tests"]
+
+
+[tool.ruff]
+line-length = 120
+exclude = ["src/*/migrations", "src/manage.py"]
