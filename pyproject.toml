@@ -1,5 +1,5 @@
 [tool.bandit]
-exclude_dirs = [".venv", "venv", "src/*/tests"]
+exclude_dirs = [".venv", "venv", "tests"]
 
 
 [tool.ruff]
