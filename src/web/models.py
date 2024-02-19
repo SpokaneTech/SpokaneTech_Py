@@ -1,9 +1,10 @@
 from django.db import models
 from django.urls import reverse
 
-# Create your models here.
+from handyhelpers.models import HandyHelperBaseModel
 
-class Event(models.Model):
+
+class Event(HandyHelperBaseModel):
     """An event on a specific day and time."""
 
     name = models.CharField(max_length=64, help_text="name of this event")
@@ -26,10 +27,10 @@ class Event(models.Model):
         return self.name  # type: ignore
 
     def get_absolute_url(self) -> str:
-        return reverse("web:detail_event", kwargs={"pk": self.pk})
+        return reverse("web:get_event", kwargs={"pk": self.pk})
 
 
-class TechGroup(models.Model):
+class TechGroup(HandyHelperBaseModel):
     """A group that organizes events."""
 
     name = models.CharField(max_length=32, unique=True)

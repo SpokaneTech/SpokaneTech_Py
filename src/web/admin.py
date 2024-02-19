@@ -1,8 +1,23 @@
 from django.contrib import admin
 
-from web.models import Event, TechGroup
+# import models
+from web.models import (Event,
+                        TechGroup
+                        )
 
-# Register your models here.
 
-admin.site.register(Event)
-admin.site.register(TechGroup)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'date_time', 'duration', 'location', 'group', 'created_at', 'updated_at']
+    search_fields = ['id', 'name', 'description', 'duration', 'location']
+    list_filter = ['group']
+
+
+class TechGroupAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'enabled', 'homepage', 'created_at', 'updated_at']
+    search_fields = ['id', 'name', 'description', 'homepage']
+    list_filter = ['enabled']
+
+
+# register models
+admin.site.register(Event, EventAdmin)
+admin.site.register(TechGroup, TechGroupAdmin)
