@@ -54,13 +54,14 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-    "web",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "handyhelpers",
+    "web",
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,8 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+PROJECT_NAME = "Spokane Tech"
+PROJECT_DESCRIPTION = """Community resource for all things tech in the Spokane and CDA area"""
+PROJECT_VERSION = "0.0.1"

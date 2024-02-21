@@ -1,0 +1,30 @@
+<aside id="sidebar" class="js-sidebar">
+    <!-- Content For Sidebar -->
+    <div class="h-100">
+        <div class="sidebar-logo">
+            <a href="/" class="fw-bold text-primary fs-3">Spokane Tech</a>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="#" class="sidebar-link collapsed" data-bs-target="#events" data-bs-toggle="collapse"
+                    aria-expanded="false"><span class="pe-2"><i class="fa-solid fa-calendar-day"></i></span>
+                    Events
+                </a>
+                <ul id="events" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar"
+                hx-get="{% url 'web:sidebar_events' %}" hx-trigger="load" hx-swap="innerHTML">
+                </ul>
+            </li>
+        </ul>
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="#" class="sidebar-link collapsed" data-bs-target="#groups" data-bs-toggle="collapse"
+                    aria-expanded="false"><span class="pe-2"><i class="fa-solid fa-people-group"></i></span>
+                    Groups
+                </a>
+                <ul id="groups" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar"
+                hx-get="{% url 'web:sidebar_groups' %}" hx-trigger="load" hx-swap="innerHTML">
+                </ul>
+            </li>
+        </ul>
+    </div>
+</aside>
