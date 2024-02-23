@@ -1,0 +1,28 @@
+<table data-toggle="table">
+  <thead>
+    <th>Name</th>
+    <th>Group</th>
+    <th>Description</th>
+    <th>When</th>
+    <th>Duration</th>
+    <th>Location</th>
+  </thead>
+  <tbody>
+    {% for event in queryset %}
+      <tr>
+        <td>
+          <a href="{{ event.get_absolute_url }}">{{ event.name }}</a>
+        </td>
+        <td>
+          <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
+        </td>
+        <td>{{ event.description }}</td>
+        <td>
+          {% include 'spokanetech/partials/human_readable_datetime.htm' with object=event only %}
+        </td>
+        <td>{{ event.duration }} hour{{ event.duration|pluralize }}</td>
+        <td>{{ event.location }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
