@@ -1,0 +1,12 @@
+site_name: Spokane Tech — Docs
+
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - styleguide.md
+  - infrastructure.md
+
+extra_css:
+  - static/main.css
