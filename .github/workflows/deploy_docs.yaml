@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '/docs/**'
-      
+      - 'mkdocs.yml'
   workflow_dispatch:
 
 jobs:
@@ -14,18 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      
       - uses: actions/cache@v3
         with:
           key: ${{ github.ref }}
           path: .cache
-      
       - run: pip install -r requirements.txt
-        working-directory: ./docs
-
       - run: mkdocs gh-deploy --force
-        working-directory: ./docs
