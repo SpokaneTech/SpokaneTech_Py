@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from django.views.generic import DetailView
 from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
-from handyhelpers.views.htmx import GenericHtmxView
+from handyhelpers.views.htmx import HtmxSidebarItems
 
 from web.models import Event, TechGroup
 
@@ -58,13 +58,13 @@ def get_event(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "web/get_tech_group.html", { "event": event })
 
 
-class GetTechGroups(GenericHtmxView):
+class GetTechGroups(HtmxSidebarItems):
     """Get a list of enabled TechGroups and render a partial to use on the sidebar navigation"""
     template_name = "web/partials/sidebar_items.htm"
     queryset = TechGroup.objects.filter(enabled=True)
 
 
-class GetEvents(GenericHtmxView):
+class GetEvents(HtmxSidebarItems):
     """Get a list of upcoming Events and render a partial to use on the sidebar navigation"""
     template_name = "web/partials/sidebar_items.htm"
 
