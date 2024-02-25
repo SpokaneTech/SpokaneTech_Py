@@ -23,8 +23,7 @@ class Index(HandyHelperIndexView):
                 "title": str(tech_group),
                 "description": (tech_group.description or "")[:100],
             }
-            for tech_group in
-            TechGroup.objects.all()
+            for tech_group in TechGroup.objects.all()
         ]
         super().__init__(**kwargs)
 
@@ -45,27 +44,29 @@ class DetailEvent(DetailView):
 
 def list_tech_groups(request: HttpRequest) -> HttpResponse:
     groups = TechGroup.objects.all()
-    return render(request, "web/list_tech_groups.html", { "groups": groups })
+    return render(request, "web/list_tech_groups.html", {"groups": groups})
 
 
 def get_tech_group(request: HttpRequest, pk: int) -> HttpResponse:
     group = TechGroup.objects.get(pk=pk)
-    return render(request, "web/get_tech_group.html", { "group": group })
+    return render(request, "web/get_tech_group.html", {"group": group})
 
 
 def get_event(request: HttpRequest, pk: int) -> HttpResponse:
     event = Event.objects.get(pk=pk)
-    return render(request, "web/get_tech_group.html", { "event": event })
+    return render(request, "web/get_tech_group.html", {"event": event})
 
 
 class GetTechGroups(HtmxSidebarItems):
     """Get a list of enabled TechGroups and render a partial to use on the sidebar navigation"""
+
     template_name = "web/partials/sidebar_items.htm"
     queryset = TechGroup.objects.filter(enabled=True)
 
 
 class GetEvents(HtmxSidebarItems):
     """Get a list of upcoming Events and render a partial to use on the sidebar navigation"""
+
     template_name = "web/partials/sidebar_items.htm"
 
     def __init__(self, **kwargs):
