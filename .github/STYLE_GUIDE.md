@@ -1,7 +1,9 @@
 # Project Style Guide
 
+# --8<-- [start:intro]
 This Python style guide provides conventions and best practices for writing clean and maintainable Python code. Adhering to these guidelines will help ensure consistency across projects and enhance the clarity, maintainability, 
 and readability of the code.
+# --8<-- [end:intro]
 
 ## Table of Contents
 - [PEP 8](#pep-8)
@@ -11,19 +13,14 @@ and readability of the code.
 - [Typing](#typing)
 - [Virtual Environments](#virtual-environments)
 
-<br/>
-
+# --8<-- [start:mkdocs]
 ## PEP 8
 
 Adhere to the PEP 8 style guide, which is the style guide for Python code. Please make sure to familiarize yourself with PEP 8 guidelines: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/).
 
-<br/>
-
 ## Line Length
 
 The maximum line length for code and comments is set to 120 characters. This allows for better readability without excessively long lines.
-
-<br/>
 
 ## Naming Conventions
 
@@ -115,8 +112,6 @@ Choosing meaningful and consistent variable names is essential for code readabil
     name_list = ["John", "Mary", "Robert", "Sue"]
     ```
 
-<br/>
-
 ## Docstrings
 
 Documenting your code is crucial for understanding its functionality and usage. Use Google-style docstrings to provide clear and concise documentation.
@@ -172,8 +167,6 @@ Documenting your code is crucial for understanding its functionality and usage. 
         # Function implementation
 
     ```
-
-<br/>
 
 ## Typing
 Python's optional type hints, introduced in PEP 484 and expanded in subsequent PEPs, provide a way to statically indicate the type of variables and function parameters. Proper use of typing can enhance code readability, maintainability, and catch certain types of errors early in the development process.
@@ -310,8 +303,6 @@ Python's optional type hints, introduced in PEP 484 and expanded in subsequent P
         return func(a, b)
     ```
 
-<br/>
-
 ## Virtual Environments
 
 ### Introduction
@@ -342,3 +333,4 @@ source venv/bin/activate
 ```
 
 <br/>
+# --8<-- [end:mkdocs]
