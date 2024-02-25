@@ -3,10 +3,16 @@ site_name: Spokane Tech — Docs
 theme:
   name: material
 
+markdown_extensions:
+  - pymdownx.snippets:
+      base_path: !relative $config_dir
+
 nav:
   - Home: index.md
-  - styleguide.md
-  - infrastructure.md
+  - Contributing: CONTRIBUTING.md
+  - Style Guide: STYLE_GUIDE.md
+  - Infrastructure: infrastructure.md
+  - Code of Conduct: CODE_OF_CONDUCT.md
 
 extra_css:
   - static/main.css

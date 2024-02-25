@@ -1,4 +1,3 @@
-
 # Contributor Code of Conduct
 
 As contributors and maintainers of this project, and in the interest of
@@ -44,6 +43,6 @@ incident.
 
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 1.3.0, available at https://www.contributor-covenant.org/version/1/3/0/code-of-conduct.html
+version 1.3.0, available at [https://www.contributor-covenant.org/version/1/3/0/code-of-conduct.html](https://www.contributor-covenant.org/version/1/3/0/code-of-conduct.html).
 
 [homepage]: https://www.contributor-covenant.org
