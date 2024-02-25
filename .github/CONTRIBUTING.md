@@ -57,13 +57,13 @@ First [fork](https://help.github.com/en/articles/fork-a-repo) the
 git clone git@github.com:<you>/SpokaneTech_Py.git
 ```
 
-Create a virtual environment and install dependancies:
+Create a virtual environment and install dependencies:
 
 ```shell
 cd SpokaneTech_Py
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements/dev.txt
 ```
 
 Unit tests are located under the tests directory and can be executed via pytest:
