@@ -1,7 +1,27 @@
 site_name: Spokane Tech — Docs
+site_url: https://docs.spokanetech.org
+
+plugins:
+  - social:
+  - search:
 
 theme:
   name: material
+  logo: static/logo.jpg
+  favicon: static/logo.jpg
+  palette: 
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.top
 
 markdown_extensions:
   - pymdownx.snippets:
