@@ -1,0 +1,8 @@
+{% extends 'spokanetech/base.html' %}
+
+{% block content %}
+    <h1>{{ object }}</h1>
+    {% if object.homepage %}
+        <a href="{{ object.homepage }}">{{ object.homepage }}</a>
+    {% endif %}
+{% endblock content %}

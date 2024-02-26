@@ -42,4 +42,4 @@ def test_get_tech_group(client: Client):
 
     # Assert
     assert response.status_code == 200
-    assert response.context["group"].pk == tech_group.pk
+    assert response.context["object"].pk == tech_group.pk
