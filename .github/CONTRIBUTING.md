@@ -1,10 +1,10 @@
 # Contributing to SpokaneTech_Py
 
-# --8<-- [start:intro]
+--8<-- [start:intro]
 First off, thank you for considering contributing to SpokaneTech_Py!
 
 The following is a set of guidelines for contributing to this project. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
-# --8<-- [start:end]
+--8<-- [start:end]
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ The following is a set of guidelines for contributing to this project. These are
 - [Style Guide](#style-guide)
 - [License](#license)
 
-# --8<-- [start:mkdocs]
+--8<-- [start:mkdocs]
 ## Code of Conduct
 
 This project and everyone participating in it are governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [maintainer email].
@@ -95,4 +95,4 @@ Follow the coding style outlined in the [style guide](STYLE_GUIDE.md).
 ## License
 
 By contributing, you agree that your contributions will be licensed under the [GNU-3 license](LICENSE.md).
-# --8<-- [start:end]
+--8<-- [start:end]
