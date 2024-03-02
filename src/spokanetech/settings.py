@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "storages",
     "handyhelpers",
     "web",
 ]
@@ -147,8 +148,28 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-if not DEBUG:
-    STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", "/code/static")
+# Storages
+USE_AZURE = os.environ["USE_AZURE"] == "true" if "USE_AZURE" in os.environ else not DEBUG
+if USE_AZURE:
+    DEFAULT_FILE_STORAGE = "spokanetech.backend.AzureMediaStorage"
+    STATICFILES_STORAGE = "spokanetech.backend.AzureStaticStorage"
+
+    STATIC_LOCATION = "static"
+    MEDIA_LOCATION = "media"
+
+    AZURE_URL_EXPIRATION_SECS = None
+    AZURE_ACCOUNT_NAME = os.environ["AZURE_ACCOUNT_NAME"]
+    AZURE_ACCOUNT_KEY = os.environ["AZURE_ACCOUNT_KEY"]
+    AZURE_CUSTOM_DOMAIN = os.environ.get(
+        "AZURE_CDN_DOMAIN",
+        f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
+    )
+    STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
+    MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+    MEDIA_UPLOAD_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}"
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
