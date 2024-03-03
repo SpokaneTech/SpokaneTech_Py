@@ -73,7 +73,6 @@ class BuildSidebar(BuildModelSidebarNav):
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
-            "list_all_url": "events",
         },
         {
             "queryset": TechGroup.objects.filter(enabled=True),
