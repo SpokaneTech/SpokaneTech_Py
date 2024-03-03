@@ -1,9 +1,9 @@
 # Project Style Guide
 
-# --8<-- [start:intro]
+--8<-- [start:intro]
 This Python style guide provides conventions and best practices for writing clean and maintainable Python code. Adhering to these guidelines will help ensure consistency across projects and enhance the clarity, maintainability, 
 and readability of the code.
-# --8<-- [end:intro]
+--8<-- [end:intro]
 
 ## Table of Contents
 - [PEP 8](#pep-8)
@@ -13,7 +13,7 @@ and readability of the code.
 - [Typing](#typing)
 - [Virtual Environments](#virtual-environments)
 
-# --8<-- [start:mkdocs]
+--8<-- [start:mkdocs]
 ## PEP 8
 
 Adhere to the PEP 8 style guide, which is the style guide for Python code. Please make sure to familiarize yourself with PEP 8 guidelines: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/).
@@ -333,4 +333,4 @@ source venv/bin/activate
 ```
 
 <br/>
-# --8<-- [end:mkdocs]
+--8<-- [end:mkdocs]
