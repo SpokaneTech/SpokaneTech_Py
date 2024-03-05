@@ -4,7 +4,6 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.template import loader
 
-# from django.urls import reverse
 from django.views.generic import DetailView
 from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
 from handyhelpers.views.calendar import CalendarView
