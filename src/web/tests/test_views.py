@@ -91,4 +91,4 @@ class TestEventCalendarView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "handyhelpers/partials/calendar.htm")
         self.assertIn(self.object.name, response.content.decode("utf-8"))
-        self.assertIn(f"/get_event_details/{self.object.pk}", response.content.decode("utf-8"))
+        self.assertIn(f"/events/{self.object.pk}/details", response.content.decode("utf-8"))
