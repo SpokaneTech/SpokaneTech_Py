@@ -6,6 +6,12 @@ on:
       - '/docs/**'
       - 'mkdocs.yml'
 
+env:
+  DJANGO_SECRET_KEY: noop
+  CELERY_BROKER_URL: noop
+  DISCORD_WEBHOOK_URL: noop
+  USE_AZURE: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,4 +25,4 @@ jobs:
           key: ${{ github.ref }}
           path: .cache
       - run: pip install -r requirements.txt -r requirements/dev.txt
-      - run: pytest -vv --config-file=pyproject.toml src
+      - run: DJANGO_SECRET_KEY=test pytest -vv --config-file=pyproject.toml src
