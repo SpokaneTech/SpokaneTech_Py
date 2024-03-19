@@ -19,6 +19,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
+    - content.code.annotate
     - navigation.indexes
     - navigation.instant
     - navigation.top
@@ -27,6 +28,13 @@ markdown_extensions:
   - attr_list
   - pymdownx.snippets:
       base_path: !relative $config_dir
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 
 nav:
   - Home: index.md
