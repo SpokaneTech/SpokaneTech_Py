@@ -49,7 +49,7 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         self._timezones_by_abbreviation = {pytz.timezone(tz).tzname(naive_now): tz for tz in pytz.all_timezones}
     
     def scrape(self, url: str) -> list[str]:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
         
@@ -93,7 +93,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
     TIME_RANGE_PATTERN = re.compile(r"(\d{1,}:\d{2} [AP]M) to \d{1,}:\d{2} [AP]M")
 
     def scrape(self, url: str) -> models.Event:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
         
