@@ -1,5 +1,7 @@
 import json
+import pathlib
 import re
+import urllib.parse
 from datetime import datetime
 from typing import Any, Protocol, TypeVar
 
@@ -35,7 +37,7 @@ class MeetupScraperMixin:
         return [apollo_state[key] for key in event_keys]
 
 
-class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[models.Event]]):
+class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
     """Scrape a list of upcoming events from a Meetup group's home page."""
 
     def __init__(self) -> None:
@@ -64,7 +66,6 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[models.Event]]):
             filtered_event_containers = [event for event in events if self._filter_event_tag(event)]
             event_urls = [event_container["href"] for event_container in filtered_event_containers]
         
-        # events = [self.event_scraper.scrape(url) for url in event_urls]  # TODO: parallelize (with async?)
         return event_urls
     
     def _parse_event_urls_from_state(self, apollo_state: dict) -> list[str]:
@@ -108,19 +109,22 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             date_time = datetime.fromisoformat(event_json["dateTime"])
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
+            external_id = event_json["id"]
         else:
             name = self._parse_name(soup)
             description = self._parse_description(soup)
             date_time = self._parse_date_time(soup)
             location = self._parse_location(soup)
+            external_id = self._parse_external_id(url)
 
         return models.Event(
             name=name,
             description=description,
             date_time=date_time,
             location=location,
+            external_id=external_id,
         )
-
+    
     def _parse_name(self, soup: BeautifulSoup) -> str:
         name: str = soup.find_all("h1")[0].text
         name = " ".join(name.split())
@@ -141,3 +145,8 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         location = " ".join((line.strip() for line in location.splitlines()))
         location = location.replace(" · ", ", ")
         return location
+    
+    def _parse_external_id(self, url: str) -> str:
+        parsed_url = urllib.parse.urlparse(url).path
+        external_id = pathlib.PurePosixPath(urllib.parse.unquote(parsed_url)).parts[-1]
+        return external_id

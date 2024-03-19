@@ -3,10 +3,9 @@ from zoneinfo import ZoneInfo
 import pathlib
 
 import freezegun
+import responses
 
 from django.test import TestCase
-
-import responses
 
 from web import scrapers
 
@@ -79,6 +78,7 @@ class TestMeetupEventScraper(TestCase):
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
         assert actual.date_time == datetime(2024, 3, 19, 18, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
+        assert actual.external_id == "298213205"
 
     @responses.activate
     def test_scraper_without_json(self):
@@ -97,3 +97,4 @@ class TestMeetupEventScraper(TestCase):
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
         assert actual.date_time == datetime(2024, 3, 19, 18, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
+        assert actual.external_id == "298213205"
