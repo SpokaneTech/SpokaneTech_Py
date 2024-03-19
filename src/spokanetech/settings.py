@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "storages",
+    "django_celery_results",
+    "django_celery_beat",
     "handyhelpers",
     "web",
 ]
@@ -180,6 +182,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PROJECT_NAME = "Spokane Tech"
 PROJECT_DESCRIPTION = """Community resource for all things tech in the Spokane and CDA area"""
 PROJECT_VERSION = "0.0.1"
+
+
+# Celery
+CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
 # Discord

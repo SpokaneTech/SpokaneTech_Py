@@ -5,6 +5,7 @@
 - [Fly.io](https://fly.io)
     - Hosted app service
     - [PostgresSQL](https://www.postgresql.org/) database ([not managed](https://fly.io/docs/postgres/getting-started/what-you-should-know/))
+    - [Upstash for Redis](https://fly.io/docs/reference/redis/) for the Celery broker (managed)
 - [Azure](https://azure.microsoft.com)
     - Media and static file storage
 

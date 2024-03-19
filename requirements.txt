@@ -1,5 +1,8 @@
 asgiref==3.7.2
+celery[redis]==5.3.6
 dj-database-url==2.1.0
+django-celery-beat==2.6.0
+django-celery-results==2.5.1
 django-handyhelpers==0.3.20
 django-storages[azure]==1.14.2
 Django==5.0.1
