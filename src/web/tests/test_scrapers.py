@@ -36,6 +36,29 @@ class TestMeetupHomepageScraper(TestCase):
         ]
         assert actual == expected
 
+    @freezegun.freeze_time("2024-03-18")
+    @responses.activate
+    def test_scraper_without_json(self):
+        fin = open(pathlib.Path(__file__).parent / "data" / "meetup-homepage-with-json.html")
+        body = fin.read()
+        fin.close()
+        responses.get(
+            "https://www.meetup.com/python-spokane/",
+            body=body,
+        )
+
+        scraper = scrapers.MeetupHomepageScraper()
+        actual = scraper.scrape("https://www.meetup.com/python-spokane/")
+
+        expected = [
+            "https://www.meetup.com/python-spokane/events/298213205/",
+            "https://www.meetup.com/python-spokane/events/299750715/",
+            "https://www.meetup.com/python-spokane/events/298346552/",
+            "https://www.meetup.com/python-spokane/events/298346579/",
+            # "https://www.meetup.com/python-spokane/events/298812750/",  # in the past
+        ]
+        assert actual == expected
+
 
 class TestMeetupEventScraper(TestCase):
 
