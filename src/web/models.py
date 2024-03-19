@@ -17,6 +17,11 @@ class Event(HandyHelperBaseModel):
         null=True,
         help_text="location where this event is being hosted",
     )
+    url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="URL to the event details",
+    )
     group = models.ForeignKey("TechGroup", blank=True, null=True, on_delete=models.SET_NULL)
     # labels = models.ManyToManyField("TechnicalArea")
 
