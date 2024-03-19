@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from celery import shared_task
 from discord import SyncWebhook
 
 from django.conf import settings
@@ -8,7 +9,9 @@ from django.utils import timezone
 from web import models
 
 
-def send_events():
+@shared_task()
+def send_events_to_discord():
+    """Send upcoming events to the Discord server."""
     webhook = SyncWebhook.from_url(settings.DISCORD_WEBHOOK_URL)
     today = timezone.localdate()
     events = models.Event.objects.filter(
