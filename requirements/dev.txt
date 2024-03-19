@@ -1,2 +1,4 @@
+freezegun==1.4.0
 mkdocs==1.5.3
 mkdocs-material[imaging]==9.5.10
+responses==0.25.0
