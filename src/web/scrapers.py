@@ -21,7 +21,21 @@ class Scraper(Protocol[ST]):
         ...
 
 
-class MeetupHomepageScraper(Scraper[list[models.Event]]):
+class MeetupScraperMixin:
+    """Common Meetup scraping functionality."""
+
+    def _parse_apollo_state(self, soup: BeautifulSoup) -> dict:
+        next_data = soup.find_all(attrs={"id": "__NEXT_DATA__"})[0].text
+        next_data = json.loads(next_data)
+        apollo_state: dict[str, Any] = next_data["props"]["pageProps"]["__APOLLO_STATE__"]
+        return apollo_state
+    
+    def _parse_events_json(self, apollo_state: dict) -> list[dict]:
+        event_keys = [key for key in apollo_state.keys() if key.split(":")[0] == "Event"]
+        return [apollo_state[key] for key in event_keys]
+
+
+class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[models.Event]]):
     """Scrape a list of upcoming events from a Meetup group's home page."""
 
     def __init__(self) -> None:
@@ -36,14 +50,34 @@ class MeetupHomepageScraper(Scraper[list[models.Event]]):
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
-        upcoming_section = soup.find_all(id="upcoming-section")[0]
-        events = upcoming_section.find_all_next(id=re.compile(r"event-card-"))
-        filtered_event_containers = [event for event in events if self._filter_event(event)]
-        event_urls = [event_container["href"] for event_container in filtered_event_containers]
+        
+        try:
+            apollo_state = self._parse_apollo_state(soup)
+        except LookupError:
+            apollo_state = {}
+        
+        if apollo_state:
+            event_urls = self._parse_event_urls_from_state(apollo_state)
+        else:
+            upcoming_section = soup.find_all(id="upcoming-section")[0]
+            events = upcoming_section.find_all_next(id=re.compile(r"event-card-"))
+            filtered_event_containers = [event for event in events if self._filter_event_tag(event)]
+            event_urls = [event_container["href"] for event_container in filtered_event_containers]
+        
         # events = [self.event_scraper.scrape(url) for url in event_urls]  # TODO: parallelize (with async?)
         return event_urls
+    
+    def _parse_event_urls_from_state(self, apollo_state: dict) -> list[str]:
+        events = self._parse_events_json(apollo_state)
+        future_events = [
+            event for event in events
+            if datetime.fromisoformat(event["dateTime"]) > self._now
+        ]
+        future_events = sorted(future_events, key=lambda event: datetime.fromisoformat(event["dateTime"]))
+        future_event_urls = [event["eventUrl"] for event in future_events]
+        return future_event_urls
 
-    def _filter_event(self, event: Tag) -> bool:
+    def _filter_event_tag(self, event: Tag) -> bool:
         time: str = event.find_all("time")[0].text
         time, tz_abbrv = time.rsplit(maxsplit=1)
         tz = self._timezones_by_abbreviation[tz_abbrv]
@@ -52,7 +86,7 @@ class MeetupHomepageScraper(Scraper[list[models.Event]]):
         return event_datetime > self._now
 
 
-class MeetupEventScraper(Scraper[models.Event]):
+class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
     """Scrape an Event from a Meetup details page."""
 
     TIME_RANGE_PATTERN = re.compile(r"(\d{1,}:\d{2} [AP]M) to \d{1,}:\d{2} [AP]M")
@@ -64,7 +98,7 @@ class MeetupEventScraper(Scraper[models.Event]):
         
         try:
             apollo_state = self._parse_apollo_state(soup)
-            event_json = self._parse_event_json(apollo_state)
+            event_json = self._parse_events_json(apollo_state)[0]
         except LookupError:
             event_json = {}
             
@@ -86,17 +120,6 @@ class MeetupEventScraper(Scraper[models.Event]):
             date_time=date_time,
             location=location,
         )
-
-    def _parse_apollo_state(self, soup: BeautifulSoup) -> dict:
-        next_data = soup.find_all(attrs={"id": "__NEXT_DATA__"})[0].text
-        next_data = json.loads(next_data)
-        apollo_state: dict[str, Any] = next_data["props"]["pageProps"]["__APOLLO_STATE__"]
-        return apollo_state
-
-    def _parse_event_json(self, apollo_state: dict) -> dict:
-        event_key = [key for key in apollo_state.keys() if key.split(":")[0] == "Event"][0]
-        event_value = apollo_state[event_key]
-        return event_value
 
     def _parse_name(self, soup: BeautifulSoup) -> str:
         name: str = soup.find_all("h1")[0].text
