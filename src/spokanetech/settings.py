@@ -180,3 +180,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PROJECT_NAME = "Spokane Tech"
 PROJECT_DESCRIPTION = """Community resource for all things tech in the Spokane and CDA area"""
 PROJECT_VERSION = "0.0.1"
+
+
+# Discord
+DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
