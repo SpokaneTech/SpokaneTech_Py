@@ -7,8 +7,5 @@ django-handyhelpers==0.3.20
 django-storages[azure]==1.14.2
 Django==5.0.1
 gunicorn==21.2.0
-model-bakery==1.17.0
 psycopg[binary]==3.1.17
-pytest==8.0.0
-pytest-django==4.8.0
 sqlparse==0.4.4
