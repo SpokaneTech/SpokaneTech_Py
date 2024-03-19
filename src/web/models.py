@@ -35,6 +35,11 @@ class Event(HandyHelperBaseModel):
         null=True,
         help_text="location where this event is being hosted",
     )
+    url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="URL to the event details",
+    )
     external_id = models.CharField(
         max_length=1024,
         blank=True,
