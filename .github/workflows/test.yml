@@ -25,4 +25,4 @@ jobs:
           key: ${{ github.ref }}
           path: .cache
       - run: pip install -r requirements.txt -r requirements/dev.txt
-      - run: DJANGO_SECRET_KEY=test pytest -vv --config-file=pyproject.toml src
+      - run: pytest -vv --config-file=pyproject.toml src
