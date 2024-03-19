@@ -41,8 +41,6 @@ class Calculator:
 - Function names should be lowercase, with words separated by underscores.
 - Function names should begin with a verb to indicate the action or operation they perform.
 
-Examples: 
-
 ```python linenums="1" hl_lines="1 5 9"
 def calculate_sum(numbers):
     """Calculate the sum of a list of numbers."""
@@ -63,8 +61,6 @@ Choosing meaningful and consistent variable names is essential for code readabil
 - Use lowercase letters with underscores for variable names (snake_case).
 - Be descriptive and use meaningful names to indicate the purpose of the variable.
 
-Examples:
-
 ```python linenums="1"
 # Good variable names
 user_name = "John"
@@ -78,8 +74,6 @@ n = 5       # Not recommended
 
 
 - Constants should be in uppercase with underscores.
-
-Examples:
 
 ```python linenums="1"
 MAX_RETRIES = 3
