@@ -1,1 +1,0 @@
-{% for event in events %}{{ event.name }}{% endfor %}
