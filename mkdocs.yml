@@ -24,6 +24,7 @@ theme:
     - navigation.top
 
 markdown_extensions:
+  - attr_list
   - pymdownx.snippets:
       base_path: !relative $config_dir
 
@@ -32,6 +33,7 @@ nav:
   - Contributing: CONTRIBUTING.md
   - Style Guide: STYLE_GUIDE.md
   - Infrastructure: infrastructure.md
+  - Celery: celery.md
   - Code of Conduct: CODE_OF_CONDUCT.md
 
 extra_css:
