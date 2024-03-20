@@ -14,6 +14,10 @@ app.conf.beat_schedule = {
         "task": "web.tasks.scrape_events_from_meetup",
         "schedule": crontab(hour="0"),
     },
+    "Send Events to Discord": {
+        "task": "web.tasks.send_events_to_discord",
+        "schedule": crontab(day_of_week="mon"),
+    },
 }
 
 

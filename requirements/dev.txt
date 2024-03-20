@@ -1,4 +1,7 @@
 freezegun==1.4.0
 mkdocs==1.5.3
 mkdocs-material[imaging]==9.5.10
+model-bakery==1.17.0
+pytest==8.0.0
+pytest-django==4.8.0
 responses==0.25.0
