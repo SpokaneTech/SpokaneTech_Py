@@ -194,3 +194,7 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_ACKS_LATE = True
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+
+# Discord
+DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]

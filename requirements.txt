@@ -1,5 +1,6 @@
 asgiref==3.7.2
 celery[redis]==5.3.6
+discord.py==2.3.2
 dj-database-url==2.1.0
 django-celery-beat==2.6.0
 django-celery-results==2.5.1
@@ -7,8 +8,5 @@ django-handyhelpers==0.3.20
 django-storages[azure]==1.14.2
 Django==5.0.1
 gunicorn==21.2.0
-model-bakery==1.17.0
 psycopg[binary]==3.1.17
-pytest==8.0.0
-pytest-django==4.8.0
 sqlparse==0.4.4
