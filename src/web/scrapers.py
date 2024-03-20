@@ -17,9 +17,9 @@ ST = TypeVar("ST", covariant=True)
 
 
 class Scraper(Protocol[ST]):
-    """Scrape the URL and return a typed object."""
 
     def scrape(self, url: str) -> ST:
+        """Scrape the URL and return a typed object."""
         ...
 
 
@@ -89,8 +89,6 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
 
 class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
     """Scrape an Event from a Meetup details page."""
-
-    TIME_RANGE_PATTERN = re.compile(r"(\d{1,}:\d{2} [AP]M) to \d{1,}:\d{2} [AP]M")
 
     def scrape(self, url: str) -> models.Event:
         response = requests.get(url, timeout=10)
