@@ -1,0 +1,11 @@
+# This is only used for local development and only needs to be used if you
+# want to run Celery locally.
+
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+     - "6379:6379"
