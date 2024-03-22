@@ -22,9 +22,12 @@ class MeetupService:
             event_urls = self.homepage_scraper.scrape(tech_group.homepage)  # type: ignore
             for event_url in event_urls:  # TODO: parallelize (with async?)
                 event = self.event_scraper.scrape(event_url)
+                event.group = tech_group
+                defaults = model_to_dict(event, exclude=["id"])
+                defaults["group"] = tech_group
                 models.Event.objects.update_or_create(
                     external_id=event.external_id,
-                    defaults=model_to_dict(event, exclude=["id", "group"]),
+                    defaults=defaults,
                 )
 
 
