@@ -100,7 +100,7 @@ WARNING: You are using pip version 22.0.4; however, version 24.0 is available.
 You should consider upgrading via the '/Users/user/code/SpokaneTech_Py/venv/bin/python -m pip install --upgrade pip' command.
 (venv) $ cp .env.template .env
 (venv) $ cd src
-(venv) $ src python manage.py migrate
+(venv) $ python manage.py migrate
 Operations to perform:
   Apply all migrations: admin, auth, contenttypes, django_celery_beat, django_celery_results, sessions, web
 Running migrations:
@@ -113,13 +113,13 @@ Running migrations:
   Applying web.0002_techgroup_event_group... OK
   Applying web.0003_event_created_at_event_updated_at_and_more... OK
   Applying web.0004_event_url... OK
-(venv) $ src python manage.py createsuperuser
+(venv) $ python manage.py createsuperuser
 Username (leave blank to use 'user'): admin
 Email address: 
 Password: 
 Password (again): 
 Superuser created successfully.
-(venv) $ src python manage.py runserver
+(venv) $ python manage.py runserver
 Watching for file changes with StatReloader
 Performing system checks...
 System check identified no issues (0 silenced).
