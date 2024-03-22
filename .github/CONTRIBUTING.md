@@ -64,6 +64,12 @@ source venv/bin/activate
 pip install -r requirements.txt -r requirements/dev.txt
 ```
 
+ `python-dotenv` will automatically load values in the `.env` file when Django's `manage.py` is used. Create a `.env` file from the template (**note: `.env` should never be checked in to source control!**):
+
+```shell
+cp .env.template .env
+```
+
 Run Django migrations:
 ```shell
 cd src
