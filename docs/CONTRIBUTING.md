@@ -132,13 +132,39 @@ Quit the server with CONTROL-C.
 
 </details>
 
-## Docs
+### Celery
 
-When updating the docs locally, use the following command to run the `mkdocs` server:
+
+The easiest way to run Celery locally is using Docker to run the message broker. We are using redis for our message broker. Make sure you have [Docker](https://docs.docker.com/get-docker/) installed and run the following docker command to start a redis container in the background:
 
 ```shell
-mkdocs serve -w .github -w docs
+docker compose up -d
 ```
+
+In a separate terminal, run the Celery worker:
+
+```shell
+python -m celery --workdir ./src -A spokanetech.celery worker -B -l INFO
+```
+
+After running the Celery worker, you should see periodic tasks show in the [Django admin UI](http://127.0.0.1:8000/admin/django_celery_beat/periodictask/):
+
+```shell
+cd src
+python manage.py runserver # (1)!
+```
+
+1.  Then navigate to the [Django admin UI](http://127.0.0.1:8000/admin/django_celery_beat/periodictask/)
+
+![](./static/celery-admin.png)
+
+Refer to our [Celery docs](./celery.md) for more information on how Celery works.
+
+## Docs
+
+When updating the docs locally, run the mkdocs server with `mkdocs serve`.
+
+You can also build the docs with `mkdocs build`.
 
 ## Style Guide
 
