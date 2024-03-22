@@ -15,9 +15,8 @@ class TestMeetupHomepageScraper(TestCase):
     @freezegun.freeze_time("2024-03-18")
     @responses.activate
     def test_scraper_with_json(self):
-        fin = open(pathlib.Path(__file__).parent / "data" / "meetup-homepage-with-json.html")
-        body = fin.read()
-        fin.close()
+        with open(pathlib.Path(__file__).parent / "data" / "meetup-homepage-with-json.html") as fin:
+            body = fin.read()
         responses.get(
             "https://www.meetup.com/python-spokane/",
             body=body,
