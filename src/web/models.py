@@ -1,7 +1,25 @@
+from __future__ import annotations
+
 from django.db import models
 from django.urls import reverse
 
 from handyhelpers.models import HandyHelperBaseModel
+
+
+class TechGroup(HandyHelperBaseModel):
+    """A group that organizes events."""
+
+    name = models.CharField(max_length=32, unique=True)
+    description = models.TextField(blank=True, null=True)
+    enabled = models.BooleanField(default=True)
+    #platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
+    homepage = models.URLField(blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse("web:get_tech_group", kwargs={"pk": self.pk})
 
 
 class Event(HandyHelperBaseModel):
@@ -22,7 +40,13 @@ class Event(HandyHelperBaseModel):
         null=True,
         help_text="URL to the event details",
     )
-    group = models.ForeignKey("TechGroup", blank=True, null=True, on_delete=models.SET_NULL)
+    external_id = models.CharField(
+        max_length=1024,
+        blank=True,
+        null=True,
+        help_text="ID field for tracking a unique external event",
+    )
+    group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     # labels = models.ManyToManyField("TechnicalArea")
 
     # class Meta:
@@ -33,19 +57,3 @@ class Event(HandyHelperBaseModel):
 
     def get_absolute_url(self) -> str:
         return reverse("web:get_event", kwargs={"pk": self.pk})
-
-
-class TechGroup(HandyHelperBaseModel):
-    """A group that organizes events."""
-
-    name = models.CharField(max_length=32, unique=True)
-    description = models.TextField(blank=True, null=True)
-    enabled = models.BooleanField(default=True)
-    #platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
-    homepage = models.URLField(blank=True, null=True)
-
-    def __str__(self) -> str:
-        return self.name
-
-    def get_absolute_url(self) -> str:
-        return reverse("web:get_tech_group", kwargs={"pk": self.pk})

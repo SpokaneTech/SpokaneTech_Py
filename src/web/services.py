@@ -1,13 +1,36 @@
 from typing import Protocol
 from datetime import timedelta
 
+from django.forms.models import model_to_dict
 from django.utils import timezone
 
-from web import models
+from web import models, scrapers
+
+
+class MeetupService:
+    def __init__(
+        self,
+        homepage_scraper: scrapers.Scraper[list[str]] | None = None,
+        event_scraper: scrapers.Scraper[models.Event] | None = None,
+    ) -> None:
+        self.homepage_scraper: scrapers.Scraper[list[str]] = homepage_scraper or scrapers.MeetupHomepageScraper()
+        self.event_scraper: scrapers.Scraper[models.Event] = event_scraper or scrapers.MeetupEventScraper()
+
+    def scrape_events_from_meetup(self) -> None:
+        """Scrape upcoming events from Meetup and save them to the database."""
+        for tech_group in models.TechGroup.objects.filter(homepage__icontains="meetup.com"):
+            event_urls = self.homepage_scraper.scrape(tech_group.homepage)  # type: ignore
+            for event_url in event_urls:  # TODO: parallelize (with async?)
+                event = self.event_scraper.scrape(event_url)
+                models.Event.objects.update_or_create(
+                    external_id=event.external_id,
+                    defaults=model_to_dict(event, exclude=["id", "group"]),
+                )
 
 
 class Sender(Protocol):
     def send(self, message: str, **kwargs) -> None:
+        """Send a message somewhere."""
         ...
 
 
