@@ -1,0 +1,9 @@
+{
+  "python.testing.pytestArgs": [
+    "--reuse-db",
+    "-vv",
+    "src"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
+}
