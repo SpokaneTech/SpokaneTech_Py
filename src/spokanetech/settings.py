@@ -106,7 +106,7 @@ WSGI_APPLICATION = "spokanetech.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:////{BASE_DIR}/db.sqlite3",
+        default="sqlite:///db.sqlite3",
         conn_max_age=600,
         conn_health_checks=True,
     ),
@@ -188,7 +188,15 @@ PROJECT_VERSION = "0.0.1"
 
 
 # Celery
-CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+try:
+    CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+    CELERY_ENABLED = True
+except KeyError:
+    if IS_DEVELOPMENT:
+        CELERY_ENABLED = False
+    else:
+        raise
+
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
