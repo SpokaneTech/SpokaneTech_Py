@@ -2,7 +2,7 @@ import json
 import pathlib
 import re
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Protocol, TypeVar
 
 import pytz
@@ -90,6 +90,8 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
 class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
     """Scrape an Event from a Meetup details page."""
 
+    DURATION_PATTERN = re.compile(r"1?\d:\d{2} [AP]M to 1?\d:\d{2} [AP]M")
+
     def scrape(self, url: str) -> models.Event:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -105,6 +107,8 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             name = event_json["title"]
             description = event_json["description"]
             date_time = datetime.fromisoformat(event_json["dateTime"])
+            end_time = datetime.fromisoformat(event_json["endTime"])
+            duration = end_time - date_time
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
             external_id = event_json["id"]
@@ -112,6 +116,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             name = self._parse_name(soup)
             description = self._parse_description(soup)
             date_time = self._parse_date_time(soup)
+            duration = self._parse_duration(soup)
             location = self._parse_location(soup)
             external_id = self._parse_external_id(url)
 
@@ -119,8 +124,10 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             name=name,
             description=description,
             date_time=date_time,
+            duration=duration,
             location=location,
             external_id=external_id,
+            url=url,
         )
     
     def _parse_name(self, soup: BeautifulSoup) -> str:
@@ -137,6 +144,16 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
     
     def _parse_date_time(self, soup: BeautifulSoup) -> datetime:
         return datetime.fromisoformat(soup.find_all("time")[0]["datetime"])
+
+    def _parse_duration(self, soup: BeautifulSoup) -> timedelta:
+        time: Tag = soup.find_all("time")[0]
+        matches = self.DURATION_PATTERN.findall(time.text)
+        if not matches:
+            raise ValueError("Could not find duration from:", time.text)
+        start_time, end_time = matches[0].split(" to ")
+        start_time = datetime.strptime(start_time, "%I:%M %p")
+        end_time = datetime.strptime(end_time, "%I:%M %p")
+        return end_time - start_time
 
     def _parse_location(self, soup: BeautifulSoup) -> str:
         location: str = soup.find_all(attrs={"data-testid": "location-info"})[0].text
