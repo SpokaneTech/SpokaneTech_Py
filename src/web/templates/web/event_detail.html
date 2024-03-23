@@ -1,43 +1,7 @@
 {% extends 'spokanetech/base.html' %}
-{% load web_extras %}
-
-{% block page_head %}
-<style>
-.group-card {
-  width: fit-content;
-}
-</style>
-{% endblock page_head %}
 
 {% block content %}
 <div class="mw-100">
-  <h1 class="mb-3 text-primary">
-    {{ object }}
-  </h1>
-  
-  <div class="mb-3 d-inline-block">
-    {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object only %}
-    {% if object.duration %}for {{ object.duration|timedelta }}{% endif %}
-  </div>
-  
-  <div class="mb-3 card group-card">
-    <div class="card-body">
-      <div class="card-title">
-        <a href="{{ object.group.get_absolute_url }}">{{ object.group }}</a>
-      </div>
-      <p class="card-text">{{ object.group.description|truncatewords_html:10 }}</p>
-    </div>
-  </div>
-  
-  <p>
-    <h2>Description</h2>
-    {{ object.description }}
-  </p>
-
-  {% if event.url %}
-  <a class="btn btn-primary" href="{{ event.url }}" target="_blank">
-    RSVP <i class="fa-solid fa-arrow-up-right-from-square"></i> 
-  </a>
-  {% endif %}
+  {% include "web/partials/detail_event.htm" with object=object %}
 </div>
 {% endblock content %}
