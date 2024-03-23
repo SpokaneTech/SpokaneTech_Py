@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "storages",
     "django_celery_results",
     "django_celery_beat",
+    "markdownify.apps.MarkdownifyConfig",
     "handyhelpers",
     "web",
 ]
@@ -209,3 +210,25 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Discord
 DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+
+
+# Markdownify
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            "a",
+            "abbr",
+            "acronym",
+            "b",
+            "blockquote",
+            "code",
+            "em",
+            "i",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "ul",
+        ]
+    },
+}
