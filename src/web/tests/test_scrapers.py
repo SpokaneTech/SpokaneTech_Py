@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import pathlib
 
@@ -76,7 +76,9 @@ class TestMeetupEventScraper(TestCase):
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
         assert actual.date_time == datetime(2024, 3, 19, 18, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
+        assert actual.duration == timedelta(hours=1, minutes=30)
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
+        assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
 
     @responses.activate
@@ -95,5 +97,7 @@ class TestMeetupEventScraper(TestCase):
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
         assert actual.date_time == datetime(2024, 3, 19, 18, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
+        assert actual.duration == timedelta(hours=1, minutes=30)
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
+        assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"

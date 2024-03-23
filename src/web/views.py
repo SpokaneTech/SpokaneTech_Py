@@ -68,6 +68,8 @@ def list_tech_groups(request: HttpRequest) -> HttpResponse:
 class BuildSidebar(BuildModelSidebarNav):
     """Get a list of upcoming Events and enabled TechGroups and render a partial to use on the sidebar navigation"""
 
+    template_name = "spokanetech/htmx/build_sidebar.htm"
+
     menu_item_list = [
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()),

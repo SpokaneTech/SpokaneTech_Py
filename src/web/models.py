@@ -28,7 +28,7 @@ class Event(HandyHelperBaseModel):
     name = models.CharField(max_length=64, help_text="name of this event")
     description = models.TextField(blank=True, null=True, help_text="name of this event")
     date_time = models.DateTimeField(auto_now=False, auto_now_add=False, help_text="")
-    duration = models.IntegerField(blank=True, null=True, help_text="planned duration of this event")
+    duration = models.DurationField(blank=True, null=True, help_text="planned duration of this event")
     location = models.CharField(
         max_length=128,
         blank=True,
