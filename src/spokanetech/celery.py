@@ -19,6 +19,6 @@ if settings.CELERY_ENABLED:
         },
         "Send Events to Discord": {
             "task": "web.tasks.send_events_to_discord",
-            "schedule": crontab(day_of_week="mon"),
+            "schedule": crontab(day_of_week="mon", hour="0", minute="0"),
         },
     }
