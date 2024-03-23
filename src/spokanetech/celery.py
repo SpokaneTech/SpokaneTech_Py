@@ -15,10 +15,10 @@ if settings.CELERY_ENABLED:
     app.conf.beat_schedule = {
         "Scrape Events from Meetup": {
             "task": "web.tasks.scrape_events_from_meetup",
-            "schedule": crontab(hour="0"),
+            "schedule": crontab(hour="0", minute="0"),
         },
         "Send Events to Discord": {
             "task": "web.tasks.send_events_to_discord",
-            "schedule": crontab(day_of_week="mon"),
+            "schedule": crontab(day_of_week="mon", hour="0", minute="0"),
         },
     }
