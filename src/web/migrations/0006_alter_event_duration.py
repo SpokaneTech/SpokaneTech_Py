@@ -10,7 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='event',
+            name='duration',
+            field=models.IntegerField(blank=True, help_text='planned duration of this event', null=True),
+        ),
+        migrations.AddField(
             model_name='event',
             name='duration',
             field=models.DurationField(blank=True, help_text='planned duration of this event', null=True),
