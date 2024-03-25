@@ -7,7 +7,6 @@ from asyncio import TaskGroup
 
 PYTHON_VERSION = "3.11-slim-bullseye"
 GUNICORN_CMD = ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
-DATABASE_URL = "postgres://dagger:dagger@postgres:5432/dagger"
 
 
 @object_type
@@ -25,10 +24,7 @@ class SpokaneTech:
             .with_env_variable("PYTHONDONTWRITEBYTECODE", "1")
             .with_env_variable("PYTHONUNBUFFERED", "1")
             # Default Env vars
-            .with_env_variable("SPOKANE_TECH_DEV", "true")
-            .with_env_variable("DISCORD_WEBHOOK_URL", "")
-            .with_env_variable("DATABASE_URL", DATABASE_URL)
-            .with_env_variable("USE_AZURE", "false")
+            .with_(env_variables())
             .with_exposed_port(8000)
             .with_file("/tmp/requirements.txt", self.req)
             .with_exec(["pip", "install", "--upgrade", "pip"])
@@ -51,7 +47,6 @@ class SpokaneTech:
             await self.wipe_db_cache()
         ctr = (
             self.base_container()
-            .with_env_variable("CELERY_BROKER_URL", "redis://redis:6379/0")
             .with_workdir("/code/src")
             # Need to make sure to run the migrations if the database was wiped
             .with_env_variable("CACHEBUSTER", str(time()) if fresh_database else "")
@@ -72,7 +67,11 @@ class SpokaneTech:
 
         Used to deploy to Fly.io.
         """
-        return self.base_container().with_exec(GUNICORN_CMD)
+        return (
+            self.base_container()
+            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in Fly.io prod.
+            .with_exec(GUNICORN_CMD)
+        )
 
     async def wipe_db_cache(self) -> str:
         return await (
@@ -102,7 +101,7 @@ class SpokaneTech:
         return (
             self.base_container()
             .without_exposed_port(8000)
-            .with_env_variable("CELERY_BROKER_URL", "redis://redis:6379/0")
+            .with_(env_variables())
             .with_service_binding("postgres", self.postgres())
             .with_service_binding("redis", self.redis())
             .with_exec(
@@ -179,3 +178,28 @@ class SpokaneTech:
             .with_service_binding("postgres", self.postgres())
         )
         return await self.run_linter("pytest -vv --config-file=pyproject.toml src", ctr)
+
+
+def env_variables(**kwargs):
+    """
+    Used to add environment variables to a container.
+
+    To override or add environment variables pass them as kwargs to the function.
+    """
+    defaults: dict[str, str] = {
+        "SPOKANE_TECH_DEV": "true",
+        "DATABASE_URL": "postgres://dagger:dagger@postgres:5432/dagger",
+        "CELERY_BROKER_URL": "redis://redis:6379/0",
+        "USE_AZURE": "false",
+        "CELERY_BROKER_URL": "redis://localhost:6379/0",
+        "DISCORD_WEBHOOK_URL": "",
+    }
+    if kwargs is not None:
+        defaults.update(kwargs)
+
+    def _env_vars(ctr: dagger.Container) -> dagger.Container:
+        for k, v in defaults.items():
+            ctr = ctr.with_env_variable(k, v)
+        return ctr
+
+    return _env_vars
