@@ -166,9 +166,16 @@ class SpokaneTech:
         return await self.run_linter("bandit -c pyproject.toml -r src", ctr)
 
     @function
-    async def test(self, pyproject: dagger.File) -> str:
+    async def test(self, pyproject: dagger.File, dev_req: dagger.File) -> str:
         """
         Run tests using Pytest.
         """
-        ctr = self.base_container().with_file("pyproject.toml", pyproject).with_workdir("src/")
-        return await self.run_linter("pytest", ctr)
+        ctr = (
+            self.base_container()
+            .with_env_variable("CELERY_BROKER_URL", "noop")
+            .with_file("dev_req.txt", dev_req)
+            .with_exec(["pip", "install", "-r", "dev_req.txt"])
+            .with_file("pyproject.toml", pyproject)
+            .with_service_binding("postgres", self.postgres())
+        )
+        return await self.run_linter("pytest -vv --config-file=pyproject.toml src", ctr)
