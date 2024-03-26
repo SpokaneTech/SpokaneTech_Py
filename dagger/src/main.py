@@ -122,23 +122,15 @@ class SpokaneTech:
             .as_service()
         )
 
-    async def run_linter(self, cmd: str, ctr: dagger.Container) -> str:
+    async def run_linter(self, cmd: list[str], ctr: dagger.Container) -> str:
         """
         Helper function to run linters.
         """
-        lint = ctr.with_exec(["bash", "-c", f"{cmd} &> results; echo -n $? > exitcode"])
-
-        async with TaskGroup() as tg:
-            code = tg.create_task(lint.file("exitcode").contents())
-            result = tg.create_task(lint.file("results").contents())
-
-        exit_code = int(code.result())
-        result = result.result()
-
-        if exit_code != 0:
-            # CancelledError so it won't cancel other tasks when run in a TaskGroup.
-            raise CancelledError(f"Command '{cmd}' failed with exit code {exit_code} and stdout/stderr:\n{result}")
-        return f"Command '{cmd}' succeded with exit code {exit_code}\n\tand stdout/stderr:\n{result}"
+        try:
+            return f"Command {' '.join(cmd)} passed!\n{await ctr.with_exec(cmd).stdout()}"
+        except dagger.ExecError as e:
+            # The ExecError exposes the
+            raise LinterError(exec_error=e)
 
     @function
     async def lint(self) -> str:
@@ -146,7 +138,7 @@ class SpokaneTech:
         Lint using ruff.
         """
         ctr = self.base_container().with_exec(["pip", "install", "ruff"])
-        return await self.run_linter("ruff check", ctr)
+        return await self.run_linter(["ruff", "check"], ctr)
 
     @function
     async def format(self) -> str:
@@ -154,7 +146,7 @@ class SpokaneTech:
         Check if the code is formatted correctly.
         """
         ctr = self.base_container().with_exec(["pip", "install", "ruff"])
-        return await self.run_linter("ruff format --check", ctr)
+        return await self.run_linter(["ruff", "format", "--check"], ctr)
 
     @function
     async def bandit(self, pyproject: dagger.File) -> str:
@@ -162,7 +154,7 @@ class SpokaneTech:
         Check for security issues using Bandit.
         """
         ctr = self.base_container().with_exec(["pip", "install", "bandit"]).with_file("pyproject.toml", pyproject)
-        return await self.run_linter("bandit -c pyproject.toml -r src", ctr)
+        return await self.run_linter(["bandit", "-c", "pyproject.toml", "-r", "src"], ctr)
 
     @function
     async def test(self, pyproject: dagger.File, dev_req: dagger.File) -> str:
@@ -172,18 +164,18 @@ class SpokaneTech:
         ctr = (
             self.base_container()
             .with_env_variable("CELERY_BROKER_URL", "noop")
+            .without_env_variable("DATABASE_URL")  # Use default sqlite
             .with_file("dev_req.txt", dev_req)
             .with_exec(["pip", "install", "-r", "dev_req.txt"])
             .with_file("pyproject.toml", pyproject)
-            .with_service_binding("postgres", self.postgres())
         )
-        return await self.run_linter("pytest -vv --config-file=pyproject.toml src", ctr)
+        return await self.run_linter(["pytest", "-vv", "--config-file", "pyproject.toml", "src"], ctr)
 
     @function
     async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
         """
         Runs all the liners.
-        Pass `--verbose` to not truncate passed linters.
+        Pass `--verbose` to not summarize linter output.
         """
         # Run all the linters
         async with TaskGroup() as tg:
@@ -206,13 +198,16 @@ class SpokaneTech:
         failed = ""
         for task in tasks:
             try:
+                # Task Passed
                 result = task.result()
                 if not verbose:
                     result = result.splitlines()[0]  # Just grab the first line
-                passed = f"{passed}\n{PASS}{result}"
-            except CancelledError as e:
-                result = str(e)
-                failed = f"{failed}\n{FAIL}{result}"
+                passed += f"{PASS}{result}\n"
+            except LinterError as e:
+                # Task failed
+                failed += f"{FAIL}Command `{' '.join(e.exec_error.command)}` failed with exit code {e.exec_error.exit_code}.\n"
+                if verbose:
+                    failed += f"stdout:\n{e.exec_error.stdout}\nstderr:\n{e.exec_error.stderr}\n"
         if failed:
             print(f"{passed}\n{failed}")
             sys.exit(1)
@@ -221,7 +216,7 @@ class SpokaneTech:
 
 def env_variables(**kwargs):
     """
-    Used to add environment variables to a container.
+    Used to add environment variables to a container via the `dagger.Container.with_` function.
 
     To override or add environment variables pass them as kwargs to the function.
     """
@@ -241,3 +236,13 @@ def env_variables(**kwargs):
         return ctr
 
     return _env_vars
+
+
+class LinterError(CancelledError):
+    exec_error: dagger.ExecError
+
+    def __init__(self, exec_error):
+        self.exec_error = exec_error
+
+    def __str__(self):
+        return str(self.exec_error)
