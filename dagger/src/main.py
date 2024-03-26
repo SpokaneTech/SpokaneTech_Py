@@ -3,7 +3,7 @@ from dagger import dag, function, object_type
 
 import sys
 from time import time
-from asyncio import TaskGroup
+from asyncio import CancelledError, TaskGroup
 
 PYTHON_VERSION = "3.11-slim-bullseye"
 GUNICORN_CMD = ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
@@ -136,9 +136,9 @@ class SpokaneTech:
         result = result.result()
 
         if exit_code != 0:
-            print(result)
-            sys.exit(exit_code)
-        return result
+            # CancelledError so it won't cancel other tasks when run in a TaskGroup.
+            raise CancelledError(f"Command '{cmd}' failed with exit code {exit_code} and stdout/stderr:\n{result}")
+        return f"Command '{cmd}' succeded with exit code {exit_code}\n\tand stdout/stderr:\n{result}"
 
     @function
     async def lint(self) -> str:
@@ -179,6 +179,45 @@ class SpokaneTech:
         )
         return await self.run_linter("pytest -vv --config-file=pyproject.toml src", ctr)
 
+    @function
+    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
+        """
+        Runs all the liners.
+        Pass `--verbose` to not truncate passed linters.
+        """
+        # Run all the linters
+        async with TaskGroup() as tg:
+            tasks = [
+                tg.create_task(self.lint()),
+                tg.create_task(self.format()),
+                tg.create_task(self.bandit(pyproject)),
+                tg.create_task(self.test(pyproject, dev_req)),
+            ]
+
+        # Color Codes
+        RESET = "\u001b[0m"
+        RED = "\u001b[31m"
+        GREEN = "\u001b[32m"
+        PASS = f"{GREEN}PASSED!{RESET} "
+        FAIL = f"{RED}FAILED!{RESET} "
+
+        # Format the results nicely
+        passed = ""
+        failed = ""
+        for task in tasks:
+            try:
+                result = task.result()
+                if not verbose:
+                    result = result.splitlines()[0]  # Just grab the first line
+                passed = f"{passed}\n{PASS}{result}"
+            except CancelledError as e:
+                result = str(e)
+                failed = f"{failed}\n{FAIL}{result}"
+        if failed:
+            print(f"{passed}\n{failed}")
+            sys.exit(1)
+        return f"{passed}\n{failed}"
+
 
 def env_variables(**kwargs):
     """
@@ -189,9 +228,8 @@ def env_variables(**kwargs):
     defaults: dict[str, str] = {
         "SPOKANE_TECH_DEV": "true",
         "DATABASE_URL": "postgres://dagger:dagger@postgres:5432/dagger",
-        "CELERY_BROKER_URL": "redis://redis:6379/0",
         "USE_AZURE": "false",
-        "CELERY_BROKER_URL": "redis://localhost:6379/0",
+        "CELERY_BROKER_URL": "redis://redis:6379/0",
         "DISCORD_WEBHOOK_URL": "",
     }
     if kwargs is not None:
