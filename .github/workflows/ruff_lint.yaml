@@ -14,3 +14,4 @@ jobs:
         with:
           verb: call 
           args: "--src src --req requirements.txt lint"
+          module: "dagger"
