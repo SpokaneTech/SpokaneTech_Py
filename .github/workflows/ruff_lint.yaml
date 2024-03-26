@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     name: "ruff"
     steps:
+      - name: "Checkout Repo"
+        uses: actions/checkout@v4
       - name: Lint using Ruff
         uses: dagger/dagger-for-github@v5
         with:
           verb: call 
           args: "--src src --req requirements.txt lint"
-          module: "dagger"
+          version: "0.10.2"
