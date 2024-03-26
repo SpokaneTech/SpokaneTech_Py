@@ -213,6 +213,41 @@ class SpokaneTech:
             sys.exit(1)
         return f"{passed}\n{failed}"
 
+    @function
+    def docs(self, mkdocs: dagger.File) -> dagger.Service:
+        """
+        Run the documentation server locally, without needing to
+        install cairo.
+
+        When calling this function use
+          `--src ./docs` and `--req ./requirements/dev.txt`.
+        """
+        return (
+            dag.container()
+            .from_(f"python:{PYTHON_VERSION}")
+            .with_exec(["apt-get", "update"])
+            .with_exec(
+                [
+                    "apt-get",
+                    "install",
+                    "-y",
+                    "libcairo2-dev",
+                    "libfreetype6-dev",
+                    "libffi-dev",
+                    "libjpeg-dev",
+                    "libpng-dev",
+                    "libz-dev",
+                ]
+            )
+            .with_exposed_port(8000)
+            .with_file("/req.txt", self.req)
+            .with_exec(["pip", "install", "-r", "req.txt"])
+            .with_directory("/docs", self.src)
+            .with_file("mkdocs.yaml", mkdocs)
+            .with_exec(["mkdocs", "serve", "-a", "0.0.0.0:8000", "--no-livereload"])
+            .as_service()
+        )
+
 
 def env_variables(**kwargs):
     """
