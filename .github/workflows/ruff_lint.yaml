@@ -7,7 +7,7 @@ on:
 jobs:
   ruff:
     runs-on: ubuntu-latest
-    name: "ruff"
+    name: Lint using Ruff
     steps:
       - name: "Checkout Repo"
         uses: actions/checkout@v4
