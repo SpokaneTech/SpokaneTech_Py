@@ -15,7 +15,7 @@ def _timedelta(duration: timedelta) -> str:
     hours = minutes // 60
 
     result = f"{hours} hour{pluralize(hours)}"
-    
+
     remaining_minutes = minutes % 60
     if remaining_minutes != 0:
         result += f" {remaining_minutes} minute{pluralize(remaining_minutes)}"

@@ -12,7 +12,7 @@ class TechGroup(HandyHelperBaseModel):
     name = models.CharField(max_length=32, unique=True)
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
-    #platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
+    # platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
     homepage = models.URLField(blank=True, null=True)
 
     def __str__(self) -> str:

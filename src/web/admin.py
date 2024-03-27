@@ -1,21 +1,29 @@
 from django.contrib import admin
 
 # import models
-from web.models import (Event,
-                        TechGroup
-                        )
+from web.models import Event, TechGroup
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'date_time', 'duration', 'location', 'group', 'created_at', 'updated_at']
-    search_fields = ['id', 'name', 'description', 'duration', 'location']
-    list_filter = ['group']
+    list_display = [
+        "id",
+        "name",
+        "description",
+        "date_time",
+        "duration",
+        "location",
+        "group",
+        "created_at",
+        "updated_at",
+    ]
+    search_fields = ["id", "name", "description", "duration", "location"]
+    list_filter = ["group"]
 
 
 class TechGroupAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'description', 'enabled', 'homepage', 'created_at', 'updated_at']
-    search_fields = ['id', 'name', 'description', 'homepage']
-    list_filter = ['enabled']
+    list_display = ["id", "name", "description", "enabled", "homepage", "created_at", "updated_at"]
+    search_fields = ["id", "name", "description", "homepage"]
+    list_filter = ["enabled"]
 
 
 # register models
