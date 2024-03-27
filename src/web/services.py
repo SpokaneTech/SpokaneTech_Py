@@ -44,10 +44,14 @@ class DiscordService:
     def send_events(self) -> None:
         """Send upcoming events to the Discord server."""
         today = timezone.localdate()
-        events = models.Event.objects.filter(
-            date_time__gte=today,
-            date_time__lt=today + timedelta(days=7),
-        ).select_related("group").order_by("date_time")
+        events = (
+            models.Event.objects.filter(
+                date_time__gte=today,
+                date_time__lt=today + timedelta(days=7),
+            )
+            .select_related("group")
+            .order_by("date_time")
+        )
 
         message = "_Here are the upcoming Spokane Tech events for this week:_\n\n"
         for event in events:
