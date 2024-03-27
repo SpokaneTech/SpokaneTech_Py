@@ -133,11 +133,11 @@ class SpokaneTech:
             raise LinterError(exec_error=e)
 
     @function
-    async def lint(self) -> str:
+    async def lint(self, pyproject: dagger.File) -> str:
         """
         Lint using ruff.
         """
-        ctr = self.base_container().with_exec(["pip", "install", "ruff"])
+        ctr = self.base_container().with_exec(["pip", "install", "ruff"]).with_file("pyproject.toml", pyproject)
         return await self.run_linter(["ruff", "check"], ctr)
 
     @function
@@ -180,7 +180,7 @@ class SpokaneTech:
         # Run all the linters
         async with TaskGroup() as tg:
             tasks = [
-                tg.create_task(self.lint()),
+                tg.create_task(self.lint(pyproject)),
                 tg.create_task(self.format(pyproject)),
                 tg.create_task(self.bandit(pyproject)),
                 tg.create_task(self.test(pyproject, dev_req)),
