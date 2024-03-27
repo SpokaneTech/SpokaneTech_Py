@@ -141,11 +141,11 @@ class SpokaneTech:
         return await self.run_linter(["ruff", "check"], ctr)
 
     @function
-    async def format(self) -> str:
+    async def format(self, pyproject: dagger.File) -> str:
         """
         Check if the code is formatted correctly.
         """
-        ctr = self.base_container().with_exec(["pip", "install", "ruff"])
+        ctr = self.base_container().with_exec(["pip", "install", "ruff"]).with_file("pyproject.toml", pyproject)
         return await self.run_linter(["ruff", "format", "--check"], ctr)
 
     @function
@@ -181,7 +181,7 @@ class SpokaneTech:
         async with TaskGroup() as tg:
             tasks = [
                 tg.create_task(self.lint()),
-                tg.create_task(self.format()),
+                tg.create_task(self.format(pyproject)),
                 tg.create_task(self.bandit(pyproject)),
                 tg.create_task(self.test(pyproject, dev_req)),
             ]
