@@ -11,25 +11,31 @@ class MeetupService:
     def __init__(
         self,
         homepage_scraper: scrapers.Scraper[list[str]] | None = None,
-        event_scraper: scrapers.Scraper[models.Event] | None = None,
+        event_scraper: scrapers.Scraper[scrapers.MeetUpEventScraperResult] | None = None,
     ) -> None:
         self.homepage_scraper: scrapers.Scraper[list[str]] = homepage_scraper or scrapers.MeetupHomepageScraper()
-        self.event_scraper: scrapers.Scraper[models.Event] = event_scraper or scrapers.MeetupEventScraper()
+        self.event_scraper: scrapers.Scraper[scrapers.MeetUpEventScraperResult] = (
+            event_scraper or scrapers.MeetupEventScraper()
+        )
 
     def scrape_events_from_meetup(self) -> None:
         """Scrape upcoming events from Meetup and save them to the database."""
         for tech_group in models.TechGroup.objects.filter(homepage__icontains="meetup.com"):
             event_urls = self.homepage_scraper.scrape(tech_group.homepage)  # type: ignore
             for event_url in event_urls:  # TODO: parallelize (with async?)
-                event = self.event_scraper.scrape(event_url)
+                event, tags = self.event_scraper.scrape(event_url)
                 event.group = tech_group
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
-                del defaults["tags"]
-                models.Event.objects.update_or_create(
+
+                tags = defaults["tags"]
+                del defaults["tags"]  # Can't apply Many-to-Many relationship untill after the event has been saved.
+                new_event, _ = models.Event.objects.update_or_create(
                     external_id=event.external_id,
                     defaults=defaults,
                 )
+                for tag in tags:
+                    new_event.tags.add(tag)
 
 
 class Sender(Protocol):

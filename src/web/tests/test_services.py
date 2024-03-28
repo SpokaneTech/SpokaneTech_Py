@@ -9,28 +9,40 @@ class MockMeetupHomepageScraper(scrapers.Scraper[list[str]]):
         return ["https://www.meetup.com/python-spokane/events/298213205/"]
 
 
-class MockMeetupEventScraper(scrapers.Scraper[models.Event]):
+class MockMeetupEventScraper(scrapers.Scraper[scrapers.MeetUpEventScraperResult]):
     EXTERNAL_ID = "298213205"
 
     def __init__(self) -> None:
         self._call_count = 0
 
-    def scrape(self, url: str) -> models.Event:
+    def scrape(self, url: str) -> scrapers.MeetUpEventScraperResult:
         self._call_count += 1
 
         if self._call_count == 1:
-            return models.Event(
-                name="March Meetup 2024",
-                description="TBD",
-                date_time=timezone.localtime(),
-                external_id=self.EXTERNAL_ID,
+            return (
+                models.Event(
+                    name="March Meetup 2024",
+                    description="TBD",
+                    date_time=timezone.localtime(),
+                    external_id=self.EXTERNAL_ID,
+                ),
+                [],
             )
 
-        return models.Event(
-            name="Intro to Dagger",
-            description="Super cool intro to Dagger CI/CD!",
-            date_time=timezone.localtime(),
-            external_id=self.EXTERNAL_ID,
+        return (
+            models.Event(
+                name="Intro to Dagger",
+                description="Super cool intro to Dagger CI/CD!",
+                date_time=timezone.localtime(),
+                external_id=self.EXTERNAL_ID,
+            ),
+            [
+                models.Tag(value="Linux"),
+                models.Tag(value="Python"),
+                models.Tag(value="Django"),
+                models.Tag(value="Agile and Scrum"),
+                models.Tag(value="Python Web Development"),
+            ],
         )
 
 
