@@ -5,6 +5,15 @@ from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 
+class Tag(models.Model):
+    """A Tag that describes attributes of a Event."""
+
+    value = models.CharField(max_length=32, unique=True, null=False)
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class TechGroup(HandyHelperBaseModel):
     """A group that organizes events."""
 
@@ -55,6 +64,7 @@ class Event(HandyHelperBaseModel):
         help_text="ID field for tracking a unique external event",
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(Tag)
     # labels = models.ManyToManyField("TechnicalArea")
 
     # class Meta:
