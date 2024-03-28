@@ -5,7 +5,7 @@ from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 
-class Tag(models.Model):
+class Tag(HandyHelperBaseModel):
     """A Tag that describes attributes of a Event."""
 
     value = models.CharField(max_length=32, unique=True, null=False)
