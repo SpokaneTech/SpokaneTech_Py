@@ -25,6 +25,7 @@ class MeetupService:
                 event.group = tech_group
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
+                del defaults["tags"]
                 models.Event.objects.update_or_create(
                     external_id=event.external_id,
                     defaults=defaults,

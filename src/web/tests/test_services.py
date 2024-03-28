@@ -58,3 +58,36 @@ class TestMeetupService(TestCase):
         assert event.name == "Intro to Dagger"
         assert event.description == "Super cool intro to Dagger CI/CD!"
         assert event.external_id == MockMeetupEventScraper.EXTERNAL_ID
+
+    def test_manually_applied_tags_are_not_overriden(self):
+        # Arrange
+        tags = {
+            models.Tag.objects.create(value="Python"),  # Tagged on Meetup
+            models.Tag.objects.create(value="MortonSalt"),  # Not tagged on Meetup
+        }
+
+        models.TechGroup.objects.create(
+            name="Spokane Python User Group",
+            homepage="https://www.meetup.com/Python-Spokane/",
+        )
+
+        meetup_service = services.MeetupService(
+            MockMeetupHomepageScraper(),
+            MockMeetupEventScraper(),
+        )
+
+        meetup_service.scrape_events_from_meetup()
+
+        event = models.Event.objects.get()
+        event.tags.set(tags)
+
+        # Act
+        meetup_service.scrape_events_from_meetup()
+
+        # Assert
+        assert models.Event.objects.count() == 1
+        event = models.Event.objects.get()
+
+        assert event.tags.count() == 2
+        model_tags = event.tags.all()
+        assert tags.issubset(model_tags)
