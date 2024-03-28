@@ -217,6 +217,22 @@ dagger call --src src --req requirements.txt dev --run \
 ```
 </details>
 
+### Contributing to CI
+
+When contirbuting to the CI it can be useful to install the SDK for
+autocomplete and linting. Plus, this enables type hints for third party
+modules, not just the first party Dagger SDK. Inside your virtual environment,
+run the following commands:
+
+```shell
+dagger develop # Generates the SDK
+pip install -e ./dagger/sdk
+```
+
+Dagger has an in-depth [Developing with
+Python](https://docs.dagger.io/manuals/developer/python) guide, and the Python
+SDK referance is [here](https://dagger-io.readthedocs.io/en/latest/). 
+
 ### Celery
 
 
