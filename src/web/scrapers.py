@@ -17,7 +17,6 @@ ST = TypeVar("ST", covariant=True)
 
 
 class Scraper(Protocol[ST]):
-
     def scrape(self, url: str) -> ST:
         """Scrape the URL and return a typed object."""
         ...
@@ -31,7 +30,7 @@ class MeetupScraperMixin:
         next_data = json.loads(next_data)
         apollo_state: dict[str, Any] = next_data["props"]["pageProps"]["__APOLLO_STATE__"]
         return apollo_state
-    
+
     def _parse_events_json(self, apollo_state: dict) -> list[dict]:
         event_keys = [key for key in apollo_state.keys() if key.split(":")[0] == "Event"]
         return [apollo_state[key] for key in event_keys]
@@ -47,17 +46,17 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         self._now = timezone.localtime()
         # See https://gist.github.com/ajosephau/2a22698faaf6206ce195c7aa78e48247
         self._timezones_by_abbreviation = {pytz.timezone(tz).tzname(naive_now): tz for tz in pytz.all_timezones}
-    
+
     def scrape(self, url: str) -> list[str]:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
-        
+
         try:
             apollo_state = self._parse_apollo_state(soup)
         except LookupError:
             apollo_state = {}
-        
+
         if apollo_state:
             event_urls = self._parse_event_urls_from_state(apollo_state)
         else:
@@ -65,15 +64,12 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
             events = upcoming_section.find_all_next(id=re.compile(r"event-card-"))
             filtered_event_containers = [event for event in events if self._filter_event_tag(event)]
             event_urls = [event_container["href"] for event_container in filtered_event_containers]
-        
+
         return event_urls
-    
+
     def _parse_event_urls_from_state(self, apollo_state: dict) -> list[str]:
         events = self._parse_events_json(apollo_state)
-        future_events = [
-            event for event in events
-            if datetime.fromisoformat(event["dateTime"]) > self._now
-        ]
+        future_events = [event for event in events if datetime.fromisoformat(event["dateTime"]) > self._now]
         future_events = sorted(future_events, key=lambda event: datetime.fromisoformat(event["dateTime"]))
         future_event_urls = [event["eventUrl"] for event in future_events]
         return future_event_urls
@@ -96,13 +92,13 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
-        
+
         try:
             apollo_state = self._parse_apollo_state(soup)
             event_json = self._parse_events_json(apollo_state)[0]
         except LookupError:
             event_json = {}
-            
+
         if event_json:
             name = event_json["title"]
             description = event_json["description"]
@@ -129,7 +125,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             external_id=external_id,
             url=url,
         )
-    
+
     def _parse_name(self, soup: BeautifulSoup) -> str:
         name: str = soup.find_all("h1")[0].text
         name = " ".join(name.split())
@@ -139,9 +135,9 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         description: str = soup.find_all(attrs={"id": "event-details"})[0].text
         description = description.lstrip()
         if description.startswith("Details"):
-            description = description[len("Details"):].lstrip()
+            description = description[len("Details") :].lstrip()
         return description
-    
+
     def _parse_date_time(self, soup: BeautifulSoup) -> datetime:
         return datetime.fromisoformat(soup.find_all("time")[0]["datetime"])
 
@@ -160,7 +156,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         location = " ".join((line.strip() for line in location.splitlines()))
         location = location.replace(" · ", ", ")
         return location
-    
+
     def _parse_external_id(self, url: str) -> str:
         parsed_url = urllib.parse.urlparse(url).path
         external_id = pathlib.PurePosixPath(urllib.parse.unquote(parsed_url)).parts[-1]

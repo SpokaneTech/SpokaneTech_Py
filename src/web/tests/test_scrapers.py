@@ -11,7 +11,6 @@ from web import scrapers
 
 
 class TestMeetupHomepageScraper(TestCase):
-
     @freezegun.freeze_time("2024-03-18")
     @responses.activate
     def test_scraper_with_json(self):
@@ -59,7 +58,6 @@ class TestMeetupHomepageScraper(TestCase):
 
 
 class TestMeetupEventScraper(TestCase):
-
     @responses.activate
     def test_scraper_with_json(self):
         fin = open(pathlib.Path(__file__).parent / "data" / "meetup-with-json.html")

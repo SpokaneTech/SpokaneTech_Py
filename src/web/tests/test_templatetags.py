@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from web.templatetags import web_extras
 
+
 def test_timedelta_only_hours():
     duration = timedelta(hours=2)
     actual = web_extras._timedelta(duration)

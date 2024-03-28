@@ -9,7 +9,6 @@ from web import models, services
 
 
 class SimpleSender(services.Sender):
-
     def __init__(self, expected: str) -> None:
         self.expected = expected
 
@@ -18,7 +17,6 @@ class SimpleSender(services.Sender):
 
 
 class TestSendEventsToDiscord(TestCase):
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -30,18 +28,18 @@ class TestSendEventsToDiscord(TestCase):
         group = models.TechGroup.objects.create(name="Spokane Python User Group")
         models.Event.objects.create(
             name="Intro to Python",
-            date_time = today + timedelta(days=1),
+            date_time=today + timedelta(days=1),
             url="https://spokanepython.com/meetups/intro-to-python/",
             group=group,
         )
         event2 = models.Event.objects.create(
             name="Advanced Python",
-            date_time = today + timedelta(days=2, hours=18),
+            date_time=today + timedelta(days=2, hours=18),
             group=group,
         )
         models.Event.objects.create(
             name="Way in the future event",
-            date_time = today + timedelta(days=7),
+            date_time=today + timedelta(days=7),
             group=group,
         )
 

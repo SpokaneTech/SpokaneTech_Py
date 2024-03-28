@@ -9,7 +9,6 @@ import pytest
 from web.models import TechGroup
 
 
-
 @pytest.mark.django_db
 def test_list_tech_groups(client: Client):
     # Arrange
@@ -62,20 +61,21 @@ class TestEventDetailModal(TestCase):
 
     @pytest.mark.django_db
     def test_get(self):
-        """verify modal content can be rendered"""      
+        """verify modal content can be rendered"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/modal/detail_event.htm")
 
     @pytest.mark.django_db
     def test_non_htmx_call(self):
-        """verify 400 response if non-htmx request is used"""      
+        """verify 400 response if non-htmx request is used"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer)
         self.assertEqual(response.status_code, 400)
 
 
 class TestEventCalendarView(TestCase):
     """test EventCalendarView view"""
+
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
         self.object = baker.make("web.Event")
@@ -86,7 +86,7 @@ class TestEventCalendarView(TestCase):
 
     @pytest.mark.django_db
     def test_get(self):
-        """verify page content can be rendered"""      
+        """verify page content can be rendered"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "handyhelpers/partials/calendar.htm")

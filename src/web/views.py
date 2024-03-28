@@ -92,9 +92,7 @@ class GetEventDetailsModal(BuildBootstrapModalView):
         context = {}
         context["object"] = Event.objects.get(pk=kwargs["pk"])
         self.modal_subtitle = context["object"]
-        self.modal_body = loader.render_to_string(
-            "web/partials/modal/detail_event.htm", context=context
-        )
+        self.modal_body = loader.render_to_string("web/partials/modal/detail_event.htm", context=context)
         return super().get(request, *args, **kwargs)
 
 
