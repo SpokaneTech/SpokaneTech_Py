@@ -134,7 +134,7 @@ Quit the server with CONTROL-C.
 
 ### Dagger
 
-[Dagger](https://dagger.io/) is used for continuous intergration and 
+[Dagger](https://dagger.io/) is used for continuous integration and 
 provides a dev environment with a Celery, Redis, and Postgres instances.
 
 To run Dagger locally you will need:
@@ -168,7 +168,7 @@ To wipe the database, pass the `--fresh-database` flag to `dev`.
 <details>
 <summary>More Details</summary>
 
-To list avalable functions use:
+To list available functions use:
 ```shell
 dagger functions
 ```
@@ -208,7 +208,7 @@ Global Flags:
 ```
 
 For functions that return a `Container` - like `dev` - addtional commands can
-be chaned on that will act on that container. For example, the following
+be chained on that will act on that container. For example, the following
 command transforms the development container into a service, and starts it.
 
 ```shell
@@ -219,7 +219,7 @@ dagger call --src src --req requirements.txt dev --run \
 
 ### Contributing to CI
 
-When contirbuting to the CI it can be useful to install the SDK for
+When contributing to the CI it can be useful to install the SDK for
 autocomplete and linting. Plus, this enables type hints for third party
 modules, not just the first party Dagger SDK. Inside your virtual environment,
 run the following commands:
@@ -236,7 +236,7 @@ SDK referance is [here](https://dagger-io.readthedocs.io/en/latest/).
 ### Celery
 
 
-The easiest way to run Celery is using the Dagger development environment discribed above. 
+The easiest way to run Celery is using the Dagger development environment described above. 
 
 To run Celery manually you will need to start a message broker and a Celery
 worker. We are using redis for our message broker. Make sure you have
