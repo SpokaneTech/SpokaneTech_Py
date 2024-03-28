@@ -7,13 +7,13 @@ on:
 jobs:
   ruff:
     runs-on: ubuntu-latest
-    name: "Run Bandit"
+    name: Ruff Format
     steps:
       - name: "Checkout Repo"
         uses: actions/checkout@v4
-      - name: Run Bandit
+      - name: Check formatting using Ruff
         uses: dagger/dagger-for-github@v5
         with:
           verb: call 
-          args: "--src src --req requirements.txt bandit --pyproject pyproject.toml"
+          args: "--src src --req requirements.txt format --pyproject pyproject.toml"
           version: "0.10.2"
