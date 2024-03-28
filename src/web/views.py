@@ -9,7 +9,11 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
-from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
+from handyhelpers.views.gui import (
+    HandyHelperListPlusFilterView,
+    HandyHelperListView,
+    HandyHelperIndexView,
+)
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
 from web import forms
@@ -61,10 +65,12 @@ class RequireStaffMixin(UserPassesTestMixin):
         return user.is_authenticated and user.is_staff  # type: ignore
 
 
-class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListView):
+class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
     title = "Events"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_events.htm"
+
+    filter_form_obj = forms.ListEventsFilter
 
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")

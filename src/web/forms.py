@@ -43,3 +43,7 @@ class EventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_class = "container-xs"
         self.helper.add_input(Submit("save", "Save", css_class="float-end"))
+
+
+class ListEventsFilter(forms.Form):
+    tags = forms.ModelMultipleChoiceField(queryset=models.Tag.objects.all())
