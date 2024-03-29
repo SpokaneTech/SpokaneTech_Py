@@ -132,13 +132,119 @@ Quit the server with CONTROL-C.
 
 </details>
 
+### Dagger
+
+[Dagger](https://dagger.io/) is used for continuous integration and 
+provides a dev environment with a Celery, Redis, and Postgres instances.
+
+To run Dagger locally you will need:
+
+- [The Dagger CLI](https://docs.dagger.io/install)
+- [The Docker Engine](https://docs.docker.com/get-docker/)
+
+
+To run all linters at once:
+```shell
+dagger call --src src --req requirements.txt \
+    all-linters --pyproject pyproject.toml --dev-req requirements/dev.txt
+```
+
+To spin up a dev environment use:
+```shell
+dagger call --src src --req requirements.txt \
+    dev --run as-service up
+```
+
+This command:
+
+- Spins up the Django Server, Redis, Postgres, and Celery
+- Creates a Django admin with username/password `dagger`/`dagger`
+- Tunnels the Django server to [localhost:8000]()
+
+The Postgres database is mounted as a cache volume, so its state will persist between runs. 
+To wipe the database, pass the `--fresh-database` flag to `dev`.
+
+
+<details>
+<summary>More Details</summary>
+
+To list available functions use:
+```shell
+dagger functions
+```
+
+Then, to call the functions use:
+
+```shell
+dagger call --src src --req requirements.txt FUNCTION-NAME FUNCTION-ARGS
+```
+
+To gather more information about a function, you can pass the `--help` arg to it:
+
+```shell
+$ dagger call --src src --req requirements.txt test --help
+Run tests using Pytest.
+
+Usage:
+  dagger call test [flags]
+
+Flags:
+      --dev-req File     A file.
+      --pyproject File   A file.
+
+Global Flags:
+      --debug             Show more information for debugging
+      --focus             Only show output for focused commands (default true)
+      --json              Present result as JSON
+  -m, --mod string        Path to dagger.json config file for the module
+                          or a directory containing that file. Either
+                          local path (e.g. "/path/to/some/dir") or a
+                          github repo (e.g.
+                          "github.com/dagger/dagger/path/to/some/subdir")
+  -o, --output string     Path in the host to save the result to
+      --progress string   progress output format (auto, plain, tty)
+                          (default "auto")
+  -s, --silent            disable terminal UI and progress output
+```
+
+For functions that return a `Container` - like `dev` - addtional commands can
+be chained on that will act on that container. For example, the following
+command transforms the development container into a service, and starts it.
+
+```shell
+dagger call --src src --req requirements.txt dev --run \
+    as-service up
+```
+</details>
+
+### Contributing to CI
+
+When contributing to the CI it can be useful to install the SDK for
+autocomplete and linting. Plus, this enables type hints for third party
+modules, not just the first party Dagger SDK. Inside your virtual environment,
+run the following commands:
+
+```shell
+dagger develop # Generates the SDK
+pip install -e ./dagger/sdk
+```
+
+Dagger has an in-depth [Developing with
+Python](https://docs.dagger.io/manuals/developer/python) guide, and the Python
+SDK referance is [here](https://dagger-io.readthedocs.io/en/latest/). 
+
 ### Celery
 
 
-The easiest way to run Celery locally is using Docker to run the message broker. We are using redis for our message broker. Make sure you have [Docker](https://docs.docker.com/get-docker/) installed and run the following docker command to start a redis container in the background:
+The easiest way to run Celery is using the Dagger development environment described above. 
+
+To run Celery manually you will need to start a message broker and a Celery
+worker. We are using redis for our message broker. Make sure you have
+[Docker](https://docs.docker.com/get-docker/) installed and run the following
+docker command to start a redis container:
 
 ```shell
-docker compose up -d
+docker run -t -p 6379:6379 redis:7.2
 ```
 
 In a separate terminal, run the Celery worker:

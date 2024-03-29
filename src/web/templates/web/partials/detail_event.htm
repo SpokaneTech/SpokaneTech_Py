@@ -1,4 +1,4 @@
-{% load web_extras %}
+{% load web_extras markdownify %}
 
 <h1 class="mb-3 text-primary">
   {{ object }}
@@ -20,7 +20,7 @@
 
 <p>
   <h2>Description</h2>
-  {{ object.description }}
+  {{ object.description|markdownify }}
 </p>
 
 {% if event.url %}

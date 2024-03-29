@@ -1,3 +1,4 @@
+{% load markdownify %}
 <table data-toggle="table">
   <thead>
     <th>Name</th>
@@ -16,7 +17,7 @@
         <td>
           <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
         </td>
-        <td>{{ event.description }}</td>
+        <td>{{ event.description|markdownify }}</td>
         <td>
           {% include 'spokanetech/partials/human_readable_datetime.htm' with object=event only %}
         </td>
