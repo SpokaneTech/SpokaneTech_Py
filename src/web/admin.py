@@ -13,11 +13,12 @@ class EventAdmin(admin.ModelAdmin):
         "duration",
         "location",
         "group",
+        "approved",
         "created_at",
         "updated_at",
     ]
     search_fields = ["id", "name", "description", "duration", "location"]
-    list_filter = ["group"]
+    list_filter = ["group", "approved"]
 
 
 class TechGroupAdmin(admin.ModelAdmin):

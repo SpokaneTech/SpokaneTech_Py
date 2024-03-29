@@ -15,7 +15,11 @@
           <a href="{{ event.get_absolute_url }}">{{ event.name }}</a>
         </td>
         <td>
-          <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
+          {% if event.group %}
+            <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
+          {% else %}
+            None
+          {% endif %}
         </td>
         <td>{{ event.description|markdownify }}</td>
         <td>

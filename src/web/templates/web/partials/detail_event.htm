@@ -9,14 +9,16 @@
   {% if object.duration %}for {{ object.duration|timedelta }}{% endif %}
 </div>
 
+{% if object.group %}
 <div class="mb-3 card fit-content">
   <div class="card-body">
-    <div class="card-title">
-      <a href="{{ object.group.get_absolute_url }}">{{ object.group }}</a>
-    </div>
+      <div class="card-title">
+        <a href="{{ object.group.get_absolute_url }}">{{ object.group }}</a>
+      </div>
     <p class="card-text">{{ object.group.description|truncatewords_html:10 }}</p>
   </div>
 </div>
+{% endif %}
 
 <p>
   <h2>Description</h2>

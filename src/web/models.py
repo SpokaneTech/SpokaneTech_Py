@@ -47,6 +47,7 @@ class Event(HandyHelperBaseModel):
         help_text="ID field for tracking a unique external event",
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
+    approved = models.BooleanField(default=False)
     # labels = models.ManyToManyField("TechnicalArea")
 
     # class Meta:
