@@ -55,7 +55,7 @@ https://github.com/SpokaneTech/SpokaneTech_Py/issues
 
 ## Need more help or direction? 
 
-Reach out in the Discord channel:   https://discord.com/channels/1087885800311632043/1175132957959266347 (best option)  
+Join the Discord channel:   https://discord.com/channels/1087885800311632043/1175132957959266347 (best option)  
 or post a question here: 
 https://github.com/SpokaneTech/SpokaneTech_Py/issues/new/choose 
 
