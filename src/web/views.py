@@ -1,15 +1,14 @@
 from typing import Any
+
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.template import loader
-
+from django.utils import timezone
 from django.views.generic import DetailView
-from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
-from handyhelpers.views.calendar import CalendarView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
-from handyhelpers.views.htmx import BuildModelSidebarNav, BuildBootstrapModalView
-
+from handyhelpers.views.calendar import CalendarView
+from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
+from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
 from web.models import Event, TechGroup
 
@@ -23,9 +22,8 @@ class Index(HandyHelperIndexView):
         self.item_list = [
             {
                 "url": tech_group.get_absolute_url(),
-                "icon": "fa-brands fa-python",  # TODO: add this to the TechGroup model
+                "icon": tech_group.icon,
                 "title": str(tech_group),
-                "description": (tech_group.description or "")[:100],
             }
             for tech_group in TechGroup.objects.all()
         ]
@@ -72,11 +70,11 @@ class BuildSidebar(BuildModelSidebarNav):
 
     menu_item_list = [
         {
-            "queryset": Event.objects.filter(date_time__gte=timezone.now()),
+            "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {
-            "queryset": TechGroup.objects.filter(enabled=True),
+            "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
             "icon": """<i class="fa-solid fa-people-group"></i>""",
         },
     ]
