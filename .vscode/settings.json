@@ -1,9 +1,18 @@
 {
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
   "python.testing.pytestArgs": [
+    "-c", "pyproject.toml",
     "--reuse-db",
     "-vv",
     "src"
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "ruff.organizeImports": true
 }
