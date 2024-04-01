@@ -1,0 +1,11 @@
+{% extends 'spokanetech/base.html' %}
+
+{% block content %}
+{% for object in queryset %}
+<div class="card">
+  <div class="card-body">
+    {{ object }}
+  </div>
+</div>
+{% endfor %}
+{% endblock content %}

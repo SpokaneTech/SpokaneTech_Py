@@ -1,15 +1,14 @@
 from typing import Any
+
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.template import loader
-
+from django.utils import timezone
 from django.views.generic import DetailView
-from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
-from handyhelpers.views.calendar import CalendarView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
-from handyhelpers.views.htmx import BuildModelSidebarNav, BuildBootstrapModalView
-
+from handyhelpers.views.calendar import CalendarView
+from handyhelpers.views.gui import HandyHelperGenericBaseListView, HandyHelperIndexView
+from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
 from web.models import Event, TechGroup
 
@@ -32,9 +31,10 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HandyHelperListView):
+class ListEvents(HandyHelperGenericBaseListView):
     title = "Events"
     base_template = "spokanetech/base.html"
+    template_name = "web/event_list.html"
     table = "web/partials/table/table_events.htm"
 
     def __init__(self, **kwargs: Any) -> None:
