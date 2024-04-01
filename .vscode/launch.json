@@ -1,0 +1,32 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "django: runserver",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "manage",
+      "args": ["runserver"],
+      "cwd": "${workspaceFolder}/src",
+      "console": "internalConsole"
+    },
+    {
+      "name": "celery",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "celery",
+      "args": [
+        "--workdir", "./src",
+        "-A", "spokanetech.celery",
+        "worker",
+        "-B",
+        "-l", "INFO"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    }
+  ]
+}
