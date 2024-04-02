@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.views.generic import DetailView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
-from handyhelpers.views.gui import HandyHelperGenericBaseListView, HandyHelperIndexView
+from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
 from web.models import Event, TechGroup
@@ -30,7 +30,7 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HandyHelperGenericBaseListView):
+class ListEvents(HandyHelperListView):
     title = "Events"
     base_template = "spokanetech/base.html"
     template_name = "web/event_list.html"

@@ -14,14 +14,20 @@ def _timedelta(duration: timedelta) -> str:
     minutes = seconds // 60
     hours = minutes // 60
 
-    result = f"{hours} hour{pluralize(hours)}"
+    result = f"{hours} hour"
+    if hours > 1:
+        result += "s"
 
     remaining_minutes = minutes % 60
     if remaining_minutes != 0:
         result += f" {remaining_minutes} minute{pluralize(remaining_minutes)}"
+        if remaining_minutes > 1:
+            result += "s"
 
     remaining_seconds = seconds % 60
     if remaining_seconds != 0:
-        result += f" {remaining_seconds} second{pluralize(seconds)}"
+        result += f" {remaining_seconds} second{pluralize(remaining_seconds)}"
+        if remaining_seconds > 1:
+            result += "1"
 
     return result
