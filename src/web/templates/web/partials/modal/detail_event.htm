@@ -1,0 +1,32 @@
+<div class="container-fluid my-3">
+    {% if object.group %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary">Group:</div>
+        <div class="col-8 text-secondary">{{ object.group.name }}</div>
+    </div>
+    {% endif %}
+    {% if object.description %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary">Description:</div>
+        <div class="col-8 text-secondary">{{ object.description }}</div>
+    </div>
+    {% endif %}
+    {% if object.date_time %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary">Date/Time:</div>
+        <div class="col-8 text-secondary">{{ object.date_time }}</div>
+    </div>
+    {% endif %}
+    {% if object.duration %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary">Duration:</div>
+        <div class="col-8 text-secondary">{{ object.duration }} hours</div>
+    </div>
+    {% endif %}
+    {% if object.location %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary">Location:</div>
+        <div class="col-8 text-secondary">{{ object.location }}</div>
+    </div>
+    {% endif %}
+</div>

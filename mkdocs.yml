@@ -1,0 +1,51 @@
+site_name: Spokane Tech — Docs
+site_url: https://docs.spokanetech.org
+
+plugins:
+  - social:
+  - search:
+
+theme:
+  name: material
+  logo: static/logo.jpg
+  favicon: static/logo.jpg
+  palette: 
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - navigation.indexes
+    - navigation.instant
+    - navigation.top
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.snippets:
+      base_path: !relative $config_dir
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - toc:
+      toc_depth: 2
+
+nav:
+  - Home: index.md
+  - Contributing: CONTRIBUTING.md
+  - Style Guide: STYLE_GUIDE.md
+  - Infrastructure: infrastructure.md
+  - Celery: celery.md
+  - Code of Conduct: CODE_OF_CONDUCT.md
+
+extra_css:
+  - static/main.css

@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand px-3 border-bottom">
+  <button class="btn" id="sidebar-toggle" type="button">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="navbar-collapse navbar">
+    <ul class="navbar-nav">
+      <li class="nav-item dropdown align-end mx-2">
+        <a href="https://discord.gg/wHrSJNgpnP" target="_blank" title="join us on Discord!" class="nav-link"><i class="fa-brands fa-discord"></i></a>
+      </li>
+      <li class="nav-item dropdown align-end mx-2">
+        <a href="#" class="nav-link" title="Calendar view of all events"
+          hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main">
+          <i class="fa-regular fa-calendar-days"></i>
+        </a>
+      </li>
+      <li class="nav-item dropdown align-end mx-2">
+        <a class="nav-link" href="#" 
+          hx-get="{% url 'handyhelpers:about' %}" 
+          hx-target="#modal_wrapper"
+          data-bs-toggle="modal"
+          data-bs-target="#modal_wrapper"
+        >
+            <i class="fa fa-info-circle fw"></i>
+        </a>
+      </li>
+      <li class="nav-item dropdown align-end mx-2">
+        <a href="#" class="nav-link theme-toggle">
+          <i class="fa-regular fa-moon"></i>
+          <i class="fa-regular fa-sun"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>

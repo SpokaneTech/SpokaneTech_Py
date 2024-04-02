@@ -1,0 +1,9 @@
+<aside id="sidebar" class="js-sidebar">
+    <!-- Content For Sidebar -->
+    <div class="h-100">
+        <div class="sidebar-logo">
+            <a href="/" class="fw-bold text-primary fs-3">Spokane Tech</a>
+        </div>
+        <div id="sidebar-item-wrapper" hx-get="{% url 'web:build_sidebar' %}" hx-trigger="load" hx-swap="innerHTML"></div>
+    </div>
+</aside>

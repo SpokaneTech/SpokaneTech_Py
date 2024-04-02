@@ -1,0 +1,9 @@
+{% load markdownify %}
+<h1>{{ object }}</h1>
+{% if object.homepage %}
+    <a href="{{ object.homepage }}">{{ object.homepage }}</a>
+{% endif %}
+{% if object.description %}
+    <hr>
+    <p>{{ object.description|markdownify }}</p>
+{% endif %}

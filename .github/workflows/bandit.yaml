@@ -3,15 +3,17 @@ on:
     branches: 
       - main
   pull_request:
-  
 
 jobs:
-  bandit:
+  ruff:
     runs-on: ubuntu-latest
-    name: "bandit"
+    name: "Run Bandit"
     steps:
-      - uses: davidslusser/actions_python_bandit@v1.0.0
+      - name: "Checkout Repo"
+        uses: actions/checkout@v4
+      - name: Run Bandit
+        uses: dagger/dagger-for-github@v5
         with:
-          src: "src"
-          options: "-c pyproject.toml -r"
-          python_version: "3.11"
+          verb: call 
+          args: "--src src --req requirements.txt bandit --pyproject pyproject.toml"
+          version: "0.10.2"

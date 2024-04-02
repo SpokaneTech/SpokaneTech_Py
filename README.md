@@ -1,26 +1,5 @@
-Create virtual environment.
+# Spokane Tech
 
-```
-python -m venv .venv
+Home of [SpokaneTech.org](https://SpokaneTech.org), an online hub for Spokane's tech events and groups. It's not just a website; it's a community-driven, open-source initiative aimed at fostering learning and collaboration among aspiring and seasoned tech enthusiasts.
 
-# Activate - Linux
-source .venv/bin/activate
-
-# Activate - Windows
-.venv/scripts/activate.ps1
-
-pip install -r requirements.txt
-```
-
-Run Migrations
-```
-cd src
-python manage.py migrate
-```
-
-Run locally
-
-```
-cd src
-python manage.py runserver
-```
+Please visit our [docs](https://spokanetech.github.io/SpokaneTech_Py/) to learn how to get started working on SpokaneTech_Py!

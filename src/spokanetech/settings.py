@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,13 +57,18 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-    "web",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "storages",
+    "django_celery_results",
+    "django_celery_beat",
+    "markdownify.apps.MarkdownifyConfig",
+    "handyhelpers",
+    "web",
 ]
 
 MIDDLEWARE = [
@@ -99,7 +107,7 @@ WSGI_APPLICATION = "spokanetech.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:////{BASE_DIR}/db.sqlite3",
+        default="sqlite:///db.sqlite3",
         conn_max_age=600,
         conn_health_checks=True,
     ),
@@ -146,10 +154,82 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-if not DEBUG:
-    STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", "/code/static")
+# Storages
+USE_AZURE = os.environ["USE_AZURE"] == "true" if "USE_AZURE" in os.environ else not DEBUG
+if USE_AZURE:
+    DEFAULT_FILE_STORAGE = "spokanetech.backend.AzureMediaStorage"
+    STATICFILES_STORAGE = "spokanetech.backend.AzureStaticStorage"
+
+    STATIC_LOCATION = "static"
+    MEDIA_LOCATION = "media"
+
+    AZURE_URL_EXPIRATION_SECS = None
+    AZURE_ACCOUNT_NAME = os.environ["AZURE_ACCOUNT_NAME"]
+    AZURE_ACCOUNT_KEY = os.environ["AZURE_ACCOUNT_KEY"]
+    AZURE_CUSTOM_DOMAIN = os.environ.get(
+        "AZURE_CDN_DOMAIN",
+        f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
+    )
+    STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
+    MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+    MEDIA_UPLOAD_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}"
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+PROJECT_NAME = "Spokane Tech"
+PROJECT_DESCRIPTION = """Community resource for all things tech in the Spokane and CDA area"""
+PROJECT_VERSION = "0.0.1"
+
+
+# Celery
+try:
+    CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+    CELERY_ENABLED = True
+except KeyError:
+    if IS_DEVELOPMENT:
+        CELERY_ENABLED = False
+    else:
+        raise
+
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+CELERY_RESULT_EXTENDED = True
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+
+# Discord
+DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+
+
+# Markdownify
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            "a",
+            "abbr",
+            "acronym",
+            "b",
+            "blockquote",
+            "code",
+            "em",
+            "i",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "ul",
+        ]
+    },
+}

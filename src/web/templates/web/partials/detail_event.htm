@@ -1,0 +1,30 @@
+{% load web_extras markdownify %}
+
+<h1 class="mb-3 text-primary">
+  {{ object }}
+</h1>
+
+<div class="mb-3 d-inline-block">
+  {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object only %}
+  {% if object.duration %}for {{ object.duration|timedelta }}{% endif %}
+</div>
+
+<div class="mb-3 card fit-content">
+  <div class="card-body">
+    <div class="card-title">
+      <a href="{{ object.group.get_absolute_url }}">{{ object.group }}</a>
+    </div>
+    <p class="card-text">{{ object.group.description|truncatewords_html:10 }}</p>
+  </div>
+</div>
+
+<p>
+  <h2>Description</h2>
+  {{ object.description|markdownify }}
+</p>
+
+{% if event.url %}
+<a class="btn btn-primary" href="{{ event.url }}" target="_blank">
+  RSVP <i class="fa-solid fa-arrow-up-right-from-square"></i> 
+</a>
+{% endif %}
