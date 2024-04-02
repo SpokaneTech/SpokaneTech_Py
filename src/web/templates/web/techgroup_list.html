@@ -1,0 +1,26 @@
+{% extends 'spokanetech/base.html' %}
+{% load web_extras markdownify %}
+
+{% block content %}
+<div class="grid">
+  {% for object in object_list %}
+  <div class="card mb-0">
+    <div class="card-body card-header">
+      <h5 class="card-title text-primary">
+        <i class="{{ object.icon }}"></i>
+        <a href="{{ object.get_absolute_url }}">
+          {{ object }}
+        </a>
+      </h5>
+    </div>
+    <div class="card-body">
+      {% if object.description %}
+      {{ object.description|markdownify|truncatewords_html:50 }}
+      {% else %}
+      <i>No description</i>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

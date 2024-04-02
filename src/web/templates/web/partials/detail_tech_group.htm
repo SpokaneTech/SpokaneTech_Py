@@ -1,9 +1,16 @@
 {% load markdownify %}
-<h1>{{ object }}</h1>
-{% if object.homepage %}
-    <a href="{{ object.homepage }}">{{ object.homepage }}</a>
-{% endif %}
-{% if object.description %}
-    <hr>
-    <p>{{ object.description|markdownify }}</p>
-{% endif %}
+<div class="max-w-content">
+    <h1>
+        <i class="{{ object.icon }}"></i>
+        {{ object }}
+    </h1>
+    {% if object.homepage %}
+        <a href="{{ object.homepage }}">{{ object.homepage }}</a>
+    {% endif %}
+    <hr class>
+    {% if description %}
+    {{ object.description|markdownify }}
+    {% else %}
+    <i>No description</i>
+    {% endif %}
+</div>

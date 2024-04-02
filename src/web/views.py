@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 from django.utils import timezone
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import HandyHelperListView, HandyHelperIndexView
@@ -57,6 +57,10 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
         if self.is_htmx():
             self.template_name = "web/partials/detail_tech_group.htm"
         return super().get(request, *args, **kwargs)
+
+
+class ListTechGroup(ListView):
+    model = TechGroup
 
 
 def list_tech_groups(request: HttpRequest) -> HttpResponse:

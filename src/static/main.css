@@ -1,3 +1,27 @@
 .fit-content {
   width: fit-content;
 }
+
+.max-w-content {
+  max-width: 600px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px
+}
+
+@media screen and (min-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card-header {
+  flex: 0 1 auto !important;
+}
+
+.card-title {
+  margin-top: var(--bs-card-title-spacer-y);
+}
