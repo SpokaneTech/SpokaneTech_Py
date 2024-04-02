@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django import template
 from django.template.defaultfilters import pluralize
@@ -31,3 +31,8 @@ def _timedelta(duration: timedelta) -> str:
             result += "1"
 
     return result
+
+
+@register.filter(name="add_time")
+def _add_time(dt: datetime, duration: timedelta) -> datetime:
+    return dt + duration

@@ -35,8 +35,7 @@
           {{ object }}
         </a>
       </h5>
-      {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object only %}
-      {% if object.duration %}for {{ object.duration|timedelta }}{% endif %}
+      {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object duration=object.duration only %}
     </div>
     <div class="card-body">
       {{ object.description|markdownify|truncatewords_html:50 }}
