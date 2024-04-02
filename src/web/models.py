@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from django.db import models
 from django.urls import reverse
-
 from handyhelpers.models import HandyHelperBaseModel
 
 
@@ -14,6 +13,11 @@ class TechGroup(HandyHelperBaseModel):
     enabled = models.BooleanField(default=True)
     # platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
     homepage = models.URLField(blank=True, null=True)
+    icon = models.CharField(
+        max_length=256,
+        blank=True,
+        help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
+    )
 
     def __str__(self) -> str:
         return self.name

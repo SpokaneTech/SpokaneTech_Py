@@ -22,9 +22,8 @@ class Index(HandyHelperIndexView):
         self.item_list = [
             {
                 "url": tech_group.get_absolute_url(),
-                "icon": "fa-brands fa-python",  # TODO: add this to the TechGroup model
+                "icon": tech_group.icon,
                 "title": str(tech_group),
-                "description": (tech_group.description or "")[:100],
             }
             for tech_group in TechGroup.objects.all()
         ]
@@ -72,11 +71,11 @@ class BuildSidebar(BuildModelSidebarNav):
 
     menu_item_list = [
         {
-            "queryset": Event.objects.filter(date_time__gte=timezone.now()),
+            "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {
-            "queryset": TechGroup.objects.filter(enabled=True),
+            "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
             "icon": """<i class="fa-solid fa-people-group"></i>""",
         },
     ]
