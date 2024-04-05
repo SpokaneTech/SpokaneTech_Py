@@ -26,7 +26,7 @@
   <h3>Tags</h3>
   <ul>
   {% for tag in object.tags.all %}
-    <li>{{ tag.value }}</li>
+  <li><a href="/events?tags={{ tag.id }}&">{{ tag.value }}</a></li>
   {% empty %}
     <li>None!</li>
   {% endfor %}
