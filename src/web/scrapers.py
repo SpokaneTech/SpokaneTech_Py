@@ -8,7 +8,9 @@ from typing import Any, Protocol, TypeVar
 import pytz
 import requests
 from bs4 import BeautifulSoup, Tag
+from eventbrite import Eventbrite
 
+from django.conf import settings
 from django.utils import timezone
 
 from web import models
@@ -161,3 +163,17 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         parsed_url = urllib.parse.urlparse(url).path
         external_id = pathlib.PurePosixPath(urllib.parse.unquote(parsed_url)).parts[-1]
         return external_id
+
+
+
+class EventbriteScraper(Scraper[list[models.Event]]):
+
+    def __init__(self, api_token: str | None = None):
+        self.client = Eventbrite(api_token or settings.EVENTBRITE_API_TOKEN)
+
+    def scrape(self, organization_id: str) -> list[models.Event]:
+        eventbrite_events = self.client.get_organizer_events(
+            organization_id,
+            # status="live,canceled",
+        )
+        return []

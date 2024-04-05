@@ -213,6 +213,10 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
 
 
+# Eventbrite
+EVENTBRITE_API_TOKEN = os.environ["EVENTBRITE_API_TOKEN"]
+
+
 # Markdownify
 MARKDOWNIFY = {
     "default": {

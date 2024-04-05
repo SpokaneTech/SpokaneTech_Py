@@ -99,3 +99,38 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+
+
+class TestEventbriteScraper(TestCase):
+
+    def test_scraper(self):
+        scraper = scrapers.EventbriteScraper()
+        scraper.scrape("72020528223")
+
+    def test_blah(self):
+        from eventbrite.models import EventbriteObject
+
+        scraper = scrapers.EventbriteScraper()
+        client = scraper.client
+        user_response: EventbriteObject = client.get_user()  # type: ignore
+        user_id = user_response.id
+        events_response = client.get_user_events(user_id)
+        pass
+    
+
+
+    def test_manual(self):
+        import os
+        import requests
+
+        organization_id = "72020528223"  # actually 1773924472233
+        headers = {
+            'Authorization': f'Bearer {os.environ["EVENTBRITE_API_TOKEN"]}'
+        }
+        # response = requests.get(f'https://www.eventbriteapi.com/v3/organizations/{organization_id}/events/', headers=headers)
+
+        user_url = "/users/me/?expand=assortment"
+        response = requests.get("https://www.eventbriteapi.com/v3" + user_url, headers=headers)
+
+        response_body = response.content
+        print(response_body)
