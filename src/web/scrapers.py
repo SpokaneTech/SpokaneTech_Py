@@ -171,6 +171,6 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
         return external_id
 
     def _parse_tags(self, soup: BeautifulSoup) -> list[models.Tag]:
-        tags = soup.find_all("a", id=(lambda a: a and a.startswith("topics-link-")))
+        tags = soup.find_all("a", id=re.compile("topics-link-"))
         tags = [re.sub(r"\s+", " ", t.text) for t in tags]  # Some tags have newlines & extra spaces
         return [models.Tag(value=t) for t in tags]
