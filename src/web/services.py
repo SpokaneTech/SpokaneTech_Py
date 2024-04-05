@@ -28,13 +28,13 @@ class MeetupService:
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
 
-                tags = defaults["tags"]
                 del defaults["tags"]  # Can't apply Many-to-Many relationship untill after the event has been saved.
                 new_event, _ = models.Event.objects.update_or_create(
                     external_id=event.external_id,
                     defaults=defaults,
                 )
                 for tag in tags:
+                    tag, _ = models.Tag.objects.get_or_create(value=tag)
                     new_event.tags.add(tag)
 
 

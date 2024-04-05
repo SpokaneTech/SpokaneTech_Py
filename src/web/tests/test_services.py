@@ -26,7 +26,13 @@ class MockMeetupEventScraper(scrapers.Scraper[scrapers.MeetUpEventScraperResult]
                     date_time=timezone.localtime(),
                     external_id=self.EXTERNAL_ID,
                 ),
-                [],
+                [
+                    models.Tag(value="Linux"),
+                    models.Tag(value="Python"),
+                    models.Tag(value="Django"),
+                    models.Tag(value="Agile and Scrum"),
+                    models.Tag(value="Python Web Development"),
+                ],
             )
 
         return (
@@ -91,7 +97,8 @@ class TestMeetupService(TestCase):
         meetup_service.scrape_events_from_meetup()
 
         event = models.Event.objects.get()
-        event.tags.set(tags)
+        for tag in tags:
+            event.tags.add(tag)
 
         # Act
         meetup_service.scrape_events_from_meetup()
@@ -100,6 +107,32 @@ class TestMeetupService(TestCase):
         assert models.Event.objects.count() == 1
         event = models.Event.objects.get()
 
-        assert event.tags.count() == 2
         model_tags = event.tags.all()
         assert tags.issubset(model_tags)
+
+    def test_scraped_tags_are_attached_to_event(self):
+        expected_tags = {
+            models.Tag.objects.create(value="Linux"),
+            models.Tag.objects.create(value="Python"),
+            models.Tag.objects.create(value="Django"),
+            models.Tag.objects.create(value="Agile and Scrum"),
+            models.Tag.objects.create(value="Python Web Development"),
+        }
+        models.TechGroup.objects.create(
+            name="Spokane Python User Group",
+            homepage="https://www.meetup.com/Python-Spokane/",
+        )
+
+        meetup_service = services.MeetupService(
+            MockMeetupHomepageScraper(),
+            MockMeetupEventScraper(),
+        )
+
+        # Act
+        meetup_service.scrape_events_from_meetup()
+
+        event = models.Event.objects.get()
+        tags = event.tags
+
+        assert tags.count() == 5
+        assert set(tags.all()) == expected_tags
