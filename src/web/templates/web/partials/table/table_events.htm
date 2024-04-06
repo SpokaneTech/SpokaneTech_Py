@@ -1,9 +1,8 @@
-{% load markdownify %}
-<table data-toggle="table">
+{% load web_extras markdownify %}
+<table class="table table-bordered table-hover" data-toggle="table">
   <thead>
     <th>Name</th>
     <th>Group</th>
-    <th>Description</th>
     <th>When</th>
     <th>Duration</th>
     <th>Location</th>
@@ -17,11 +16,10 @@
         <td>
           <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
         </td>
-        <td>{{ event.description|markdownify }}</td>
         <td data-testid="date_time">
           {% include 'spokanetech/partials/human_readable_datetime.htm' with object=event only %}
         </td>
-        <td>{{ event.duration }} hour{{ event.duration|pluralize }}</td>
+        <td>{% if event.duration %}{{ event.duration|timedelta }}{% endif %}</td>
         <td>{{ event.location }}</td>
       </tr>
     {% endfor %}

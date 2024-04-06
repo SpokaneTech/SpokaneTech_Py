@@ -18,7 +18,7 @@ Build dropdown navigations in a sidebar. This is intented to be used with the ha
                 {% if item.htmx_link is False %}
                 <a href="{{ item.list_all_url}}" class="sidebar-link ms-4">All {{ item.model_name }}</a>
                 {% else %}
-                <a hx-get="{{ item.list_all_url }}" hx-target="#{{ item.htmx_target }}" class="sidebar-link ms-4">All {{ item.model_name }}</a>
+                <a hx-get="{{ item.list_all_url }}" hx-target="#{{ item.htmx_target }}" hx-push-url="true" class="sidebar-link ms-4">All {{ item.model_name }}</a>
                 {% endif %}
             </li>
             {% endif %}
