@@ -28,7 +28,7 @@ def test_list_tech_groups(client: Client):
 
     # Assert
     assert response.status_code == 200
-    assert response.context["groups"].get().pk == tech_group.pk
+    assert response.context["queryset"].get().pk == tech_group.pk
 
 
 @pytest.mark.django_db
