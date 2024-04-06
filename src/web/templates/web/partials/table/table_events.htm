@@ -18,7 +18,7 @@
           <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
         </td>
         <td>{{ event.description|markdownify }}</td>
-        <td>
+        <td data-testid="date_time">
           {% include 'spokanetech/partials/human_readable_datetime.htm' with object=event only %}
         </td>
         <td>{{ event.duration }} hour{{ event.duration|pluralize }}</td>

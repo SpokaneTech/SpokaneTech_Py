@@ -1,5 +1,5 @@
-from typing import Protocol
 from datetime import timedelta
+from typing import Protocol
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -43,7 +43,7 @@ class DiscordService:
 
     def send_events(self) -> None:
         """Send upcoming events to the Discord server."""
-        today = timezone.localdate()
+        today = timezone.localtime()
         events = (
             models.Event.objects.filter(
                 date_time__gte=today,
@@ -56,7 +56,8 @@ class DiscordService:
         message = "_Here are the upcoming Spokane Tech events for this week:_\n\n"
         for event in events:
             event_url = event.url if event.url else f"https://spokanetech.org{event.get_absolute_url()}"
-            event_msg = f"**{event.date_time.strftime('%A, %b %d @ %-I:%M %p')}**\n"
+            unix_timestamp = int(event.date_time.timestamp())
+            event_msg = f"**<t:{unix_timestamp}:F>**\n"
             if event.group:
                 event_msg += f"{event.group.name} — "
             event_msg += f"[{event.name}](<{event_url}>)"

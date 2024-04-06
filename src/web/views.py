@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
@@ -11,6 +12,13 @@ from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
 from web.models import Event, TechGroup
+
+
+@require_http_methods(["POST"])
+def set_timezone(request: HttpRequest) -> HttpResponse:
+    timezone_id = request.POST["timezone"]
+    request.session["timezone"] = timezone_id
+    return HttpResponse()
 
 
 class Index(HandyHelperIndexView):

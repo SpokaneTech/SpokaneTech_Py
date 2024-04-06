@@ -1,10 +1,8 @@
 from datetime import timedelta
 
 import freezegun
-
 from django.test import TestCase
 from django.utils import timezone
-
 from web import models, services
 
 
@@ -45,10 +43,10 @@ class TestSendEventsToDiscord(TestCase):
 
         expected = f"""_Here are the upcoming Spokane Tech events for this week:_
 
-**Tuesday, Mar 19 @ 12:00 AM**
+**<t:1710806400:F>**
 Spokane Python User Group — [Intro to Python](<https://spokanepython.com/meetups/intro-to-python/>)
 
-**Wednesday, Mar 20 @ 6:00 PM**
+**<t:1710957600:F>**
 Spokane Python User Group — [Advanced Python](<https://spokanetech.org/events/{event2.pk}>)
 
 """
