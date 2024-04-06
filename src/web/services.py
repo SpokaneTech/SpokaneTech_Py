@@ -57,7 +57,7 @@ class DiscordService:
         for event in events:
             event_url = event.url if event.url else f"https://spokanetech.org{event.get_absolute_url()}"
             unix_timestamp = int(event.date_time.timestamp())
-            event_msg = f"<t:{unix_timestamp}:F>\n"
+            event_msg = f"**<t:{unix_timestamp}:F>**\n"
             if event.group:
                 event_msg += f"{event.group.name} — "
             event_msg += f"[{event.name}](<{event_url}>)"
