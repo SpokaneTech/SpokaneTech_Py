@@ -1,8 +1,8 @@
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 from django.template import loader
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
@@ -38,7 +38,7 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HandyHelperListView):
+class ListEvents(HtmxViewMixin, HandyHelperListView):
     title = "Events"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_events.htm"
@@ -46,6 +46,11 @@ class ListEvents(HandyHelperListView):
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
         super().__init__(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+        return super().get(request, *args, **kwargs)
 
 
 class DetailEvent(HtmxViewMixin, DetailView):
@@ -66,9 +71,19 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-def list_tech_groups(request: HttpRequest) -> HttpResponse:
-    groups = TechGroup.objects.all()
-    return render(request, "web/list_tech_groups.html", {"groups": groups})
+class ListTechGroup(HtmxViewMixin, HandyHelperListView):
+    title = "Tech Groups"
+    base_template = "spokanetech/base.html"
+    table = "web/partials/table/table_tech_groups.htm"
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.queryset = TechGroup.objects.filter(enabled=True)
+        super().__init__(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+        return super().get(request, *args, **kwargs)
 
 
 class BuildSidebar(BuildModelSidebarNav):
@@ -79,10 +94,12 @@ class BuildSidebar(BuildModelSidebarNav):
     menu_item_list = [
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
+            "list_all_url": reverse_lazy("web:events"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {
             "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
+            "list_all_url": reverse_lazy("web:list_tech_groups"),
             "icon": """<i class="fa-solid fa-people-group"></i>""",
         },
     ]
