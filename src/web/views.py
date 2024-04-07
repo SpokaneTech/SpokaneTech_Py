@@ -42,7 +42,6 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
     title = "Events"
     base_template = "spokanetech/base.html"
     template_name = "web/event_list.html"
-    table = "web/partials/table/table_events.htm"
 
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
@@ -50,7 +49,7 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
-            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+            self.template_name = "web/partials/event_list.htm"
         return super().get(request, *args, **kwargs)
 
 

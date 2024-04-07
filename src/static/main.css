@@ -25,3 +25,7 @@
 .card-title {
   margin-top: var(--bs-card-title-spacer-y);
 }
+
+.link {
+  text-decoration: 2px solid underline;
+}

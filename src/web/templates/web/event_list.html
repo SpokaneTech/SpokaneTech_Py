@@ -1,32 +1,5 @@
 {% extends 'spokanetech/base.html' %}
-{% load web_extras markdownify %}
 
 {% block content %}
-<div class="grid">
-  {% for object in queryset %}
-  <div class="card mb-0">
-    <div class="card-body card-header">
-      <h5 class="card-title">
-        <a href="{{ object.get_absolute_url }}">
-          {{ object }}
-        </a>
-      </h5>
-      {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object duration=object.duration only %}
-    </div>
-    <div class="card-body">
-      {{ object.description|markdownify|truncatewords_html:50 }}
-    </div>
-    <div class="card-body d-flex flex-wrap align-items-end justify-content-between" style="gap: 8px;">
-      <a href="{{ object.group.get_absolute_url }}" class="card-link">
-        {{ object.group }}
-      </a>
-      <div class="flex-grow-1 text-end">
-        <a href="{{ object.url }}" target="_blank" class="card-link">
-          RSVP <i class="fa-solid fa-arrow-up-right-from-square"></i> 
-        </a>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
+{% include "web/partials/event_list.htm" %}
 {% endblock content %}
