@@ -1,6 +1,6 @@
 from typing import Callable
 
-import pytz
+import zoneinfo
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
@@ -11,6 +11,6 @@ class TimezoneMiddleware:
 
     def __call__(self, request: HttpRequest):
         if timezone_id := request.session.get("timezone"):
-            timezone.activate(pytz.timezone(timezone_id))
+            timezone.activate(zoneinfo.ZoneInfo(timezone_id))
 
         return self.get_response(request)
