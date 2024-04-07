@@ -9,6 +9,7 @@ urlpatterns = [
     path("set_timezone/", views.set_timezone, name="set_timezone"),
     path("events", views.ListEvents.as_view(), name="events"),
     path("groups", views.ListTechGroup.as_view(), name="list_tech_groups"),
+    path("groups/add", views.CreateTechGroup.as_view(), name="add_tech_group"),
     path("groups/<int:pk>", views.DetailTechGroup.as_view(), name="get_tech_group"),
     path("events/<int:pk>", views.DetailEvent.as_view(), name="get_event"),
     path("build_sidebar", views.BuildSidebar.as_view(), name="build_sidebar"),

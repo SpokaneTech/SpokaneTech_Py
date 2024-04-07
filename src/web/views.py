@@ -1,16 +1,18 @@
 from typing import Any
 
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
 from django.template import loader
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from django.views.generic import DetailView
+from django.views.generic import CreateView, DetailView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
+from web import forms
 from web.models import Event, TechGroup
 
 
@@ -84,6 +86,15 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
         if self.is_htmx():
             self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
         return super().get(request, *args, **kwargs)
+
+
+class CreateTechGroup(UserPassesTestMixin, CreateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
 
 
 class BuildSidebar(BuildModelSidebarNav):
