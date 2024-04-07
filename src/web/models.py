@@ -29,10 +29,14 @@ class TechGroup(HandyHelperBaseModel):
 class Event(HandyHelperBaseModel):
     """An event on a specific day and time."""
 
-    name = models.CharField(max_length=64, help_text="name of this event")
-    description = models.TextField(blank=True, null=True, help_text="name of this event")
+    name = models.CharField(max_length=64)
+    description = models.TextField(blank=True, null=True)
     date_time = models.DateTimeField(auto_now=False, auto_now_add=False, help_text="")
-    duration = models.DurationField(blank=True, null=True, help_text="planned duration of this event")
+    duration = models.DurationField(
+        blank=True,
+        null=True,
+        help_text="planned duration of this event",
+    )
     location = models.CharField(
         max_length=128,
         blank=True,

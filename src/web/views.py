@@ -49,6 +49,11 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
         self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
         super().__init__(**kwargs)
 
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        user = request.user
+        can_edit = user.is_authenticated and user.is_staff  # type: ignore
+        super().setup(request, *args, can_edit=can_edit, **kwargs)
+
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
@@ -58,10 +63,34 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
 class DetailEvent(HtmxViewMixin, DetailView):
     model = Event
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)  # type: ignore
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
+
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "web/partials/detail_event.htm"
         return super().get(request, *args, **kwargs)
+
+
+class CreateEvent(UserPassesTestMixin, CreateView):
+    model = Event
+    form_class = forms.EventForm
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
+
+
+class UpdateEvent(UserPassesTestMixin, UpdateView):
+    model = Event
+    form_class = forms.EventForm
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
 
 
 class DetailTechGroup(HtmxViewMixin, DetailView):
