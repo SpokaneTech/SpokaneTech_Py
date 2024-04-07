@@ -99,7 +99,7 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context["can_edit_group"] = user.is_authenticated and user.is_staff  # type: ignore
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
         return context
 
     def get(self, request, *args, **kwargs):
@@ -119,8 +119,8 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         user = request.user
-        can_add_group = user.is_authenticated and user.is_staff  # type: ignore
-        super().setup(request, *args, can_add_group=can_add_group, **kwargs)
+        can_edit = user.is_authenticated and user.is_staff  # type: ignore
+        super().setup(request, *args, can_edit=can_edit, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():

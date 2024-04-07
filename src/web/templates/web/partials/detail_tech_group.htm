@@ -8,6 +8,6 @@
     <p>{{ object.description|markdownify }}</p>
 {% endif %}
 
-{% if can_edit_group %}
+{% if can_edit %}
 <a href="{% url 'web:edit_tech_group' object.pk %}" class="btn btn-primary">Edit</a>
 {% endif %}
