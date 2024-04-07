@@ -5,10 +5,9 @@ import urllib.parse
 from datetime import datetime, timedelta
 from typing import Any, Protocol, TypeVar
 
-import pytz
 import requests
+import zoneinfo
 from bs4 import BeautifulSoup, Tag
-
 from django.utils import timezone
 
 from web import models
@@ -45,7 +44,9 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         naive_now = datetime.now()
         self._now = timezone.localtime()
         # See https://gist.github.com/ajosephau/2a22698faaf6206ce195c7aa78e48247
-        self._timezones_by_abbreviation = {pytz.timezone(tz).tzname(naive_now): tz for tz in pytz.all_timezones}
+        self._timezones_by_abbreviation = {
+            zoneinfo.ZoneInfo(tz).tzname(naive_now): tz for tz in zoneinfo.available_timezones()
+        }
 
     def scrape(self, url: str) -> list[str]:
         response = requests.get(url, timeout=10)
@@ -78,7 +79,7 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         time: str = event.find_all("time")[0].text
         time, tz_abbrv = time.rsplit(maxsplit=1)
         tz = self._timezones_by_abbreviation[tz_abbrv]
-        tz = pytz.timezone(tz)
+        tz = zoneinfo.ZoneInfo(tz)
         event_datetime = datetime.strptime(time, "%a, %b %d, %Y, %I:%M %p").astimezone(tz)
         return event_datetime > self._now
 

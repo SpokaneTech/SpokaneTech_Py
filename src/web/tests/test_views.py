@@ -1,11 +1,13 @@
+from datetime import datetime
+
+import freezegun
+import pytest
+from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
-
 from model_bakery import baker
-import pytest
-
 from web.models import TechGroup
 
 
@@ -26,7 +28,7 @@ def test_list_tech_groups(client: Client):
 
     # Assert
     assert response.status_code == 200
-    assert response.context["groups"].get().pk == tech_group.pk
+    assert response.context["queryset"].get().pk == tech_group.pk
 
 
 @pytest.mark.django_db
@@ -47,6 +49,25 @@ def test_get_tech_group(client: Client):
     # Assert
     assert response.status_code == 200
     assert response.context["object"].pk == tech_group.pk
+
+
+@freezegun.freeze_time("2024-03-17")
+@pytest.mark.django_db
+def test_set_timezone_and_timezone_middleware(client: Client):
+    # Arrange
+    date_time = datetime.fromisoformat("2024-03-19T01:00:00Z")
+    baker.make("web.Event", date_time=date_time)
+
+    # Act
+    client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
+    response = client.get(reverse("web:events"))
+
+    # Assert
+    soup = BeautifulSoup(response.content, "lxml")
+    date_time_tag = soup.find(attrs={"data-testid": "date_time"})
+    assert date_time_tag is not None
+    actual = date_time_tag.text.strip()
+    assert actual == "Monday, March 18, 2024 at 6:00 PM"
 
 
 class TestEventDetailModal(TestCase):

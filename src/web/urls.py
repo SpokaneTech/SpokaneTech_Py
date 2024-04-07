@@ -1,11 +1,12 @@
-from web import views
-
 from django.urls import path
+
+from web import views
 
 app_name = "web"
 
 urlpatterns = [
     path("", views.Index.as_view(), name="index"),
+    path("set_timezone/", views.set_timezone, name="set_timezone"),
     path("events", views.ListEvents.as_view(), name="events"),
     path("groups", views.ListTechGroup.as_view(), name="list_tech_groups"),
     path("groups/<int:pk>", views.DetailTechGroup.as_view(), name="get_tech_group"),
