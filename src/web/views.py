@@ -74,7 +74,7 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
 class ListTechGroup(HtmxViewMixin, HandyHelperListView):
     title = "Tech Groups"
     base_template = "spokanetech/base.html"
-    table = "web/partials/table/table_tech_groups.htm"
+    template_name = "web/techgroup_list.html"
 
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = TechGroup.objects.filter(enabled=True)
@@ -82,7 +82,7 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
-            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+            self.template_name = "web/partials/techgroup_list.htm"
         return super().get(request, *args, **kwargs)
 
 

@@ -8,7 +8,7 @@
         <a href="{{ object.homepage }}">{{ object.homepage }}</a>
     {% endif %}
     <hr class>
-    {% if description %}
+    {% if object.description %}
     {{ object.description|markdownify }}
     {% else %}
     <i>No description</i>
