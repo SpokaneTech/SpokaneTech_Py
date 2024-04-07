@@ -44,7 +44,7 @@ class ListEvents(HandyHelperListView):
     table = "web/partials/table/table_events.htm"
 
     def __init__(self, **kwargs: Any) -> None:
-        self.queryset = Event.objects.filter(date_time__gte=timezone.now())
+        self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
         super().__init__(**kwargs)
 
 
