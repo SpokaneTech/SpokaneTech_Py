@@ -6,7 +6,7 @@ from django.template import loader
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
@@ -67,6 +67,12 @@ class DetailEvent(HtmxViewMixin, DetailView):
 class DetailTechGroup(HtmxViewMixin, DetailView):
     model = TechGroup
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["can_edit_group"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
+
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "web/partials/detail_tech_group.htm"
@@ -82,6 +88,11 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
         self.queryset = TechGroup.objects.filter(enabled=True)
         super().__init__(**kwargs)
 
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        user = request.user
+        can_add_group = user.is_authenticated and user.is_staff  # type: ignore
+        super().setup(request, *args, can_add_group=can_add_group, **kwargs)
+
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
@@ -89,6 +100,15 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
 
 
 class CreateTechGroup(UserPassesTestMixin, CreateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
+
+
+class UpdateTechGroup(UserPassesTestMixin, UpdateView):
     model = TechGroup
     form_class = forms.TechGroupForm
 

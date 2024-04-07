@@ -19,4 +19,4 @@ class TechGroupForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_class = "container-xs"
-        self.helper.add_input(Submit("save", "save", css_class="float-end"))
+        self.helper.add_input(Submit("save", "Save", css_class="float-end"))
