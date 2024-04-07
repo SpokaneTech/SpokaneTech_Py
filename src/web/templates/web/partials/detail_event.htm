@@ -6,7 +6,6 @@
 
   <div class="mb-3 d-inline-block">
     {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object only %}
-    {% if object.duration %}for {{ object.duration|timedelta }}{% endif %}
   </div>
 
   <div class="mb-3 card fit-content">
