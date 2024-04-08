@@ -3,7 +3,7 @@ from typing import Any
 
 import freezegun
 import pytest
-import pytz
+import zoneinfo
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -136,7 +136,7 @@ class TestUpdateEvent(TestCase):
         assert response.status_code == 302
 
         object.refresh_from_db()
-        assert object.date_time == datetime(2024, 4, 8, 7, tzinfo=pytz.timezone(timezone))
+        assert object.date_time == datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
 
 
 class TestEventCalendarView(TestCase):
