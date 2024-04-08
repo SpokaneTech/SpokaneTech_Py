@@ -154,7 +154,7 @@ class BuildSidebar(BuildModelSidebarNav):
     menu_item_list = [
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
-            "list_all_url": reverse_lazy("web:events"),
+            "list_all_url": reverse_lazy("web:list_events"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 import freezegun
 import pytest
@@ -62,7 +63,7 @@ def test_set_timezone_and_timezone_middleware(client: Client):
 
     # Act
     client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
-    response = client.get(reverse("web:events"))
+    response = client.get(reverse("web:list_events"))
 
     # Assert
     soup = BeautifulSoup(response.content, "lxml")
@@ -78,7 +79,7 @@ class TestEventDetailModal(TestCase):
     def setUp(self):
         super(TestEventDetailModal, self).setUp()
         self.object = baker.make("web.Event")
-        self.headers = dict(HTTP_HX_REQUEST="true")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
 
@@ -112,13 +113,13 @@ class TestUpdateEvent(TestCase):
 
         # set user TZ
         self.client.post(reverse("web:set_timezone"), {"timezone": timezone})
-        response = self.client.get(reverse("web:events"))
+        response = self.client.get(reverse("web:list_events"))
         assert response.status_code == 200
 
         # Act
         self.client.force_login(user)
         response = self.client.post(
-            reverse("web:edit_event", args=(object.pk,)),
+            reverse("web:update_event", args=(object.pk,)),
             {
                 "name": object.name,
                 "description": "",
@@ -144,7 +145,7 @@ class TestEventCalendarView(TestCase):
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
         self.object = baker.make("web.Event")
-        self.headers = dict(HTTP_HX_REQUEST="true")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.now = timezone.now()
         self.url = reverse("web:event_calendar", kwargs={"year": self.now.year, "month": self.now.month})
