@@ -69,7 +69,7 @@ class TestMeetupEventScraper(TestCase):
         )
 
         scraper = scrapers.MeetupEventScraper()
-        actual = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
 
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
@@ -78,6 +78,14 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+        assert len(actual_tags) == 5
+        assert {t.value for t in actual_tags} == {
+            "Linux",
+            "Python",
+            "Django",
+            "Python Web Development",
+            "Agile and Scrum",
+        }
 
     @responses.activate
     def test_scraper_without_json(self):
@@ -90,7 +98,7 @@ class TestMeetupEventScraper(TestCase):
         )
 
         scraper = scrapers.MeetupEventScraper()
-        actual = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
 
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
@@ -99,3 +107,11 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+        assert len(actual_tags) == 5
+        assert {t.value for t in actual_tags} == {
+            "Linux",
+            "Python",
+            "Django",
+            "Python Web Development",
+            "Agile and Scrum",
+        }
