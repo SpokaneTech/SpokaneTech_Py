@@ -40,7 +40,28 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HtmxViewMixin, HandyHelperListView):
+class CanEditMixin:
+    """Add can_edit to the template context."""
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        can_edit = self.can_edit(request.user)
+        super().setup(request, *args, can_edit=can_edit, **kwargs)  # type: ignore
+
+    def can_edit(self, user) -> bool:
+        return user.is_authenticated and user.is_staff
+
+
+class RequireStaffMixin(UserPassesTestMixin):
+    """Check that the user is a staff member before rendering the view."""
+
+    request: HttpRequest
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
+
+
+class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListView):
     title = "Events"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_events.htm"
@@ -48,11 +69,6 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
         super().__init__(**kwargs)
-
-    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
-        user = request.user
-        can_edit = user.is_authenticated and user.is_staff  # type: ignore
-        super().setup(request, *args, can_edit=can_edit, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
@@ -75,22 +91,14 @@ class DetailEvent(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class CreateEvent(UserPassesTestMixin, CreateView):
+class CreateEvent(RequireStaffMixin, CreateView):
     model = Event
     form_class = forms.EventForm
 
-    def test_func(self) -> bool | None:
-        user = self.request.user
-        return user.is_authenticated and user.is_staff  # type: ignore
 
-
-class UpdateEvent(UserPassesTestMixin, UpdateView):
+class UpdateEvent(RequireStaffMixin, UpdateView):
     model = Event
     form_class = forms.EventForm
-
-    def test_func(self) -> bool | None:
-        user = self.request.user
-        return user.is_authenticated and user.is_staff  # type: ignore
 
 
 class DetailTechGroup(HtmxViewMixin, DetailView):
@@ -108,7 +116,7 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class ListTechGroup(HtmxViewMixin, HandyHelperListView):
+class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
     title = "Tech Groups"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_tech_groups.htm"
@@ -117,33 +125,20 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
         self.queryset = TechGroup.objects.filter(enabled=True)
         super().__init__(**kwargs)
 
-    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
-        user = request.user
-        can_edit = user.is_authenticated and user.is_staff  # type: ignore
-        super().setup(request, *args, can_edit=can_edit, **kwargs)
-
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
         return super().get(request, *args, **kwargs)
 
 
-class CreateTechGroup(UserPassesTestMixin, CreateView):
+class CreateTechGroup(RequireStaffMixin, CreateView):
     model = TechGroup
     form_class = forms.TechGroupForm
 
-    def test_func(self) -> bool | None:
-        user = self.request.user
-        return user.is_authenticated and user.is_staff  # type: ignore
 
-
-class UpdateTechGroup(UserPassesTestMixin, UpdateView):
+class UpdateTechGroup(RequireStaffMixin, UpdateView):
     model = TechGroup
     form_class = forms.TechGroupForm
-
-    def test_func(self) -> bool | None:
-        user = self.request.user
-        return user.is_authenticated and user.is_staff  # type: ignore
 
 
 class BuildSidebar(BuildModelSidebarNav):
