@@ -1,16 +1,18 @@
 from typing import Any
 
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
 from django.template import loader
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from django.views.generic import DetailView
+from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
+from web import forms
 from web.models import Event, TechGroup
 
 
@@ -38,7 +40,28 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HtmxViewMixin, HandyHelperListView):
+class CanEditMixin:
+    """Add can_edit to the template context."""
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        can_edit = self.can_edit(request.user)
+        super().setup(request, *args, can_edit=can_edit, **kwargs)  # type: ignore
+
+    def can_edit(self, user) -> bool:
+        return user.is_authenticated and user.is_staff
+
+
+class RequireStaffMixin(UserPassesTestMixin):
+    """Check that the user is a staff member before rendering the view."""
+
+    request: HttpRequest
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
+
+
+class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListView):
     title = "Events"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_events.htm"
@@ -56,14 +79,36 @@ class ListEvents(HtmxViewMixin, HandyHelperListView):
 class DetailEvent(HtmxViewMixin, DetailView):
     model = Event
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)  # type: ignore
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
+
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
             self.template_name = "web/partials/detail_event.htm"
         return super().get(request, *args, **kwargs)
 
 
+class CreateEvent(RequireStaffMixin, CreateView):
+    model = Event
+    form_class = forms.EventForm
+
+
+class UpdateEvent(RequireStaffMixin, UpdateView):
+    model = Event
+    form_class = forms.EventForm
+
+
 class DetailTechGroup(HtmxViewMixin, DetailView):
     model = TechGroup
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
@@ -71,7 +116,7 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class ListTechGroup(HtmxViewMixin, HandyHelperListView):
+class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
     title = "Tech Groups"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_tech_groups.htm"
@@ -86,6 +131,16 @@ class ListTechGroup(HtmxViewMixin, HandyHelperListView):
         return super().get(request, *args, **kwargs)
 
 
+class CreateTechGroup(RequireStaffMixin, CreateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
+
+
+class UpdateTechGroup(RequireStaffMixin, UpdateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
+
+
 class BuildSidebar(BuildModelSidebarNav):
     """Get a list of upcoming Events and enabled TechGroups and render a partial to use on the sidebar navigation"""
 
@@ -94,7 +149,7 @@ class BuildSidebar(BuildModelSidebarNav):
     menu_item_list = [
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
-            "list_all_url": reverse_lazy("web:events"),
+            "list_all_url": reverse_lazy("web:list_events"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {

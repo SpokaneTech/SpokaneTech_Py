@@ -28,3 +28,7 @@
   RSVP <i class="fa-solid fa-arrow-up-right-from-square"></i> 
 </a>
 {% endif %}
+
+{% if can_edit %}
+<a href="{% url 'web:update_event' object.pk %}" class="btn btn-primary">Edit</a>
+{% endif %}
