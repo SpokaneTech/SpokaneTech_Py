@@ -17,13 +17,15 @@
   $(document).ready(() => {
     const timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const storedTimezone = window.localStorage.getItem(TIMEZONE_ID)
-    if (!storedTimezone || storedTimezone != timezoneID) {
+    const sessionTimezone = "{{ request.timezone }}"
+    if (!storedTimezone || storedTimezone != timezoneID || !sessionTimezone || sessionTimezone != timezoneID) {
       $.post({
         url: "/set_timezone/",
         data: { "timezone": timezoneID },
         headers: { "X-CSRFToken": csrftoken }, // handyhelpers base template defines `csrftoken`
         success: (data) => {
           window.localStorage.setItem(TIMEZONE_ID, timezoneID)
+          location.reload()
         },
       })
     }
