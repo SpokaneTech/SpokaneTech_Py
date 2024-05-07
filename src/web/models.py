@@ -10,6 +10,9 @@ class Tag(HandyHelperBaseModel):
 
     value = models.CharField(max_length=32, unique=True, null=False)
 
+    class Meta:
+        ordering = ["value"]
+
     def __str__(self) -> str:
         return self.value
 
@@ -27,6 +30,9 @@ class TechGroup(HandyHelperBaseModel):
         blank=True,
         help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
     )
+
+    class Meta:
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name

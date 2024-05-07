@@ -103,7 +103,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
         except LookupError:
             event_json = {}
 
-        if event_json:
+        try:
             name = event_json["title"]
             description = event_json["description"]
             date_time = datetime.fromisoformat(event_json["dateTime"])
@@ -112,7 +112,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
             external_id = event_json["id"]
-        else:
+        except KeyError:
             name = self._parse_name(soup)
             description = self._parse_description(soup)
             date_time = self._parse_date_time(soup)
