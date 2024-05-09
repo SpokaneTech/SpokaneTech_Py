@@ -3,7 +3,7 @@ import pathlib
 import re
 import urllib.parse
 from datetime import datetime, timedelta
-from typing import Any, Protocol, TypeVar
+from typing import Any, Protocol, TypeAlias, TypeVar
 
 import requests
 import zoneinfo
@@ -19,6 +19,9 @@ class Scraper(Protocol[ST]):
     def scrape(self, url: str) -> ST:
         """Scrape the URL and return a typed object."""
         ...
+
+
+MeetUpEventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag]]
 
 
 class MeetupScraperMixin:
@@ -84,12 +87,12 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         return event_datetime > self._now
 
 
-class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
+class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
     """Scrape an Event from a Meetup details page."""
 
     DURATION_PATTERN = re.compile(r"1?\d:\d{2} [AP]M to 1?\d:\d{2} [AP]M")
 
-    def scrape(self, url: str) -> models.Event:
+    def scrape(self, url: str) -> MeetUpEventScraperResult:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
@@ -100,7 +103,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         except LookupError:
             event_json = {}
 
-        if event_json:
+        try:
             name = event_json["title"]
             description = event_json["description"]
             date_time = datetime.fromisoformat(event_json["dateTime"])
@@ -109,7 +112,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
             external_id = event_json["id"]
-        else:
+        except KeyError:
             name = self._parse_name(soup)
             description = self._parse_description(soup)
             date_time = self._parse_date_time(soup)
@@ -117,14 +120,18 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
             location = self._parse_location(soup)
             external_id = self._parse_external_id(url)
 
-        return models.Event(
-            name=name,
-            description=description,
-            date_time=date_time,
-            duration=duration,
-            location=location,
-            external_id=external_id,
-            url=url,
+        tags = self._parse_tags(soup)
+        return (
+            models.Event(
+                name=name,
+                description=description,
+                date_time=date_time,
+                duration=duration,
+                location=location,
+                external_id=external_id,
+                url=url,
+            ),
+            tags,
         )
 
     def _parse_name(self, soup: BeautifulSoup) -> str:
@@ -162,3 +169,8 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[models.Event]):
         parsed_url = urllib.parse.urlparse(url).path
         external_id = pathlib.PurePosixPath(urllib.parse.unquote(parsed_url)).parts[-1]
         return external_id
+
+    def _parse_tags(self, soup: BeautifulSoup) -> list[models.Tag]:
+        tags = soup.find_all("a", id=re.compile("topics-link-"))
+        tags = [re.sub(r"\s+", " ", t.text) for t in tags]  # Some tags have newlines & extra spaces
+        return [models.Tag(value=t) for t in tags]

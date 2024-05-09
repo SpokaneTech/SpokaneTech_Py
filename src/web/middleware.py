@@ -12,5 +12,6 @@ class TimezoneMiddleware:
     def __call__(self, request: HttpRequest):
         if timezone_id := request.session.get("timezone"):
             timezone.activate(zoneinfo.ZoneInfo(timezone_id))
+            request.timezone = timezone_id  # type: ignore
 
         return self.get_response(request)

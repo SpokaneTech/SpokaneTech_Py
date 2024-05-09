@@ -13,4 +13,8 @@
     {% else %}
     <i>No description</i>
     {% endif %}
+
+    {% if can_edit %}
+    <a href="{% url 'web:edit_tech_group' object.pk %}" class="btn btn-primary">Edit</a>
+    {% endif %}
 </div>

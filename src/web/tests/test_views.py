@@ -1,14 +1,17 @@
 from datetime import datetime
+from typing import Any
 
 import freezegun
 import pytest
+import zoneinfo
 from bs4 import BeautifulSoup
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
-from web.models import TechGroup
+from web.models import Event, TechGroup
 
 
 @pytest.mark.django_db
@@ -60,7 +63,7 @@ def test_set_timezone_and_timezone_middleware(client: Client):
 
     # Act
     client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
-    response = client.get(reverse("web:events"))
+    response = client.get(reverse("web:list_events"))
 
     # Assert
     soup = BeautifulSoup(response.content, "lxml")
@@ -76,22 +79,64 @@ class TestEventDetailModal(TestCase):
     def setUp(self):
         super(TestEventDetailModal, self).setUp()
         self.object = baker.make("web.Event")
-        self.headers = dict(HTTP_HX_REQUEST="true")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
 
-    @pytest.mark.django_db
     def test_get(self):
         """verify modal content can be rendered"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/modal/detail_event.htm")
 
-    @pytest.mark.django_db
     def test_non_htmx_call(self):
         """verify 400 response if non-htmx request is used"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer)
         self.assertEqual(response.status_code, 400)
+
+
+class TestUpdateEvent(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+
+    def test_update_event_sets_right_date_time(self):
+        # Arrange
+        object: Event = baker.make(Event)
+
+        timezone = "America/Los_Angeles"
+
+        user_cls = get_user_model()
+        user = user_cls()
+        user.is_staff = True  # type: ignore
+        user.save()
+
+        # set user TZ
+        self.client.post(reverse("web:set_timezone"), {"timezone": timezone})
+        response = self.client.get(reverse("web:list_events"))
+        assert response.status_code == 200
+
+        # Act
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("web:update_event", args=(object.pk,)),
+            {
+                "name": object.name,
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "duration": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
+
+        # Assert
+        assert response.status_code == 302
+
+        object.refresh_from_db()
+        assert object.date_time == datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
 
 
 class TestEventCalendarView(TestCase):
@@ -100,12 +145,11 @@ class TestEventCalendarView(TestCase):
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
         self.object = baker.make("web.Event")
-        self.headers = dict(HTTP_HX_REQUEST="true")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.now = timezone.now()
         self.url = reverse("web:event_calendar", kwargs={"year": self.now.year, "month": self.now.month})
 
-    @pytest.mark.django_db
     def test_get(self):
         """verify page content can be rendered"""
         response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)

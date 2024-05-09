@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "storages",
     "django_celery_results",
     "django_celery_beat",
+    "crispy_forms",
+    "crispy_bootstrap5",
     "markdownify.apps.MarkdownifyConfig",
     "handyhelpers",
     "web",
@@ -265,3 +267,9 @@ DEBUG_TOOLBAR_CONFIG = {
         "debug_toolbar.panels.versions.VersionsPanel",
     }
 }
+
+
+# Crispy Forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
