@@ -1,4 +1,7 @@
+{% extends 'web/partials/generic_list.htm' %}
 {% load web_extras markdownify %}
+
+{% block content %}
 <div class="grid">
   {% for object in queryset %}
   <div class="card mb-0">
@@ -28,3 +31,4 @@
   </div>
   {% endfor %}
 </div>
+{% endblock content %}

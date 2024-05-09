@@ -10,9 +10,9 @@ from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import (
+    HandyHelperIndexView,
     HandyHelperListPlusFilterView,
     HandyHelperListView,
-    HandyHelperIndexView,
 )
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
