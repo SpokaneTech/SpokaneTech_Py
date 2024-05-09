@@ -73,7 +73,9 @@ class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
     filter_form_obj = forms.ListEventsFilter
 
     def __init__(self, **kwargs: Any) -> None:
-        self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
+        self.queryset = (
+            Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time").prefetch_related("tags")
+        )
         super().__init__(**kwargs)
 
     def get(self, request, *args, **kwargs):
