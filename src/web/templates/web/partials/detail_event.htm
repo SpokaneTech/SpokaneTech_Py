@@ -38,6 +38,8 @@
   </a>
   {% endif %}
   {% if can_edit %}
-  <a href="{% url 'web:update_event' object.pk %}" class="btn btn-primary">Edit</a>
+  <a href="{% url 'web:update_event' object.pk %}" class="btn btn-outline-primary">
+    Edit <i class="fa-solid fa-pen-to-square"></i>
+  </a>
   {% endif %}
 </div>
