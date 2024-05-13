@@ -1,12 +1,12 @@
-{% load markdownify %}
-<table data-toggle="table">
+{% load web_extras markdownify %}
+<table class="table table-bordered table-hover" data-toggle="table">
   <thead>
     <th>Name</th>
     <th>Group</th>
-    <th>Description</th>
     <th>When</th>
     <th>Duration</th>
     <th>Location</th>
+    <th>Tags</th>
   </thead>
   <tbody>
     {% for event in queryset %}
@@ -17,13 +17,25 @@
         <td>
           <a href="{{ event.group.get_absolute_url }}">{{ event.group }}</a>
         </td>
-        <td>{{ event.description|markdownify }}</td>
-        <td>
+        <td data-testid="date_time">
           {% include 'spokanetech/partials/human_readable_datetime.htm' with object=event only %}
         </td>
-        <td>{{ event.duration }} hour{{ event.duration|pluralize }}</td>
+        <td>{% if event.duration %}{{ event.duration|timedelta }}{% endif %}</td>
         <td>{{ event.location }}</td>
+        <td>
+        {% for tag in event.tags.all %}
+          {{ tag.value }}
+        {% empty %}
+          None!
+        {% endfor %}
+        </td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
+
+{% if kwargs.can_edit %}
+<div class="mt-3">
+  <a href="{% url 'web:add_event' %}" class="btn btn-primary">Add</a>
+</div>
+{% endif %}

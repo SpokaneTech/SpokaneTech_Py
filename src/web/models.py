@@ -5,10 +5,22 @@ from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
 
 
+class Tag(HandyHelperBaseModel):
+    """A Tag that describes attributes of a Event."""
+
+    value = models.CharField(max_length=1024, unique=True, null=False)
+
+    class Meta:
+        ordering = ["value"]
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class TechGroup(HandyHelperBaseModel):
     """A group that organizes events."""
 
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=1024, unique=True)
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
     # platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
@@ -18,6 +30,9 @@ class TechGroup(HandyHelperBaseModel):
         blank=True,
         help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
     )
+
+    class Meta:
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -29,12 +44,16 @@ class TechGroup(HandyHelperBaseModel):
 class Event(HandyHelperBaseModel):
     """An event on a specific day and time."""
 
-    name = models.CharField(max_length=64, help_text="name of this event")
-    description = models.TextField(blank=True, null=True, help_text="name of this event")
+    name = models.CharField(max_length=1024)
+    description = models.TextField(blank=True, null=True)
     date_time = models.DateTimeField(auto_now=False, auto_now_add=False, help_text="")
-    duration = models.DurationField(blank=True, null=True, help_text="planned duration of this event")
+    duration = models.DurationField(
+        blank=True,
+        null=True,
+        help_text="planned duration of this event",
+    )
     location = models.CharField(
-        max_length=128,
+        max_length=1024,
         blank=True,
         null=True,
         help_text="location where this event is being hosted",
@@ -51,6 +70,7 @@ class Event(HandyHelperBaseModel):
         help_text="ID field for tracking a unique external event",
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(Tag, blank=True)
     # labels = models.ManyToManyField("TechnicalArea")
 
     # class Meta:

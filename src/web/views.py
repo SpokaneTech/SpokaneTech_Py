@@ -1,16 +1,30 @@
 from typing import Any
 
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 from django.template import loader
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DetailView
+from django.views.decorators.http import require_http_methods
+from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
-from handyhelpers.views.gui import HandyHelperIndexView, HandyHelperListView
+from handyhelpers.views.gui import (
+    HandyHelperListPlusFilterView,
+    HandyHelperListView,
+    HandyHelperIndexView,
+)
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
+from web import forms
 from web.models import Event, TechGroup
+
+
+@require_http_methods(["POST"])
+def set_timezone(request: HttpRequest) -> HttpResponse:
+    timezone_id = request.POST["timezone"]
+    request.session["timezone"] = timezone_id
+    return HttpResponse()
 
 
 class Index(HandyHelperIndexView):
@@ -30,18 +44,52 @@ class Index(HandyHelperIndexView):
         super().__init__(**kwargs)
 
 
-class ListEvents(HandyHelperListView):
+class CanEditMixin:
+    """Add can_edit to the template context."""
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        can_edit = self.can_edit(request.user)
+        super().setup(request, *args, can_edit=can_edit, **kwargs)  # type: ignore
+
+    def can_edit(self, user) -> bool:
+        return user.is_authenticated and user.is_staff
+
+
+class RequireStaffMixin(UserPassesTestMixin):
+    """Check that the user is a staff member before rendering the view."""
+
+    request: HttpRequest
+
+    def test_func(self) -> bool | None:
+        user = self.request.user
+        return user.is_authenticated and user.is_staff  # type: ignore
+
+
+class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
     title = "Events"
     base_template = "spokanetech/base.html"
     table = "web/partials/table/table_events.htm"
 
+    filter_form_obj = forms.ListEventsFilter
+
     def __init__(self, **kwargs: Any) -> None:
-        self.queryset = Event.objects.filter(date_time__gte=timezone.now())
+        self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
         super().__init__(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+        return super().get(request, *args, **kwargs)
 
 
 class DetailEvent(HtmxViewMixin, DetailView):
     model = Event
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)  # type: ignore
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
@@ -49,8 +97,24 @@ class DetailEvent(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
+class CreateEvent(RequireStaffMixin, CreateView):
+    model = Event
+    form_class = forms.EventForm
+
+
+class UpdateEvent(RequireStaffMixin, UpdateView):
+    model = Event
+    form_class = forms.EventForm
+
+
 class DetailTechGroup(HtmxViewMixin, DetailView):
     model = TechGroup
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
@@ -58,9 +122,29 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-def list_tech_groups(request: HttpRequest) -> HttpResponse:
-    groups = TechGroup.objects.all()
-    return render(request, "web/list_tech_groups.html", {"groups": groups})
+class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
+    title = "Tech Groups"
+    base_template = "spokanetech/base.html"
+    table = "web/partials/table/table_tech_groups.htm"
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.queryset = TechGroup.objects.filter(enabled=True)
+        super().__init__(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+        return super().get(request, *args, **kwargs)
+
+
+class CreateTechGroup(RequireStaffMixin, CreateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
+
+
+class UpdateTechGroup(RequireStaffMixin, UpdateView):
+    model = TechGroup
+    form_class = forms.TechGroupForm
 
 
 class BuildSidebar(BuildModelSidebarNav):
@@ -71,10 +155,12 @@ class BuildSidebar(BuildModelSidebarNav):
     menu_item_list = [
         {
             "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
+            "list_all_url": reverse_lazy("web:list_events"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
         {
             "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
+            "list_all_url": reverse_lazy("web:list_tech_groups"),
             "icon": """<i class="fa-solid fa-people-group"></i>""",
         },
     ]

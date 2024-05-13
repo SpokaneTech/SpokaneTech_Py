@@ -1,13 +1,11 @@
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 import pathlib
+from datetime import datetime, timedelta
 
 import freezegun
 import responses
-
 from django.test import TestCase
-
 from web import scrapers
+from zoneinfo import ZoneInfo
 
 
 class TestMeetupHomepageScraper(TestCase):
@@ -69,7 +67,7 @@ class TestMeetupEventScraper(TestCase):
         )
 
         scraper = scrapers.MeetupEventScraper()
-        actual = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
 
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
@@ -78,6 +76,14 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+        assert len(actual_tags) == 5
+        assert {t.value for t in actual_tags} == {
+            "Linux",
+            "Python",
+            "Django",
+            "Python Web Development",
+            "Agile and Scrum",
+        }
 
     @responses.activate
     def test_scraper_without_json(self):
@@ -90,7 +96,7 @@ class TestMeetupEventScraper(TestCase):
         )
 
         scraper = scrapers.MeetupEventScraper()
-        actual = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
 
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
@@ -99,10 +105,17 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+        assert len(actual_tags) == 5
+        assert {t.value for t in actual_tags} == {
+            "Linux",
+            "Python",
+            "Django",
+            "Python Web Development",
+            "Agile and Scrum",
+        }
 
 
 class TestEventbriteScraper(TestCase):
-
     def test_scraper(self):
         scraper = scrapers.EventbriteScraper()
         scraper.scrape("72020528223")
@@ -116,17 +129,14 @@ class TestEventbriteScraper(TestCase):
         user_id = user_response.id
         events_response = client.get_user_events(user_id)
         pass
-    
-
 
     def test_manual(self):
         import os
+
         import requests
 
         organization_id = "72020528223"  # actually 1773924472233
-        headers = {
-            'Authorization': f'Bearer {os.environ["EVENTBRITE_API_TOKEN"]}'
-        }
+        headers = {"Authorization": f'Bearer {os.environ["EVENTBRITE_API_TOKEN"]}'}
         # response = requests.get(f'https://www.eventbriteapi.com/v3/organizations/{organization_id}/events/', headers=headers)
 
         user_url = "/users/me/?expand=assortment"

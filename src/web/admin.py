@@ -1,7 +1,12 @@
 from django.contrib import admin
 
 # import models
-from web.models import Event, TechGroup
+from web.models import Event, TechGroup, Tag
+
+
+class TagAdmin(admin.ModelAdmin):
+    list_display = ["value"]
+    search_fields = ["value"]
 
 
 class EventAdmin(admin.ModelAdmin):
@@ -29,3 +34,4 @@ class TechGroupAdmin(admin.ModelAdmin):
 # register models
 admin.site.register(Event, EventAdmin)
 admin.site.register(TechGroup, TechGroupAdmin)
+admin.site.register(Tag, TagAdmin)

@@ -22,9 +22,23 @@
   <h2>Description</h2>
   {{ object.description|markdownify }}
 </p>
+<p>
+  <h3>Tags</h3>
+  <ul>
+  {% for tag in object.tags.all %}
+  <li><a href="/events?tags={{ tag.id }}&">{{ tag.value }}</a></li>
+  {% empty %}
+    <li>None!</li>
+  {% endfor %}
+  </ul>
+</p>
 
 {% if event.url %}
 <a class="btn btn-primary" href="{{ event.url }}" target="_blank">
   RSVP <i class="fa-solid fa-arrow-up-right-from-square"></i> 
 </a>
+{% endif %}
+
+{% if can_edit %}
+<a href="{% url 'web:update_event' object.pk %}" class="btn btn-primary">Edit</a>
 {% endif %}

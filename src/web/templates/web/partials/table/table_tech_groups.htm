@@ -1,0 +1,29 @@
+{% load markdownify %}
+<table class="table table-bordered table-hover" data-toggle="table">
+  <thead>
+    <th>Name</th>
+    <th>Homepage</th>
+  </thead>
+  <tbody>
+    {% for object in queryset %}
+      <tr>
+        <td>
+          <a href="{{ object.get_absolute_url }}">
+            {% if object.icon %}<span class="pe-2 {{ object.icon|safe }}"></span>{% endif %}{{ object.name }}
+          </a>
+        </td>
+        <td>
+          {% if object.homepage %}
+          <a href="{{ object.homepage }}" target="_blank">{{ object.homepage }}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if kwargs.can_edit %}
+<div class="mt-3">
+  <a href="{% url 'web:add_tech_group' %}" class="btn btn-primary">Add</a>
+</div>
+{% endif %}
