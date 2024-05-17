@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-# import models
-from web.models import Event, TechGroup, Tag
+from web.models import Event, EventbriteOrganization, Tag, TechGroup
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -11,9 +10,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class EventAdmin(admin.ModelAdmin):
     list_display = [
-        "id",
         "name",
-        "description",
         "date_time",
         "duration",
         "location",
@@ -21,13 +18,19 @@ class EventAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     ]
-    search_fields = ["id", "name", "description", "duration", "location"]
+    search_fields = ["id", "name", "duration", "location"]
     list_filter = ["group"]
 
 
 class TechGroupAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "description", "enabled", "homepage", "created_at", "updated_at"]
-    search_fields = ["id", "name", "description", "homepage"]
+    list_display = [
+        "name",
+        "enabled",
+        "homepage",
+        "created_at",
+        "updated_at",
+    ]
+    search_fields = ["id", "name", "homepage"]
     list_filter = ["enabled"]
 
 
@@ -35,3 +38,4 @@ class TechGroupAdmin(admin.ModelAdmin):
 admin.site.register(Event, EventAdmin)
 admin.site.register(TechGroup, TechGroupAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(EventbriteOrganization)

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import freezegun
 import responses
 from django.test import TestCase
-from web import scrapers
+from web import models, scrapers
 from zoneinfo import ZoneInfo
 
 
@@ -118,29 +118,14 @@ class TestMeetupEventScraper(TestCase):
 class TestEventbriteScraper(TestCase):
     def test_scraper(self):
         scraper = scrapers.EventbriteScraper()
-        scraper.scrape("72020528223")
-
-    def test_blah(self):
-        from eventbrite.models import EventbriteObject
-
-        scraper = scrapers.EventbriteScraper()
-        client = scraper.client
-        user_response: EventbriteObject = client.get_user()  # type: ignore
-        user_id = user_response.id
-        events_response = client.get_user_events(user_id)
-        pass
-
-    def test_manual(self):
-        import os
-
-        import requests
-
-        organization_id = "72020528223"  # actually 1773924472233
-        headers = {"Authorization": f'Bearer {os.environ["EVENTBRITE_API_TOKEN"]}'}
-        # response = requests.get(f'https://www.eventbriteapi.com/v3/organizations/{organization_id}/events/', headers=headers)
-
-        user_url = "/users/me/?expand=assortment"
-        response = requests.get("https://www.eventbriteapi.com/v3" + user_url, headers=headers)
-
-        response_body = response.content
-        print(response_body)
+        result = scraper.scrape("72020528223")
+        actual: models.Event = result[0][0]
+        assert actual.name == "Spring Cyber - Training Series"
+        assert actual.description and actual.description.startswith(
+            "<div>Deep Dive into Pen Testing with white hacker Casey Davis"
+        )
+        assert actual.date_time == datetime(2024, 5, 23, 16, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
+        assert actual.duration == timedelta(hours=1, minutes=30)
+        assert actual.location == "2818 North Sullivan Road #Suite 100, Spokane Valley, WA 99216"
+        assert actual.url == "https://www.eventbrite.com/e/spring-cyber-training-series-tickets-860181354587"
+        assert actual.external_id == "860181354587"

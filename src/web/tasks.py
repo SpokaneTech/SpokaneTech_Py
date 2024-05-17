@@ -1,6 +1,5 @@
 from celery import shared_task
 from discord import SyncWebhook
-
 from django.conf import settings
 
 from web import scrapers, services
@@ -12,7 +11,15 @@ def scrape_events_from_meetup():
     homepage_scraper = scrapers.MeetupHomepageScraper()
     event_scraper = scrapers.MeetupEventScraper()
     meetup_service = services.MeetupService(homepage_scraper, event_scraper)
-    meetup_service.scrape_events_from_meetup()
+    meetup_service.save_events()
+
+
+@shared_task()
+def scrape_events_from_eventbrite():
+    """Scrape upcoming events from Eventbrite."""
+    events_scraper = scrapers.EventbriteScraper()
+    meetup_service = services.EventbriteService(events_scraper)
+    meetup_service.save_events()
 
 
 @shared_task()

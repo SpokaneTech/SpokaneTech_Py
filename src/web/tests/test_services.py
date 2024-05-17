@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.utils import timezone
-
 from web import models, scrapers, services
 
 
@@ -9,13 +8,13 @@ class MockMeetupHomepageScraper(scrapers.Scraper[list[str]]):
         return ["https://www.meetup.com/python-spokane/events/298213205/"]
 
 
-class MockMeetupEventScraper(scrapers.Scraper[scrapers.MeetUpEventScraperResult]):
+class MockMeetupEventScraper(scrapers.Scraper[scrapers.EventScraperResult]):
     EXTERNAL_ID = "298213205"
 
     def __init__(self) -> None:
         self._call_count = 0
 
-    def scrape(self, url: str) -> scrapers.MeetUpEventScraperResult:
+    def scrape(self, url: str) -> scrapers.EventScraperResult:
         self._call_count += 1
 
         if self._call_count == 1:
@@ -66,8 +65,8 @@ class TestMeetupService(TestCase):
         )
 
         # Act
-        meetup_service.scrape_events_from_meetup()
-        meetup_service.scrape_events_from_meetup()
+        meetup_service.save_events()
+        meetup_service.save_events()
 
         # Assert
         assert models.Event.objects.count() == 1
@@ -94,14 +93,14 @@ class TestMeetupService(TestCase):
             MockMeetupEventScraper(),
         )
 
-        meetup_service.scrape_events_from_meetup()
+        meetup_service.save_events()
 
         event = models.Event.objects.get()
         for tag in tags:
             event.tags.add(tag)
 
         # Act
-        meetup_service.scrape_events_from_meetup()
+        meetup_service.save_events()
 
         # Assert
         assert models.Event.objects.count() == 1
@@ -129,7 +128,7 @@ class TestMeetupService(TestCase):
         )
 
         # Act
-        meetup_service.scrape_events_from_meetup()
+        meetup_service.save_events()
 
         event = models.Event.objects.get()
         tags = event.tags
