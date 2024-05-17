@@ -10,9 +10,9 @@ from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import (
+    HandyHelperIndexView,
     HandyHelperListPlusFilterView,
     HandyHelperListView,
-    HandyHelperIndexView,
 )
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
@@ -68,17 +68,19 @@ class RequireStaffMixin(UserPassesTestMixin):
 class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
     title = "Events"
     base_template = "spokanetech/base.html"
-    table = "web/partials/table/table_events.htm"
+    template_name = "web/event_list.html"
 
     filter_form_obj = forms.ListEventsFilter
 
     def __init__(self, **kwargs: Any) -> None:
-        self.queryset = Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time")
+        self.queryset = (
+            Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time").prefetch_related("tags")
+        )
         super().__init__(**kwargs)
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
-            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+            self.template_name = "web/partials/event_list.htm"
         return super().get(request, *args, **kwargs)
 
 
@@ -125,7 +127,7 @@ class DetailTechGroup(HtmxViewMixin, DetailView):
 class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
     title = "Tech Groups"
     base_template = "spokanetech/base.html"
-    table = "web/partials/table/table_tech_groups.htm"
+    template_name = "web/techgroup_list.html"
 
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = TechGroup.objects.filter(enabled=True)
@@ -133,7 +135,7 @@ class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
 
     def get(self, request, *args, **kwargs):
         if self.is_htmx():
-            self.template_name = "handyhelpers/generic/bs5/generic_list_content.htm"
+            self.template_name = "web/partials/techgroup_list.htm"
         return super().get(request, *args, **kwargs)
 
 

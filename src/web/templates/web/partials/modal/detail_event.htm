@@ -1,3 +1,4 @@
+{% load web_extras markdownify %}
 <div class="container-fluid my-3">
     {% if object.group %}
     <div class="row my-3">
@@ -8,19 +9,15 @@
     {% if object.description %}
     <div class="row my-3">
         <div class="col-4 fw-bold text-primary">Description:</div>
-        <div class="col-8 text-secondary">{{ object.description }}</div>
+        <div class="col-8 text-secondary">{{ object.description|markdownify }}</div>
     </div>
     {% endif %}
     {% if object.date_time %}
     <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Date/Time:</div>
-        <div class="col-8 text-secondary">{{ object.date_time }}</div>
-    </div>
-    {% endif %}
-    {% if object.duration %}
-    <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">Duration:</div>
-        <div class="col-8 text-secondary">{{ object.duration }} hours</div>
+        <div class="col-4 fw-bold text-primary">When:</div>
+        <div class="col-8 text-secondary">
+            {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object duration=object.duration only %}
+        </div>
     </div>
     {% endif %}
     {% if object.location %}

@@ -1,1 +1,2 @@
-{{ object.date_time|date:'l, F j, Y' }} at {{ object.date_time|date:'g:i A' }}
+{% load web_extras %}
+{{ object.date_time|date:'l, F j, Y' }} at {{ object.date_time|date:'g:i A' }}{% if duration %} to {{ object.date_time|add_time:duration|date:'g:i A' }} {% endif %}
