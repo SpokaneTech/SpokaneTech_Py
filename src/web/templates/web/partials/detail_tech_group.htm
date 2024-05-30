@@ -14,6 +14,19 @@
     <i>No description</i>
     {% endif %}
 
+    {% with tags=object.tags.all %}
+    {% if tags %}
+    <p>
+        <h3>Tags</h3>
+        <ul>
+        {% for tag in tags %}
+        <li><a href="{% url 'web:list_tech_groups' %}?tags={{ tag.id }}">{{ tag.value }}</a></li>
+        {% endfor %}
+        </ul>
+    </p>
+    {% endif %}
+    {% endwith %}
+
     {% if can_edit %}
     <a href="{% url 'web:edit_tech_group' object.pk %}" class="btn btn-outline-primary">
         Edit <i class="fa-solid fa-pen-to-square"></i>
