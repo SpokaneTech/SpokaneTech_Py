@@ -1,3 +1,8 @@
+li {
+  /* Reset Handy Helpers sidebar.css */
+  list-style-type: disc !important;
+}
+
 .fit-content {
   width: fit-content;
 }
