@@ -31,6 +31,15 @@
     {% endfor %}
     </ul>
   </p>
+  {% elif object.group.tags.all %}
+  <p>
+    <h3>Tags</h3>
+    <ul>
+    {% for tag in object.group.tags.all %}
+    <li><a href="/events?tags={{ tag.id }}&">{{ tag.value }}</a></li>
+    {% endfor %}
+    </ul>
+  </p>
   {% endif %}
   {% endwith %}
 

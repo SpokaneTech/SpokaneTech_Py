@@ -22,6 +22,7 @@ class TechGroupForm(forms.ModelForm):
             "description",
             "homepage",
             "icon",
+            "tags",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -46,4 +47,7 @@ class EventForm(forms.ModelForm):
 
 
 class ListEventsFilter(forms.Form):
-    tags = forms.ModelMultipleChoiceField(queryset=models.Tag.objects.all())
+    tags = forms.ModelMultipleChoiceField(
+        queryset=models.Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+    )

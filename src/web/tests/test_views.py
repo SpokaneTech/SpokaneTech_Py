@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from typing import Any
 
 import freezegun
@@ -58,7 +58,7 @@ def test_get_tech_group(client: Client):
 @pytest.mark.django_db
 def test_set_timezone_and_timezone_middleware(client: Client):
     # Arrange
-    date_time = datetime.fromisoformat("2024-03-19T01:00:00Z")
+    date_time = datetime.datetime.fromisoformat("2024-03-19T01:00:00Z")
     baker.make("web.Event", date_time=date_time)
 
     # Act
@@ -136,7 +136,7 @@ class TestUpdateEvent(TestCase):
         assert response.status_code == 302
 
         object.refresh_from_db()
-        assert object.date_time == datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
+        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
 
 
 class TestEventCalendarView(TestCase):
@@ -157,3 +157,22 @@ class TestEventCalendarView(TestCase):
         self.assertTemplateUsed(response, "handyhelpers/partials/calendar.htm")
         self.assertIn(self.object.name, response.content.decode("utf-8"))
         self.assertIn(f"/events/{self.object.pk}/details", response.content.decode("utf-8"))
+
+
+class TestEventListView(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.tag = baker.make("web.Tag")
+        self.group = baker.make("web.TechGroup")
+        self.group.tags.set([self.tag])
+        self.object = baker.make(
+            "web.Event",
+            group=self.group,
+            date_time=timezone.localtime() + datetime.timedelta(seconds=1),
+        )
+        self.url = reverse("web:list_events")
+
+    def test_filter_on_group_tags(self):
+        response = self.client.get(self.url + f"?tags={self.tag.pk}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.object.name, response.content.decode("utf-8"))

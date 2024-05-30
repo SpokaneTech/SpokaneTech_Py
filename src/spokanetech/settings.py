@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     "storages",
     "django_celery_results",
     "django_celery_beat",
+    "django_filters",
     "crispy_forms",
     "crispy_bootstrap5",
     "markdownify.apps.MarkdownifyConfig",
