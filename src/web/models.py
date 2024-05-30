@@ -81,3 +81,9 @@ class Event(HandyHelperBaseModel):
 
     def get_absolute_url(self) -> str:
         return reverse("web:get_event", kwargs={"pk": self.pk})
+
+
+class EventbriteOrganization(models.Model):
+    tech_group = models.ForeignKey(TechGroup, on_delete=models.CASCADE)
+    url = models.URLField()
+    eventbrite_id = models.CharField(max_length=256)

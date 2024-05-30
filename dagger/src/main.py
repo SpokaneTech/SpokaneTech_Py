@@ -1,9 +1,9 @@
+import sys
+from asyncio import CancelledError, TaskGroup
+from time import time
+
 import dagger
 from dagger import dag, function, object_type
-
-import sys
-from time import time
-from asyncio import CancelledError, TaskGroup
 
 PYTHON_VERSION = "3.11-slim-bullseye"
 GUNICORN_CMD = ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
@@ -24,6 +24,7 @@ class SpokaneTech:
             .with_env_variable("PYTHONDONTWRITEBYTECODE", "1")
             .with_env_variable("PYTHONUNBUFFERED", "1")
             # Default Env vars
+            .with_env_variable("DJANGO_SETTINGS_MODULE", "spokanetech.settings")
             .with_(env_variables())
             .with_exposed_port(8000)
             .with_file("/tmp/requirements.txt", self.req)
@@ -169,7 +170,18 @@ class SpokaneTech:
             .with_exec(["pip", "install", "-r", "dev_req.txt"])
             .with_file("pyproject.toml", pyproject)
         )
-        return await self.run_linter(["pytest", "-vv", "--config-file", "pyproject.toml", "src"], ctr)
+        return await self.run_linter(
+            [
+                "pytest",
+                "-vv",
+                "--config-file",
+                "pyproject.toml",
+                "-k",
+                "not integration",
+                "src",
+            ],
+            ctr,
+        )
 
     @function
     async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
@@ -261,6 +273,7 @@ def env_variables(**kwargs):
         "USE_AZURE": "false",
         "CELERY_BROKER_URL": "redis://redis:6379/0",
         "DISCORD_WEBHOOK_URL": "",
+        "EVENTBRITE_API_TOKEN": "",
     }
     if kwargs is not None:
         defaults.update(kwargs)

@@ -1,3 +1,4 @@
+import functools
 import json
 import pathlib
 import re
@@ -5,14 +6,31 @@ import urllib.parse
 from datetime import datetime, timedelta
 from typing import Any, Protocol, TypeAlias, TypeVar
 
+import eventbrite.access_methods
 import requests
 import zoneinfo
 from bs4 import BeautifulSoup, Tag
+from django.conf import settings
 from django.utils import timezone
+from eventbrite import Eventbrite
 
 from web import models
 
 ST = TypeVar("ST", covariant=True)
+
+
+# monkeypatch eventbrite module
+# TODO: make our own eventbrite package that is up to date
+def get_venue(self, id, **data):
+    return self.get("/venues/{0}/".format(id), data=data)
+
+
+def get_event_description(self, id, **data):
+    return self.get("/events/{0}/description//".format(id), data=data)
+
+
+setattr(eventbrite.access_methods.AccessMethodsMixin, "get_venue", get_venue)
+setattr(eventbrite.access_methods.AccessMethodsMixin, "get_event_description", get_event_description)
 
 
 class Scraper(Protocol[ST]):
@@ -21,7 +39,7 @@ class Scraper(Protocol[ST]):
         ...
 
 
-MeetUpEventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag]]
+EventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag]]
 
 
 class MeetupScraperMixin:
@@ -87,12 +105,12 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         return event_datetime > self._now
 
 
-class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
+class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
     """Scrape an Event from a Meetup details page."""
 
     DURATION_PATTERN = re.compile(r"1?\d:\d{2} [AP]M to 1?\d:\d{2} [AP]M")
 
-    def scrape(self, url: str) -> MeetUpEventScraperResult:
+    def scrape(self, url: str) -> EventScraperResult:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "lxml")
@@ -174,3 +192,81 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[MeetUpEventScraperResult]):
         tags = soup.find_all("a", id=re.compile("topics-link-"))
         tags = [re.sub(r"\s+", " ", t.text) for t in tags]  # Some tags have newlines & extra spaces
         return [models.Tag(value=t) for t in tags]
+
+
+class EventbriteScraper(Scraper[list[EventScraperResult]]):
+    def __init__(self, api_token: str | None = None):
+        self.client = Eventbrite(api_token or settings.EVENTBRITE_API_TOKEN)
+        self._location_by_venue_id: dict[str, str] = {}
+
+    def scrape(self, organization_id: str) -> list[EventScraperResult]:
+        response = self.client.get_organizer_events(
+            organization_id,
+            status="live",
+        )
+        events_and_tags = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
+        return events_and_tags
+
+    def map_to_event(self, eventbrite_event: dict) -> tuple[models.Event, list[models.Tag]]:
+        name = eventbrite_event["name"]["text"]
+        start = datetime.fromisoformat(eventbrite_event["start"]["utc"])
+        end = datetime.fromisoformat(eventbrite_event["end"]["utc"])
+        duration = end - start
+        external_id = eventbrite_event["id"]
+        url = eventbrite_event["url"]
+        venue_id = eventbrite_event["venue_id"]
+        location = self._get_venue_location(venue_id)
+
+        try:
+            # full event description
+            description = self.client.get_event_description(external_id)["description"]  # type: ignore
+        except requests.RequestException:
+            # short description
+            description = eventbrite_event["description"]["html"]
+
+        event = models.Event(
+            name=name,
+            description=description,
+            date_time=start,
+            duration=duration,
+            location=location,
+            external_id=external_id,
+            url=url,
+        )
+
+        # tags: list[models.Tag] = []
+        # category_id = eventbrite_event.get("category_id") or ""
+        # subcategory_id = eventbrite_event.get("subcategory_id") or ""
+        # category_name, subcategory_name = self._get_categories(category_id, subcategory_id)
+        # if category_name:
+        #     tags.append(models.Tag(value=category_name))
+        # if subcategory_name:
+        #     tags.append(models.Tag(value=subcategory_name))
+
+        return event, []
+
+    @functools.lru_cache
+    def _get_venue_location(self, venue_id: str) -> str:
+        venue_response = self.client.get_venue(venue_id)  # type: ignore
+        address = venue_response["address"]
+        address_1 = address["address_1"]
+        address_2 = address["address_2"]
+        street_address = f"{address_1} {address_2}" if address_2 else address_1
+        city = address["city"]
+        region = address["region"]
+        postal_code = address["postal_code"]
+        location = f"{street_address}, {city}, {region} {postal_code}"
+        return location
+
+    # TODO: determine if we want to use categories as tags
+    # @functools.lru_cache
+    # def _get_categories(self, category_id: str, subcategory_id: str) -> tuple[str, str]:
+    #     category_response = self.client.get_category(category_id)
+    #     category_name = category_response["name"]
+    #     try:
+    #         subcategories = category_response["subcategories"]
+    #         subcategory = [subcategory for subcategory in subcategories if subcategory["id"] == subcategory_id][0]
+    #         subcategory_name = subcategory["name"]
+    #     except LookupError:
+    #         subcategory_name = "'"
+    #     return category_name, subcategory_name

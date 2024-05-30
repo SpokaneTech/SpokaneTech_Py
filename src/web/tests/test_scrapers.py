@@ -1,13 +1,12 @@
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 import pathlib
+from datetime import datetime, timedelta
 
 import freezegun
 import responses
-
+import pytest
 from django.test import TestCase
-
-from web import scrapers
+from web import models, scrapers
+from zoneinfo import ZoneInfo
 
 
 class TestMeetupHomepageScraper(TestCase):
@@ -115,3 +114,20 @@ class TestMeetupEventScraper(TestCase):
             "Python Web Development",
             "Agile and Scrum",
         }
+
+
+@pytest.mark.integration
+class TestEventbriteScraper(TestCase):
+    def test_scraper(self):
+        scraper = scrapers.EventbriteScraper()
+        result = scraper.scrape("72020528223")
+        actual: models.Event = result[0][0]
+        assert actual.name == "Spring Cyber - Training Series"
+        assert actual.description and actual.description.startswith(
+            "<div>Deep Dive into Pen Testing with white hacker Casey Davis"
+        )
+        assert actual.date_time == datetime(2024, 5, 23, 16, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
+        assert actual.duration == timedelta(hours=1, minutes=30)
+        assert actual.location == "2818 North Sullivan Road #Suite 100, Spokane Valley, WA 99216"
+        assert actual.url == "https://www.eventbrite.com/e/spring-cyber-training-series-tickets-860181354587"
+        assert actual.external_id == "860181354587"

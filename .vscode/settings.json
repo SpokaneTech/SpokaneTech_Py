@@ -1,9 +1,15 @@
 {
-  "python.testing.pytestArgs": [
-    "--reuse-db",
-    "-vv",
-    "src"
-  ],
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+  },
+  // testing
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["src"],
+  // linter
+  "ruff.organizeImports": true
 }
