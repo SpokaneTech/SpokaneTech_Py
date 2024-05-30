@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import freezegun
 import responses
+import pytest
 from django.test import TestCase
 from web import models, scrapers
 from zoneinfo import ZoneInfo
@@ -115,6 +116,7 @@ class TestMeetupEventScraper(TestCase):
         }
 
 
+@pytest.mark.integration
 class TestEventbriteScraper(TestCase):
     def test_scraper(self):
         scraper = scrapers.EventbriteScraper()
