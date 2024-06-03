@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import functools
+
 from django.db import models
 from django.urls import reverse
 from handyhelpers.models import HandyHelperBaseModel
@@ -23,13 +25,13 @@ class TechGroup(HandyHelperBaseModel):
     name = models.CharField(max_length=1024, unique=True)
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
-    # platform = models.ForeignKey("EventPlatform", blank=True, null=True, on_delete=models.SET_NULL)
     homepage = models.URLField(blank=True, null=True)
     icon = models.CharField(
         max_length=256,
         blank=True,
         help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
     )
+    tags = models.ManyToManyField(Tag, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -39,6 +41,17 @@ class TechGroup(HandyHelperBaseModel):
 
     def get_absolute_url(self) -> str:
         return reverse("web:get_tech_group", kwargs={"pk": self.pk})
+
+
+class EventQuerySet(models.QuerySet):
+    def filter_group_tags(self, tags):
+        return self.filter(
+            models.Q(tags=None)
+            & functools.reduce(
+                lambda a, b: a | b,
+                (models.Q(group__tags__in=tag_id) for tag_id in tags),
+            ),
+        )
 
 
 class Event(HandyHelperBaseModel):
@@ -71,10 +84,8 @@ class Event(HandyHelperBaseModel):
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
-    # labels = models.ManyToManyField("TechnicalArea")
 
-    # class Meta:
-    #     ordering = ("-created_at",)
+    objects = EventQuerySet.as_manager()
 
     def __str__(self) -> str:
         return self.name  # type: ignore

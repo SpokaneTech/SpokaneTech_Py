@@ -18,4 +18,6 @@ urlpatterns = [
     path("build_sidebar", views.BuildSidebar.as_view(), name="build_sidebar"),
     path("events/<int:pk>/details/", views.GetEventDetailsModal.as_view(), name="get_event_details"),
     path("event_calendar/<int:year>/<int:month>/", views.EventCalendarView.as_view(), name="event_calendar"),
+    # handyhelpers overrides
+    path("filter_list_view", views.FilterListView.as_view(), name="filter_list_view"),
 ]

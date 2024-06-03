@@ -2,9 +2,11 @@ from typing import Any
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, UpdateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
@@ -71,10 +73,13 @@ class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
     template_name = "web/event_list.html"
 
     filter_form_obj = forms.ListEventsFilter
+    filter_form_url = reverse_lazy("web:filter_list_view")
 
     def __init__(self, **kwargs: Any) -> None:
         self.queryset = (
-            Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time").prefetch_related("tags")
+            Event.objects.filter(date_time__gte=timezone.localtime())
+            .select_related("group")
+            .prefetch_related("tags", "group__tags")
         )
         super().__init__(**kwargs)
 
@@ -83,9 +88,28 @@ class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
             self.template_name = "web/partials/event_list.htm"
         return super().get(request, *args, **kwargs)
 
+    def filter_by_query_params(self):
+        """Include events that don't have any tags of their own but their group tags match."""
+        queryset = super().filter_by_query_params()
+        if queryset is None:
+            return None
+
+        if tags := self.request.GET.getlist("tags"):
+            events_with_group_tags_queryset = Event.objects.filter(
+                date_time__gte=timezone.localtime()
+            ).filter_group_tags(tags)  # type: ignore
+            queryset = queryset | events_with_group_tags_queryset
+
+        queryset = queryset.order_by("date_time")
+        return queryset
+
 
 class DetailEvent(HtmxViewMixin, DetailView):
     model = Event
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.queryset = Event.objects.select_related("group").prefetch_related("tags", "group__tags")
+        super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)  # type: ignore
@@ -156,7 +180,7 @@ class BuildSidebar(BuildModelSidebarNav):
 
     menu_item_list = [
         {
-            "queryset": Event.objects.filter(date_time__gte=timezone.now()).order_by("date_time"),
+            "queryset": Event.objects.filter(date_time__gte=timezone.localtime()).order_by("date_time"),
             "list_all_url": reverse_lazy("web:list_events"),
             "icon": """<i class="fa-solid fa-calendar-day"></i>""",
         },
@@ -189,3 +213,29 @@ class EventCalendarView(CalendarView):
     event_model = Event
     event_model_date_field = "date_time"
     event_detail_url = "web:get_event_details"
+
+
+class FilterListView(View):
+    """apply filters, as provided via queryparameters, to a list view that uses the FilterByQueryParamsMixin"""
+
+    def post(self, request, *args, **kwargs):
+        """process POST request
+
+        **This handles multiple values for the same filter key
+        which Handy Helpers does not currently do.**
+        """
+        redirect_url = self.request.META["HTTP_REFERER"]
+        form_parameters = self.request.POST
+
+        # build filtered URL
+        filter_url = f"{redirect_url.split('?')[0]}?"
+        for key in form_parameters:
+            # remove csrf token from POST parameters
+            if key == "csrfmiddlewaretoken":
+                continue
+
+            values = form_parameters.getlist(key)
+            for value in values:
+                filter_url += f"{key}={value}&"
+
+        return redirect(filter_url)

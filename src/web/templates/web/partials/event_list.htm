@@ -22,6 +22,12 @@
         <a href="{% url 'web:list_events' %}?tags={{ tag.pk }}" class="badge rounded-pill text-bg-primary">{{ tag }}</a>
         {% endfor %}
       </div>
+      {% elif object.group.tags.all %}
+      <div class="mb-1">
+        {% for tag in object.group.tags.all %}
+        <a href="{% url 'web:list_events' %}?tags={{ tag.pk }}" class="badge rounded-pill text-bg-primary">{{ tag }}</a>
+        {% endfor %}
+      </div>
       {% endif %}
 
       {{ object.description|markdownify|truncatewords_html:50 }}
