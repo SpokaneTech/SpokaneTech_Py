@@ -3,6 +3,10 @@ li {
   list-style-type: disc !important;
 }
 
+.navbar li {
+  list-style-type: none !important;
+}
+
 .fit-content {
   width: fit-content;
 }
