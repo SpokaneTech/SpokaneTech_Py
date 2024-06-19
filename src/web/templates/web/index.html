@@ -1,0 +1,75 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static '/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static '/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static '/favicon-16x16.png' %}">
+    <title>Spokane Tech</title>
+
+    {% comment %} <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/popper/dist/popper.min.js' %}"></script> {% endcomment %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />    
+    <link rel="stylesheet" href="{% static 'index-styles.css' %}">
+
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/fades.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/scroller.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/background_icons.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/src/css/blur_group.css' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+
+</head>
+<body>
+    <header class="fade-in-blur" style="--fade-duration: .75s;">
+        <nav class="navbar">
+            <div class="logo"><a href="{% url 'web:index' %}" title="SpokaneTech.org home">Home</div>
+            <ul class="menu">
+                <li><a href="https://discord.gg/wHrSJNgpnP" target="_blank" title="join us on Discord!"><i class="fa-brands fa-discord"></i></a></li>
+                <li><a href="{% url 'web:list_tech_groups' %}" title="groups"><i class="fa-solid fa-user-group"></i></a></li>
+                <li><a href="{% url 'web:list_events' %}" title="events"><i class="fa-solid fa-list-check"></i></a></li>
+                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar"><i class="fa-solid fa-calendar-days"></i></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main id="body_main" class="fade-in-blur" style="--fade-duration: 1.25s;">
+        <section class="hero">
+            <div class="hero-content">
+                <h1><span class="accent">Your</span> Inland Northwest tech community</h1>
+                <div class="hero-buttons">
+                    <button class="btn btn-outline" hx-get="{% url 'web:about'%}" hx-target="#body_main">Learn More</button>
+                </div>
+            </div>
+        </section>
+        <section class="scroller-nav">
+            <ul>
+                <li><a href="#" class="tooltip-trigger" title="Show upcoming events"
+                    hx-get="/index_tech_events" hx-target="#scroller-inner" hx-swap="innerHTML">Events</a></li>
+                <li><a href="#" class="tooltip-trigger" title="Show tech groups"
+                    hx-get="/index_tech_groups" hx-target="#scroller-inner" hx-swap="innerHTML">Groups</a></li>
+            </ul>
+        </section>
+        <section class="scroller-container">
+            <div class="scroller" data-speed="slow">
+                <div class="scroller__inner blur-group-container" id="scroller-inner" hx-get="/index_tech_groups" hx-trigger="load">
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="fade-in-blur" style="--fade-duration: .75s;">
+        <p class="title">SpokaneTech.org</p>
+        <p class="copyright">&copy; 2024 spokantech.org. All rights reserved.</p>
+    </footer>
+
+    <script type="text/javascript" src="{% static 'node_modules/fun-effects/src/js/scroller.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/fun-effects/src/js/background_icons.js' %}"></script>
+
+</body>
+</html>

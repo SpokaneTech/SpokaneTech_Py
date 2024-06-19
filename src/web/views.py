@@ -2,13 +2,13 @@ from typing import Any
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import (
@@ -29,21 +29,26 @@ def set_timezone(request: HttpRequest) -> HttpResponse:
     return HttpResponse()
 
 
-class Index(HandyHelperIndexView):
-    title = "Spokane Tech"
-    subtitle = "Index of Spokane's Tech User Groups"
-    base_template = "spokanetech/base.html"
 
-    def __init__(self, **kwargs: Any) -> None:
-        self.item_list = [
-            {
-                "url": tech_group.get_absolute_url(),
-                "icon": tech_group.icon,
-                "title": str(tech_group),
-            }
-            for tech_group in TechGroup.objects.all()
-        ]
-        super().__init__(**kwargs)
+class Index(TemplateView):
+    template_name = "web/index.html"
+    
+
+# class Index(HandyHelperIndexView):
+#     title = "Spokane Tech"
+#     subtitle = "Index of Spokane's Tech User Groups"
+#     base_template = "spokanetech/base.html"
+
+#     def __init__(self, **kwargs: Any) -> None:
+#         self.item_list = [
+#             {
+#                 "url": tech_group.get_absolute_url(),
+#                 "icon": tech_group.icon,
+#                 "title": str(tech_group),
+#             }
+#             for tech_group in TechGroup.objects.all()
+#         ]
+#         super().__init__(**kwargs)
 
 
 class CanEditMixin:
@@ -239,3 +244,33 @@ class FilterListView(View):
                 filter_url += f"{key}={value}&"
 
         return redirect(filter_url)
+
+
+
+class GetTechGroupsForIndex(HtmxViewMixin, View):
+    """Get a list of TechGroup entries"""
+
+    def get(self, request):
+        context = {}
+        template_name = "web/partials/index_tech_groups.htm"
+        queryset = TechGroup.objects.filter(enabled=True)
+        context["queryset"] = queryset
+        return render(request, template_name, context)
+
+
+class GetTechEventsForIndex(HtmxViewMixin, View):
+    """Get a list of Event entries"""
+
+    def get(self, request):
+        context = {}
+        template_name = "web/partials/index_tech_events.htm"
+        queryset = Event.objects.filter(date_time__gte=timezone.localtime())
+        context["queryset"] = queryset
+        return render(request, template_name, context)
+
+
+class GetAboutContent(HtmxViewMixin, View):
+    def get(self, request):
+        context = {}
+        template_name = "web/partials/about.htm"
+        return render(request, template_name, context)

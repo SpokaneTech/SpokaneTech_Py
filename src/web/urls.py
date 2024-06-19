@@ -20,4 +20,9 @@ urlpatterns = [
     path("event_calendar/<int:year>/<int:month>/", views.EventCalendarView.as_view(), name="event_calendar"),
     # handyhelpers overrides
     path("filter_list_view", views.FilterListView.as_view(), name="filter_list_view"),
+    # htmx partials
+    path("index_tech_groups/", views.GetTechGroupsForIndex.as_view(), name="index_tech_groups"),
+    path("index_tech_events/", views.GetTechEventsForIndex.as_view(), name="index_tech_events"),
+    path("about/", views.GetAboutContent.as_view(), name="about"),
+    
 ]
