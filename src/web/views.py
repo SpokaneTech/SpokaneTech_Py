@@ -197,23 +197,36 @@ class BuildSidebar(BuildModelSidebarNav):
     ]
 
 
-class GetEventDetailsModal(BuildBootstrapModalView):
+class GetEventInformationModal(BuildBootstrapModalView):
     """get details of an event and display in a modal"""
 
     modal_button_submit = None
-    modal_title = "Event Details"
+    modal_title = "Event Info"
 
     def get(self, request, *args, **kwargs):
         context = {}
         context["object"] = Event.objects.get(pk=kwargs["pk"])
         self.modal_subtitle = context["object"]
-        self.modal_body = loader.render_to_string("web/partials/modal/detail_event.htm", context=context)
+        self.modal_body = loader.render_to_string("web/partials/modal/event_information.htm", context=context)
+        return super().get(request, *args, **kwargs)
+
+
+class GetGroupInformationModal(BuildBootstrapModalView):
+    """get details of an event and display in a modal"""
+
+    modal_button_submit = None
+    modal_title = "Group Info"
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        context["object"] = TechGroup.objects.get(pk=kwargs["pk"])
+        self.modal_subtitle = context["object"]
+        self.modal_body = loader.render_to_string("web/partials/modal/group_information.htm", context=context)
         return super().get(request, *args, **kwargs)
 
 
 class EventCalendarView(CalendarView):
     """Render a monthly calendar view of events"""
-
     title = "Spokane Tech Event Calendar"
     event_model = Event
     event_model_date_field = "date_time"
@@ -246,13 +259,24 @@ class FilterListView(View):
         return redirect(filter_url)
 
 
+class GetMainForIndex(HtmxViewMixin, View):
+    """Get a list of main content entries"""
+
+    def get(self, request):
+        context = {}
+        template_name = "web/partials/index_main.htm"
+        return render(request, template_name, context)
+
 
 class GetTechGroupsForIndex(HtmxViewMixin, View):
     """Get a list of TechGroup entries"""
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        if kwargs.get("display", None) == "list":
+            template_name = "web/partials/list/groups.htm"
+        else:
+            template_name = "web/partials/marquee/group_cards.htm"
         context = {}
-        template_name = "web/partials/index_tech_groups.htm"
         queryset = TechGroup.objects.filter(enabled=True)
         context["queryset"] = queryset
         return render(request, template_name, context)
@@ -261,9 +285,12 @@ class GetTechGroupsForIndex(HtmxViewMixin, View):
 class GetTechEventsForIndex(HtmxViewMixin, View):
     """Get a list of Event entries"""
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        if kwargs.get("display", None) == "list":
+            template_name = "web/partials/list/events.htm"
+        else:
+            template_name = "web/partials/marquee/event_cards.htm"
         context = {}
-        template_name = "web/partials/index_tech_events.htm"
         queryset = Event.objects.filter(date_time__gte=timezone.localtime())
         context["queryset"] = queryset
         return render(request, template_name, context)
@@ -274,3 +301,33 @@ class GetAboutContent(HtmxViewMixin, View):
         context = {}
         template_name = "web/partials/about.htm"
         return render(request, template_name, context)
+
+
+class GetTechEvent(HtmxViewMixin, DetailView):
+    model = Event
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "web/partials/detail/event.htm"
+        return super().get(request, *args, **kwargs)
+
+
+class GetTechGroup(HtmxViewMixin, DetailView):
+    model = TechGroup
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.is_htmx():
+            self.template_name = "web/partials/detail/group.htm"
+        return super().get(request, *args, **kwargs)

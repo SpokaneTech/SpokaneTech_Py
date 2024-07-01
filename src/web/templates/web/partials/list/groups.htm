@@ -1,0 +1,17 @@
+<section class="about">
+<h1 class="fade-in-blur" style="--fade-duration: .5s;">Our Tech Groups</h1>
+
+<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 1s;">
+    {% for row in queryset %}
+    <div class="list-card" hx-get="{% url 'web:detail_group' row.pk %}" hx-target="#body_main">
+        <div class="title">{{ row.name }}</div>
+        <div class="description">{{ row.description|truncatewords_html:30 }}</div>
+        <div class="footer">
+            {% if row.homepage %}
+            <a href="{{ row.homepage }}" target="_blank">{{ row.homepage }}</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</section>

@@ -1,0 +1,24 @@
+{% load markdownify %}
+<section class="detail fade-in-blur" style="--fade-duration: .5s;">
+    <h1>{{ object.icon|safe }}</h1>
+    <h1>{{ object.name }}</h1>
+</section>
+
+<section class="fade-in-blur" style="--fade-duration: 1s;">
+    <div class="homepage">
+        {% if object.homepage %}
+        <a href="{{ object.homepage }}">{{ object.homepage }}</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="fade-in-blur" style="--fade-duration: 1.25s;">
+    <div class="description">
+        {% if object.description %}
+        {{ object.description|markdownify }}
+        {% else %}
+        <i>No description</i>
+        {% endif %}        
+    </div>
+</section>
+    

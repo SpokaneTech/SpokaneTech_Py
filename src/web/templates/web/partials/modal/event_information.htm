@@ -9,12 +9,12 @@
     {% if object.description %}
     <div class="row my-3">
         <div class="col-4 fw-bold text-primary">Description:</div>
-        <div class="col-8 text-secondary">{{ object.description|markdownify }}</div>
+        <div class="col-8 text-secondary">{{ object.description|markdownify|truncatewords_html:30 }}</div>
     </div>
     {% endif %}
     {% if object.date_time %}
     <div class="row my-3">
-        <div class="col-4 fw-bold text-primary">When:</div>
+        <div class="col-4 fw-bold text-primary">Date/Time:</div>
         <div class="col-8 text-secondary">
             {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object duration=object.duration only %}
         </div>
@@ -26,4 +26,8 @@
         <div class="col-8 text-secondary">{{ object.location }}</div>
     </div>
     {% endif %}
+    <div class="row my-3">
+        <div class="col-4 fw-bold text-primary"></div>
+        <div class="col-8 text-secondary"><a href="{{ object.get_absolute_url }}">full details</a></div>
+    </div>
 </div>
