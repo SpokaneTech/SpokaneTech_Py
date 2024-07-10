@@ -34,7 +34,10 @@ if IS_DEVELOPMENT:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+    ]
 
     INTERNAL_IPS = [
         "localhost",
@@ -172,6 +175,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(str(BASE_DIR), "staticroot")
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
@@ -264,23 +268,23 @@ MARKDOWNIFY = {
 
 
 # Django Debug Toolbar
-DEBUG_TOOLBAR_CONFIG = {
-    "DISABLE_PANELS": {
-        "debug_toolbar.panels.cache.CachePanel",
-        "debug_toolbar.panels.headers.HeadersPanel",
-        "debug_toolbar.panels.history.HistoryPanel",
-        "debug_toolbar.panels.profiling.ProfilingPanel",
-        "debug_toolbar.panels.redirects.RedirectsPanel",
-        "debug_toolbar.panels.request.RequestPanel",
-        "debug_toolbar.panels.settings.SettingsPanel",
-        "debug_toolbar.panels.signals.SignalsPanel",
-        "debug_toolbar.panels.sql.SQLPanel",
-        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
-        "debug_toolbar.panels.templates.TemplatesPanel",
-        "debug_toolbar.panels.timer.TimerPanel",
-        "debug_toolbar.panels.versions.VersionsPanel",
-    }
-}
+# DEBUG_TOOLBAR_CONFIG = {
+#     "DISABLE_PANELS": {
+#         "debug_toolbar.panels.cache.CachePanel",
+#         "debug_toolbar.panels.headers.HeadersPanel",
+#         "debug_toolbar.panels.history.HistoryPanel",
+#         "debug_toolbar.panels.profiling.ProfilingPanel",
+#         "debug_toolbar.panels.redirects.RedirectsPanel",
+#         "debug_toolbar.panels.request.RequestPanel",
+#         "debug_toolbar.panels.settings.SettingsPanel",
+#         "debug_toolbar.panels.signals.SignalsPanel",
+#         "debug_toolbar.panels.sql.SQLPanel",
+#         "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+#         "debug_toolbar.panels.templates.TemplatesPanel",
+#         "debug_toolbar.panels.timer.TimerPanel",
+#         "debug_toolbar.panels.versions.VersionsPanel",
+#     }
+# }
 
 
 # Crispy Forms

@@ -9,14 +9,18 @@ from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
-from handyhelpers.mixins.view_mixins import HtmxViewMixin
+from handyhelpers.mixins.view_mixins import HtmxViewMixin, FilterByQueryParamsMixin
 from handyhelpers.views.calendar import CalendarView
 from handyhelpers.views.gui import (
     HandyHelperIndexView,
     HandyHelperListPlusFilterView,
     HandyHelperListView,
 )
-from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
+from handyhelpers.views.htmx import (ModelDetailBootstrapModalView, 
+    HtmxOptionView, 
+    HtmxOptionDetailView, 
+    HtmxOptionMultiView,
+    HtmxOptionMultiFilterView)
 
 from web import forms
 from web.models import Event, TechGroup
@@ -28,27 +32,6 @@ def set_timezone(request: HttpRequest) -> HttpResponse:
     request.session["timezone"] = timezone_id
     return HttpResponse()
 
-
-
-class Index(TemplateView):
-    template_name = "web/index.html"
-    
-
-# class Index(HandyHelperIndexView):
-#     title = "Spokane Tech"
-#     subtitle = "Index of Spokane's Tech User Groups"
-#     base_template = "spokanetech/base.html"
-
-#     def __init__(self, **kwargs: Any) -> None:
-#         self.item_list = [
-#             {
-#                 "url": tech_group.get_absolute_url(),
-#                 "icon": tech_group.icon,
-#                 "title": str(tech_group),
-#             }
-#             for tech_group in TechGroup.objects.all()
-#         ]
-#         super().__init__(**kwargs)
 
 
 class CanEditMixin:
@@ -109,128 +92,12 @@ class ListEvents(CanEditMixin, HtmxViewMixin, HandyHelperListPlusFilterView):
         return queryset
 
 
-class DetailEvent(HtmxViewMixin, DetailView):
-    model = Event
-
-    def __init__(self, **kwargs: Any) -> None:
-        self.queryset = Event.objects.select_related("group").prefetch_related("tags", "group__tags")
-        super().__init__(**kwargs)
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)  # type: ignore
-        user = self.request.user
-        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
-        return context
-
-    def get(self, request, *args, **kwargs):
-        if self.is_htmx():
-            self.template_name = "web/partials/detail_event.htm"
-        return super().get(request, *args, **kwargs)
-
-
-class CreateEvent(RequireStaffMixin, CreateView):
-    model = Event
-    form_class = forms.EventForm
-
-
-class UpdateEvent(RequireStaffMixin, UpdateView):
-    model = Event
-    form_class = forms.EventForm
-
-
-class DetailTechGroup(HtmxViewMixin, DetailView):
-    model = TechGroup
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
-        return context
-
-    def get(self, request, *args, **kwargs):
-        if self.is_htmx():
-            self.template_name = "web/partials/detail_tech_group.htm"
-        return super().get(request, *args, **kwargs)
-
-
-class ListTechGroup(CanEditMixin, HtmxViewMixin, HandyHelperListView):
-    title = "Tech Groups"
-    base_template = "spokanetech/base.html"
-    template_name = "web/techgroup_list.html"
-
-    def __init__(self, **kwargs: Any) -> None:
-        self.queryset = TechGroup.objects.filter(enabled=True)
-        super().__init__(**kwargs)
-
-    def get(self, request, *args, **kwargs):
-        if self.is_htmx():
-            self.template_name = "web/partials/techgroup_list.htm"
-        return super().get(request, *args, **kwargs)
-
-
-class CreateTechGroup(RequireStaffMixin, CreateView):
-    model = TechGroup
-    form_class = forms.TechGroupForm
-
-
-class UpdateTechGroup(RequireStaffMixin, UpdateView):
-    model = TechGroup
-    form_class = forms.TechGroupForm
-
-
-class BuildSidebar(BuildModelSidebarNav):
-    """Get a list of upcoming Events and enabled TechGroups and render a partial to use on the sidebar navigation"""
-
-    template_name = "spokanetech/htmx/build_sidebar.htm"
-
-    menu_item_list = [
-        {
-            "queryset": Event.objects.filter(date_time__gte=timezone.localtime()).order_by("date_time"),
-            "list_all_url": reverse_lazy("web:list_events"),
-            "icon": """<i class="fa-solid fa-calendar-day"></i>""",
-        },
-        {
-            "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
-            "list_all_url": reverse_lazy("web:list_tech_groups"),
-            "icon": """<i class="fa-solid fa-people-group"></i>""",
-        },
-    ]
-
-
-class GetEventInformationModal(BuildBootstrapModalView):
-    """get details of an event and display in a modal"""
-
-    modal_button_submit = None
-    modal_title = "Event Info"
-
-    def get(self, request, *args, **kwargs):
-        context = {}
-        context["object"] = Event.objects.get(pk=kwargs["pk"])
-        self.modal_subtitle = context["object"]
-        self.modal_body = loader.render_to_string("web/partials/modal/event_information.htm", context=context)
-        return super().get(request, *args, **kwargs)
-
-
-class GetGroupInformationModal(BuildBootstrapModalView):
-    """get details of an event and display in a modal"""
-
-    modal_button_submit = None
-    modal_title = "Group Info"
-
-    def get(self, request, *args, **kwargs):
-        context = {}
-        context["object"] = TechGroup.objects.get(pk=kwargs["pk"])
-        self.modal_subtitle = context["object"]
-        self.modal_body = loader.render_to_string("web/partials/modal/group_information.htm", context=context)
-        return super().get(request, *args, **kwargs)
-
-
 class EventCalendarView(CalendarView):
     """Render a monthly calendar view of events"""
     title = "Spokane Tech Event Calendar"
     event_model = Event
     event_model_date_field = "date_time"
-    event_detail_url = "web:get_event_details"
+    event_detail_url = "web:get_event_information"
 
 
 class FilterListView(View):
@@ -259,75 +126,58 @@ class FilterListView(View):
         return redirect(filter_url)
 
 
-class GetMainForIndex(HtmxViewMixin, View):
-    """Get a list of main content entries"""
 
-    def get(self, request):
-        context = {}
-        template_name = "web/partials/index_main.htm"
-        return render(request, template_name, context)
+class GetAboutContent(HtmxOptionView):
+    htmx_template_name = "web/partials/about.htm" 
+    template_name = "web/full/about.html"
 
 
-class GetTechGroupsForIndex(HtmxViewMixin, View):
-    """Get a list of TechGroup entries"""
-
-    def get(self, request, **kwargs):
-        if kwargs.get("display", None) == "list":
-            template_name = "web/partials/list/groups.htm"
-        else:
-            template_name = "web/partials/marquee/group_cards.htm"
-        context = {}
-        queryset = TechGroup.objects.filter(enabled=True)
-        context["queryset"] = queryset
-        return render(request, template_name, context)
+class GetIndexContent(HtmxOptionView):
+    htmx_template_name = "web/partials/index.htm" 
+    template_name = "web/full/index.html"
 
 
-class GetTechEventsForIndex(HtmxViewMixin, View):
+class GetTechEvent(HtmxOptionDetailView):
+    """get details of an Event instance"""
+    model = Event
+    htmx_template_name = "web/partials/detail/event.htm" 
+    template_name = "web/full/detail_event.html"
+
+
+class GetTechEvents(HtmxOptionMultiFilterView):
     """Get a list of Event entries"""
-
-    def get(self, request, **kwargs):
-        if kwargs.get("display", None) == "list":
-            template_name = "web/partials/list/events.htm"
-        else:
-            template_name = "web/partials/marquee/event_cards.htm"
-        context = {}
-        queryset = Event.objects.filter(date_time__gte=timezone.localtime())
-        context["queryset"] = queryset
-        return render(request, template_name, context)
+    template_name = "web/full/list/events.html"
+    htmx_index_template_name = "web/partials/marquee/event_cards.htm"
+    htmx_list_template_name = "web/partials/list/events.htm"
+    queryset = Event.objects.filter(date_time__gte=timezone.localtime())
 
 
-class GetAboutContent(HtmxViewMixin, View):
-    def get(self, request):
-        context = {}
-        template_name = "web/partials/about.htm"
-        return render(request, template_name, context)
-
-
-class GetTechEvent(HtmxViewMixin, DetailView):
+class GetTechEventModal(ModelDetailBootstrapModalView):
+    """get details of an Event instance and display in a modal"""
+    modal_button_submit = None
+    modal_title = "Event Info"
+    modal_template = "web/partials/modal/event_information.htm"
     model = Event
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
-        return context
 
-    def get(self, request, *args, **kwargs):
-        if self.is_htmx():
-            self.template_name = "web/partials/detail/event.htm"
-        return super().get(request, *args, **kwargs)
-
-
-class GetTechGroup(HtmxViewMixin, DetailView):
+class GetTechGroup(HtmxOptionDetailView):
+    """get details of a TechGroup instance """
     model = TechGroup
+    htmx_template_name = "web/partials/detail/group.htm" 
+    template_name = "web/full/detail/group.html"
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context["can_edit"] = user.is_authenticated and user.is_staff  # type: ignore
-        return context
 
-    def get(self, request, *args, **kwargs):
-        if self.is_htmx():
-            self.template_name = "web/partials/detail/group.htm"
-        return super().get(request, *args, **kwargs)
+class GetTechGroups(HtmxOptionMultiFilterView):
+    """get a list of TechGroup entries"""
+    template_name = "web/full/list/groups.html"
+    htmx_index_template_name = "web/partials/marquee/group_cards.htm"
+    htmx_list_template_name = "web/partials/list/groups.htm"
+    queryset = TechGroup.objects.filter(enabled=True)
+
+
+class GetTechGroupModal(ModelDetailBootstrapModalView):
+    """get details of a TechGroup instance and display in a modal"""
+    modal_button_submit = None
+    modal_title = "Group Info"
+    modal_template = "web/partials/modal/group_information.htm"
+    model = TechGroup

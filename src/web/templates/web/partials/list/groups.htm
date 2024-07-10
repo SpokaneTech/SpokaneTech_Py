@@ -1,9 +1,11 @@
 <section class="about">
 <h1 class="fade-in-blur" style="--fade-duration: .5s;">Our Tech Groups</h1>
 
+<div hx-get="{% url 'web:get_techgroups' %}?name__icontains=6" hx-target="#body_main" hx-push-url="true">click here to filter!</div>
+
 <div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 1s;">
     {% for row in queryset %}
-    <div class="list-card" hx-get="{% url 'web:detail_group' row.pk %}" hx-target="#body_main">
+    <div class="list-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="true">
         <div class="title">{{ row.name }}</div>
         <div class="description">{{ row.description|truncatewords_html:30 }}</div>
         <div class="footer">

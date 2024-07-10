@@ -1,0 +1,6 @@
+{% extends 'spokanetech/base.html' %}
+
+{% block main_content %}
+    <main id="body_main" hx-get="{% url 'web:get_techevent' object.pk %}" hx-trigger="load"> 
+    </main>
+{% endblock main_content %}

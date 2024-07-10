@@ -1,46 +1,82 @@
-{% extends "handyhelpers/handyhelpers_with_sidebar.htm" %}
 {% load static %}
 
-{% block favicon %}
-<link rel="apple-touch-icon" sizes="180x180" href="{% static '/apple-touch-icon.png' %}">
-<link rel="icon" type="image/png" sizes="32x32" href="{% static '/favicon-32x32.png' %}">
-<link rel="icon" type="image/png" sizes="16x16" href="{% static '/favicon-16x16.png' %}">
-<link rel="stylesheet" href="{% static '/main.css' %}">
-<link rel="manifest" href="{% static '/site.webmanifest' %}">
-<title>Spokane Tech</title>
-{% endblock favicon %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block app_javascript %}
-<script>
-  const TIMEZONE_ID = "TIMEZONE_ID"
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'spokanetech/img/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'spokanetech/img/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'spokanetech/img/favicon-16x16.png' %}">
+    <title>Spokane Tech</title>
+    <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
 
-  $(document).ready(() => {
-    const timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const storedTimezone = window.localStorage.getItem(TIMEZONE_ID)
-    const sessionTimezone = "{{ request.timezone }}"
-    if (!storedTimezone || storedTimezone != timezoneID || !sessionTimezone || sessionTimezone != timezoneID) {
-      $.post({
-        url: "/set_timezone/",
-        data: { "timezone": timezoneID },
-        headers: { "X-CSRFToken": csrftoken }, // handyhelpers base template defines `csrftoken`
-        success: (data) => {
-          window.localStorage.setItem(TIMEZONE_ID, timezoneID)
-          location.reload()
-        },
-      })
-    }
-  })
-</script>
-{% endblock app_javascript %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />    
+    <link rel="stylesheet" href="{% static 'spokanetech/css/index-styles.css' %}">
 
-{% block sidebar %}
-{% include 'spokanetech/sidebar.htm' %}
-{% endblock sidebar %}
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/fades.min.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/marquee.min.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/blur_group.min.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/background_icons.min.css' %}">
+    
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 
-{% block mainnavbar %}
-{% include 'spokanetech/navbar.htm' %}
-{% endblock mainnavbar %}
+</head>
+<body>
+    <header class="fade-in-blur" style="--fade-duration: .75s;">
+        <nav class="navbar">
+            <div class="logo">
+                <a href="" title="SpokaneTech.org home" hx-get="{% url 'web:index' %}" hx-target="#body_main" hx-push-url="true">Home</a>
+            </div>
+            
+            <ul class="menu">
+                <li><a href="https://discord.gg/wHrSJNgpnP" target="_blank" title="join us on Discord!"><i class="fa-brands fa-discord"></i></a></li>
+                <li><a href="" title="groups" hx-get="{% url 'web:get_techgroups' %}" hx-target="#body_main" hx-push-url="true">
+                    <i class="fa-solid fa-user-group"></i></a>
+                </li>
+                <li><a href="" title="events" hx-get="{% url 'web:get_techevents' %}" hx-target="#body_main" hx-push-url="true">
+                    <i class="fa-solid fa-list-check"></i></a>
+                </li>
+                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar">
+                  <i class="fa-solid fa-calendar-days"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+ 
+    {% block main_content %}
+    <main id="body_main" hx-get="{% url 'web:about' %}" hx-trigger="load"> 
+    </main>
+    {% endblock main_content %}
+ 
+    <footer class="fade-in-blur" style="--fade-duration: .75s;">
+        <p class="title">SpokaneTech.org</p>
+        <p class="copyright">&copy; 2024 spokantech.org. All rights reserved.</p>
+    </footer>
 
-{% block mainfooter %}
-{% include 'spokanetech/footer.htm' %}
-{% endblock mainfooter%}
+    {% block modals %}
+    {% if not disable_modals_in_base %}
+    {% include 'handyhelpers/htmx/bs5/generic_modal.htm' %}
+    {% endif %}
+    {% endblock modals %}
+    <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/@popperjs/core/dist/umd/popper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/fun-effects/dist/js/marquee.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/fun-effects/dist/js/background_icons.min.js' %}"></script>
+
+    <script>   
+        // Listen for the htmx:afterOnLoad event
+        document.addEventListener('htmx:afterOnLoad', function(event) {
+          addAnimationDelay();
+          setRightProperty();
+          setLeftProperty();
+          addMarqueeMouseListener();
+        });
+      </script>
+
+</body>
+</html>

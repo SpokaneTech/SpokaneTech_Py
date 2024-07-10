@@ -1,7 +1,7 @@
 {% if queryset %}
 {% for row in queryset %}
 <div class="itemRight card"
-    hx-get="{% url 'web:get_event_information' row.pk %}"
+    hx-get="{% url 'web:techevent_modal' row.pk %}"
     hx-target="#modal_wrapper"
     data-bs-toggle="modal"
     data-bs-target="#modal_wrapper"

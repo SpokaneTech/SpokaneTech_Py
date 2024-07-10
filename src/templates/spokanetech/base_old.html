@@ -1,0 +1,46 @@
+{% extends "handyhelpers/handyhelpers_with_sidebar.htm" %}
+{% load static %}
+
+{% block favicon %}
+<link rel="apple-touch-icon" sizes="180x180" href="{% static '/apple-touch-icon.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static '/favicon-32x32.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static '/favicon-16x16.png' %}">
+<link rel="stylesheet" href="{% static '/main.css' %}">
+<link rel="manifest" href="{% static '/site.webmanifest' %}">
+<title>Spokane Tech</title>
+{% endblock favicon %}
+
+{% block app_javascript %}
+<script>
+  const TIMEZONE_ID = "TIMEZONE_ID"
+
+  $(document).ready(() => {
+    const timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const storedTimezone = window.localStorage.getItem(TIMEZONE_ID)
+    const sessionTimezone = "{{ request.timezone }}"
+    if (!storedTimezone || storedTimezone != timezoneID || !sessionTimezone || sessionTimezone != timezoneID) {
+      $.post({
+        url: "/set_timezone/",
+        data: { "timezone": timezoneID },
+        headers: { "X-CSRFToken": csrftoken }, // handyhelpers base template defines `csrftoken`
+        success: (data) => {
+          window.localStorage.setItem(TIMEZONE_ID, timezoneID)
+          location.reload()
+        },
+      })
+    }
+  })
+</script>
+{% endblock app_javascript %}
+
+{% block sidebar %}
+{% include 'spokanetech/sidebar.htm' %}
+{% endblock sidebar %}
+
+{% block mainnavbar %}
+{% include 'spokanetech/navbar.htm' %}
+{% endblock mainnavbar %}
+
+{% block mainfooter %}
+{% include 'spokanetech/footer.htm' %}
+{% endblock mainfooter%}
