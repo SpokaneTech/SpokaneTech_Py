@@ -47,7 +47,7 @@ else:
         raise KeyError(f"{e}: If running in development, set 'SPOKANE_TECH_DEV' to any value.") from e
 
     DEBUG = False
-    ALLOWED_HOSTS = ["spokanetech.org", "spokanetech-py.fly.dev"]
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "spokanetech.org,spokanetech-py.fly.dev").split(",")
     CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
     # SSL Options
