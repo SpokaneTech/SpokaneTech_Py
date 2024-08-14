@@ -1,16 +1,12 @@
-name: Trigger auto deployment for spokanetech-worker
+name: Deploy spokanetech-worker to azure
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
     branches: 
       [ main ]
     paths:
     - '**'
-    - '.github/workflows/spokanetech-worker-AutoDeployTrigger-fc8cee79-456f-47ed-afcd-bc09fe68767b.yml'
-
-  # Allow manual trigger 
+    - '.github/workflows/deploy_worker_azure.yml'
   workflow_dispatch:      
 
 jobs:
@@ -25,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.SPOKANETECHWORKER_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.SPOKANETECHWORKER_AZURE_TENANT_ID }}
