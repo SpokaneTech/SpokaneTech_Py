@@ -37,7 +37,11 @@ jobs:
           containerAppName: spokanetech-worker
           resourceGroup: spokanetech
           imageToBuild: spokanetechcr.azurecr.io/spokanetech-worker:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
+          environmentVariables: |
+            CELERY_BROKER_URL=secretref:celery-broker-url
+            EVENTBRITE_API_TOKEN=secretref:eventbrite-api-token
+            SENTRY_DSN=secretref=sentry-dsn
+            DJANGO_SECRET_KEY=secretref:django-secret-key
+            DATABASE_URL=secretref:database-url
+            DISCORD_WEBHOOK_URL=secretref:discord-webhook-url
+            USE_AZURE=false
