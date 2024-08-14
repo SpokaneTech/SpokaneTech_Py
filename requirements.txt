@@ -12,6 +12,7 @@ django-markdownify==0.9.3
 django-storages[azure]==1.14.2
 Django==5.0.1
 eventbrite==3.3.5
+flower==2.0.1
 gunicorn==21.2.0
 lxml==5.1.0
 psycopg[binary]==3.1.17

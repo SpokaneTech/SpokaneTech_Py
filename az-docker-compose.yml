@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  app:
+    image:
+      tag: spokanetech:latest
+      build: .
+    container_name: app
+    ports:
+      - "8000:8000"
+
+  worker:
+    image:
+      tag: spokanetech:latest
+      build: .
+    container_name: worker
+    command:
+      [
+        "python",
+        "-m",
+        "celery",
+        "--workdir",
+        "./src",
+        "-A",
+        "spokanetech.celery",
+        "worker",
+        "-B",
+        "-l",
+        "INFO",
+      ]

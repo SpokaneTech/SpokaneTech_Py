@@ -1,9 +1,14 @@
-# This is only used for local development and only needs to be used if you
-# want to run Celery locally.
-
-version: "3.8"
-
 services:
+  worker:
+    image: spokanetech-worker:latest
+    build:
+      context: .
+    container_name: worker
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+
   redis:
     image: redis:7.2
     container_name: redis
