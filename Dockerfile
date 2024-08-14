@@ -27,5 +27,4 @@ COPY . /code
 
 EXPOSE 8000
 
-# CMD ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
-CMD ["overmind", "start"]
+CMD ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
