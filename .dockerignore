@@ -1,3 +1,8 @@
 fly.toml
 .git/
 *.sqlite3
+.env*
+.venv
+.github
+.vscode
+.DS_Store
