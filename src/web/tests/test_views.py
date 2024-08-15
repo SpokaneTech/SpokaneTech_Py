@@ -59,7 +59,7 @@ def test_get_tech_group(client: Client):
 def test_set_timezone_and_timezone_middleware(client: Client):
     # Arrange
     date_time = datetime.datetime.fromisoformat("2024-03-19T01:00:00Z")
-    baker.make("web.Event", date_time=date_time)
+    baker.make("web.Event", date_time=date_time, approved=True)
 
     # Act
     client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
@@ -78,7 +78,7 @@ class TestEventDetailModal(TestCase):
 
     def setUp(self):
         super(TestEventDetailModal, self).setUp()
-        self.object = baker.make("web.Event")
+        self.object = baker.make("web.Event", approved=True)
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
@@ -102,7 +102,7 @@ class TestUpdateEvent(TestCase):
 
     def test_update_event_sets_right_date_time(self):
         # Arrange
-        object: Event = baker.make(Event)
+        object: Event = baker.make(Event, approved=True)
 
         timezone = "America/Los_Angeles"
 
@@ -144,7 +144,7 @@ class TestEventCalendarView(TestCase):
 
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
-        self.object = baker.make("web.Event")
+        self.object = baker.make("web.Event", approved=True)
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.now = timezone.now()
@@ -169,6 +169,7 @@ class TestEventListView(TestCase):
             "web.Event",
             group=self.group,
             date_time=timezone.localtime() + datetime.timedelta(seconds=1),
+            approved=True,
         )
         self.url = reverse("web:list_events")
 
