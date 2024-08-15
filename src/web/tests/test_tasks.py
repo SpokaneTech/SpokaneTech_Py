@@ -29,13 +29,13 @@ class TestSendEventsToDiscord(TestCase):
             date_time=today + timedelta(days=1),
             url="https://spokanepython.com/meetups/intro-to-python/",
             group=group,
-            approved=True,
+            approved_at=today,
         )
         event2 = models.Event.objects.create(
             name="Advanced Python",
             date_time=today + timedelta(days=2, hours=18),
             group=group,
-            approved=True,
+            approved_at=today,
         )
         models.Event.objects.create(
             name="Way in the future event",

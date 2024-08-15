@@ -56,7 +56,7 @@ class EventQuerySet(models.QuerySet):
 
 class ApprovedEventManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(approved=True)
+        return super().get_queryset().exclude(approved_at=None)
 
 
 class Event(HandyHelperBaseModel):
@@ -93,14 +93,14 @@ class Event(HandyHelperBaseModel):
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
-    approved = models.BooleanField(default=False)
+    approved_at = models.DateTimeField(null=True)
 
     objects = ApprovedEventManager.from_queryset(EventQuerySet)()
     all = EventQuerySet.as_manager()
 
     class Meta:
         indexes = [
-            models.Index(fields=["approved"]),
+            models.Index(fields=["approved_at"]),
         ]
 
     def __str__(self) -> str:

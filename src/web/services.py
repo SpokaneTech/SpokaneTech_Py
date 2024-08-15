@@ -20,12 +20,13 @@ class MeetupService:
 
     def save_events(self) -> None:
         """Scrape upcoming events from Meetup and save them to the database."""
+        now = timezone.localtime()
         for tech_group in models.TechGroup.objects.filter(homepage__icontains="meetup.com"):
             event_urls = self.homepage_scraper.scrape(tech_group.homepage)  # type: ignore
             for event_url in event_urls:  # TODO: parallelize (with async?)
                 event, tags = self.event_scraper.scrape(event_url)
                 event.group = tech_group
-                event.approved = True
+                event.approved_at = now
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
 
@@ -53,12 +54,13 @@ class EventbriteService:
 
         Note: this uses an API and doesn't actually web scrape.
         """
+        now = timezone.localtime()
         for eventbrite_organization in models.EventbriteOrganization.objects.prefetch_related("tech_group"):
             tech_group = eventbrite_organization.tech_group
             events_and_tags = self.events_scraper.scrape(eventbrite_organization.eventbrite_id)
             for event, _ in events_and_tags:
                 event.group = tech_group
-                event.approved = True
+                event.approved_at = now
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
                 del defaults["tags"]  # Can't apply Many-to-Many relationship untill after the event has been saved.

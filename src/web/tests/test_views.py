@@ -59,7 +59,7 @@ def test_get_tech_group(client: Client):
 def test_set_timezone_and_timezone_middleware(client: Client):
     # Arrange
     date_time = datetime.datetime.fromisoformat("2024-03-19T01:00:00Z")
-    baker.make("web.Event", date_time=date_time, approved=True)
+    baker.make("web.Event", date_time=date_time, approved_at=date_time)
 
     # Act
     client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
@@ -78,7 +78,7 @@ class TestEventDetailModal(TestCase):
 
     def setUp(self):
         super(TestEventDetailModal, self).setUp()
-        self.object = baker.make("web.Event", approved=True)
+        self.object = baker.make("web.Event", approved_at=timezone.localtime())
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
@@ -102,9 +102,9 @@ class TestUpdateEvent(TestCase):
 
     def test_update_event_sets_right_date_time(self):
         # Arrange
-        object: Event = baker.make(Event, approved=True)
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
 
-        timezone = "America/Los_Angeles"
+        timezone_str = "America/Los_Angeles"
 
         user_cls = get_user_model()
         user = user_cls()
@@ -112,7 +112,7 @@ class TestUpdateEvent(TestCase):
         user.save()
 
         # set user TZ
-        self.client.post(reverse("web:set_timezone"), {"timezone": timezone})
+        self.client.post(reverse("web:set_timezone"), {"timezone": timezone_str})
         response = self.client.get(reverse("web:list_events"))
         assert response.status_code == 200
 
@@ -124,6 +124,7 @@ class TestUpdateEvent(TestCase):
                 "name": object.name,
                 "description": "",
                 "date_time": "2024-04-08T07:00",
+                "approved_at": "2024-04-08T07:00",
                 "duration": "",
                 "location": "",
                 "url": "",
@@ -136,7 +137,8 @@ class TestUpdateEvent(TestCase):
         assert response.status_code == 302
 
         object.refresh_from_db()
-        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
+        tz_zoneinfo = zoneinfo.ZoneInfo(timezone_str)
+        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=tz_zoneinfo)
 
 
 class TestEventCalendarView(TestCase):
@@ -144,7 +146,7 @@ class TestEventCalendarView(TestCase):
 
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
-        self.object = baker.make("web.Event", approved=True)
+        self.object = baker.make("web.Event", approved_at=timezone.localtime())
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.now = timezone.now()
@@ -162,14 +164,15 @@ class TestEventCalendarView(TestCase):
 class TestEventListView(TestCase):
     def setUp(self):
         super().setUp()
+        now = timezone.localtime()
         self.tag = baker.make("web.Tag")
         self.group = baker.make("web.TechGroup")
         self.group.tags.set([self.tag])
         self.object = baker.make(
             "web.Event",
             group=self.group,
-            date_time=timezone.localtime() + datetime.timedelta(seconds=1),
-            approved=True,
+            date_time=now + datetime.timedelta(seconds=1),
+            approved_at=now,
         )
         self.url = reverse("web:list_events")
 
@@ -179,7 +182,7 @@ class TestEventListView(TestCase):
         self.assertIn(self.object.name, response.content.decode("utf-8"))
 
     def test_does_not_include_unapproved_events(self):
-        self.object.approved = False
+        self.object.approved_at = None
         self.object.save()
         response = self.client.get(self.url + f"?tags={self.tag.pk}")
         self.assertNotIn(self.object.name, response.content.decode("utf-8"))

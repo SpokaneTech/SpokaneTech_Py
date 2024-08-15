@@ -2,12 +2,14 @@
 
 import django.apps
 from django.db import migrations
+from django.utils import timezone
 
 
 def migrate(apps: django.apps.registry.Apps, schema_editor) -> None:
     """Automatically approve all existing Events."""
     Event = apps.get_model("web", "Event")
-    Event.objects.update(approved=True)
+    now = timezone.localtime()
+    Event.objects.update(approved_at=now)
 
 
 def reverse(apps, schema_editor) -> None:
@@ -17,7 +19,7 @@ def reverse(apps, schema_editor) -> None:
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('web', '0012_event_approved_event_web_event_approve_978171_idx'),
+        ('web', '0012_event_approved_at_event_web_event_approve_979e74_idx'),
     ]
 
     operations = [
