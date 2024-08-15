@@ -2,6 +2,8 @@ ARG PYTHON_VERSION=3.11-slim-bullseye
 
 FROM python:${PYTHON_VERSION}
 
+EXPOSE 8000 2222
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -11,6 +13,13 @@ WORKDIR /code
 RUN apt-get update && apt-get install -y \
     curl \
     tmux
+
+# Start and enable SSH
+COPY sshd_config /etc/ssh/
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends dialog \
+    && apt-get install -y --no-install-recommends openssh-server \
+    && echo "root:Docker!" | chpasswd
 
 # Download and install Overmind
 RUN curl -SL https://github.com/DarthSim/overmind/releases/download/v2.5.1/overmind-v2.5.1-linux-amd64.gz | gunzip > overmind-v2.5.1-linux-amd64 \
@@ -27,4 +36,5 @@ COPY . /code
 
 EXPOSE 8000
 
+ENTRYPOINT [ "./scripts/entrypoint.sh" ]
 CMD ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
