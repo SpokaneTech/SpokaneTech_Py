@@ -93,7 +93,7 @@ class Event(HandyHelperBaseModel):
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
-    approved_at = models.DateTimeField(null=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
 
     objects = ApprovedEventManager.from_queryset(EventQuerySet)()
     all = EventQuerySet.as_manager()
