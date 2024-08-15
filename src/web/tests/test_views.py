@@ -140,6 +140,36 @@ class TestUpdateEvent(TestCase):
         tz_zoneinfo = zoneinfo.ZoneInfo(timezone_str)
         assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=tz_zoneinfo)
 
+    def test_update_event_remove_approved_at_redirects_to_list(self):
+        # Arrange
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
+
+        user_cls = get_user_model()
+        user = user_cls()
+        user.is_staff = True  # type: ignore
+        user.save()
+
+        # Act
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("web:update_event", args=(object.pk,)),
+            {
+                "name": object.name,
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "approved_at": "",
+                "duration": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
+
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:list_events")
+
 
 class TestEventCalendarView(TestCase):
     """test EventCalendarView view"""

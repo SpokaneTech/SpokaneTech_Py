@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_http_methods
@@ -131,6 +131,13 @@ class CreateEvent(RequireStaffMixin, CreateView):
 class UpdateEvent(RequireStaffMixin, UpdateView):
     model = Event
     form_class = forms.EventForm
+
+    object: Event  # only populated if form successful
+
+    def get_success_url(self) -> str:
+        if self.object.approved_at is None:
+            return reverse("web:list_events")
+        return super().get_success_url()
 
 
 class DetailTechGroup(HtmxViewMixin, DetailView):
