@@ -6,3 +6,5 @@ fly.toml
 .github
 .vscode
 .DS_Store
+*.dump
+staticfiles
