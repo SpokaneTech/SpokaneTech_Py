@@ -197,6 +197,8 @@ if USE_AZURE:
     MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
     MEDIA_UPLOAD_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}"
 else:
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "media/"
 
