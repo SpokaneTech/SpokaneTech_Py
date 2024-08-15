@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -123,9 +124,28 @@ class DetailEvent(HtmxViewMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class CreateEvent(RequireStaffMixin, CreateView):
+class CreateEvent(CreateView):
     model = Event
-    form_class = forms.EventForm
+
+    def get_form_class(self):
+        return (
+            forms.EventForm
+            if self.request.user.is_authenticated and self.request.user.is_staff
+            else forms.SuggestEventForm
+        )
+
+    def get_success_url(self) -> str:
+        if self.object.approved_at is None:
+            messages.info(
+                self.request,
+                "Thank you for suggesting an event. A Spokane Tech admin will "
+                "review it and approve it if it meets our "
+                "<a href='https://docs.spokanetech.org/CODE_OF_CONDUCT/' target='_blank'>"
+                "code of conduct.</a>",
+                extra_tags="safe",
+            )
+            return reverse("web:list_events")
+        return super().get_success_url()
 
 
 class UpdateEvent(RequireStaffMixin, UpdateView):

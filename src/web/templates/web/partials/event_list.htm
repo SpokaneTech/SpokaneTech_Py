@@ -45,4 +45,10 @@
   </div>
   {% endfor %}
 </div>
+
+<div class="mt-3">
+  <a href="{% url 'web:add_event' %}" class="btn btn-outline-primary">
+    {% if request.user.is_staff %}Add Event{% else %}Suggest Event{% endif %}
+  </a>
+</div>
 {% endblock content %}

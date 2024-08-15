@@ -95,11 +95,33 @@ class TestEventDetailModal(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-class TestUpdateEvent(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
+class TestCreateEvent(TestCase):
+    def test_suggest_event_redirects_and_sets_unapproved(self):
+        # Act
+        response = self.client.post(
+            reverse("web:add_event"),
+            {
+                "name": "Event",
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "approved_at": "",
+                "duration": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
 
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:list_events")
+
+        actual = Event.all.get()
+        assert actual.approved_at is None
+
+
+class TestUpdateEvent(TestCase):
     def test_update_event_sets_right_date_time(self):
         # Arrange
         object: Event = baker.make(Event, approved_at=timezone.localtime())
