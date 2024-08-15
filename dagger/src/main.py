@@ -65,12 +65,10 @@ class SpokaneTech:
     def prod(self) -> dagger.Container:
         """
         A production-ready container.
-
-        Used to deploy to Fly.io.
         """
         return (
             self.base_container()
-            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in Fly.io prod.
+            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in prod.
             .with_exec(GUNICORN_CMD)
         )
 
