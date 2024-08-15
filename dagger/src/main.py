@@ -5,7 +5,7 @@ from time import time
 import dagger
 from dagger import dag, function, object_type
 
-PYTHON_VERSION = "3.11-slim-bullseye"
+PYTHON_VERSION = "3.12-slim-bullseye"
 GUNICORN_CMD = ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
 
 
