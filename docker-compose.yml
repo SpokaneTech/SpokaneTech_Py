@@ -1,6 +1,6 @@
 services:
   worker:
-    image: spokanetech-worker:latest
+    image: spokanetech:latest
     build:
       context: .
     container_name: worker
