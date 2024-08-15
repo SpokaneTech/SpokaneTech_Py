@@ -14,6 +14,8 @@ Spokane Tech uses a few different platforms for its infrastructure needs:
     - May be used for caching in the future
 - [Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/common/storage-introduction)
     - Media and static file storage
+- [Azure Communication Services](https://learn.microsoft.com/en-us/azure/communication-services/)
+    - For sending emails from Django
 
 ## Other
 - [Sentry](https://spokane-tech.sentry.io/issues/)
