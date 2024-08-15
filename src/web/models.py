@@ -60,7 +60,11 @@ class ApprovedEventManager(models.Manager):
 
 
 class Event(HandyHelperBaseModel):
-    """An event on a specific day and time."""
+    """An event on a specific day and time.
+
+    Note: Event.objects filters out unapproved events by default. Use
+    Event.all to include unapproved events if needed.
+    """
 
     name = models.CharField(max_length=1024)
     description = models.TextField(blank=True, null=True)
