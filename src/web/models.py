@@ -44,7 +44,7 @@ class TechGroup(HandyHelperBaseModel):
 
 
 class EventQuerySet(models.QuerySet):
-    def filter_group_tags(self, tags):
+    def filter_group_tags(self, tags: list[str]):
         return self.filter(
             models.Q(tags=None)
             & functools.reduce(
@@ -52,6 +52,11 @@ class EventQuerySet(models.QuerySet):
                 (models.Q(group__tags__in=tag_id) for tag_id in tags),
             ),
         )
+
+
+class ApprovedEventManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(approved=True)
 
 
 class Event(HandyHelperBaseModel):
@@ -84,8 +89,15 @@ class Event(HandyHelperBaseModel):
     )
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
+    approved = models.BooleanField(default=False)
 
-    objects = EventQuerySet.as_manager()
+    objects = ApprovedEventManager.from_queryset(EventQuerySet)()
+    all = EventQuerySet.as_manager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["approved"]),
+        ]
 
     def __str__(self) -> str:
         return self.name  # type: ignore

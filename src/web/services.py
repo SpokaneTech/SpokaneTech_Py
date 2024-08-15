@@ -25,6 +25,7 @@ class MeetupService:
             for event_url in event_urls:  # TODO: parallelize (with async?)
                 event, tags = self.event_scraper.scrape(event_url)
                 event.group = tech_group
+                event.approved = True
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
 
@@ -57,6 +58,7 @@ class EventbriteService:
             events_and_tags = self.events_scraper.scrape(eventbrite_organization.eventbrite_id)
             for event, _ in events_and_tags:
                 event.group = tech_group
+                event.approved = True
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
                 del defaults["tags"]  # Can't apply Many-to-Many relationship untill after the event has been saved.
