@@ -177,3 +177,9 @@ class TestEventListView(TestCase):
         response = self.client.get(self.url + f"?tags={self.tag.pk}")
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.object.name, response.content.decode("utf-8"))
+
+    def test_does_not_include_unapproved_events(self):
+        self.object.approved = False
+        self.object.save()
+        response = self.client.get(self.url + f"?tags={self.tag.pk}")
+        self.assertNotIn(self.object.name, response.content.decode("utf-8"))
