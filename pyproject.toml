@@ -1,6 +1,54 @@
+[project]
+name = "SpokaneTech"
+version = "0.1.0"
+description = "Home of SpokaneTech.org, an online hub for Spokane's tech events and groups."
+maintainers = [
+    { name = "Organizers", email = "organizers@spokanetech.org"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "asgiref>=3.7.2",
+    "beautifulsoup4>=4.12.3",
+    "celery[redis]>=5.3.6",
+    "crispy-bootstrap5>=2024.2",
+    "discord.py>=2.3.2",
+    "Django>=5.0.1",
+    "django-celery-beat>=2.6.0",
+    "django-celery-results>=2.5.1",
+    "django-crispy-forms>=2.1",
+    "django-handyhelpers>=0.3.22",
+    "django-markdownify>=0.9.3",
+    "django-storages[azure]>=1.14.2",
+    "dj-database-url>=2.1.0",
+    "eventbrite>=3.3.5",
+    "flower>=2.0",
+    "gunicorn>=21.2.0",
+    "lxml>=5.1.0",
+    "psycopg[binary]>=3.1.17",
+    "python-dotenv>=1.0.1",
+    "sentry-sdk[celery,django]>=2.1.1",
+    "sqlparse>=0.4.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "django-debug-toolbar>=4.3",
+    "freezegun>=1.4",
+    "mkdocs>=1.6",
+    "mkdocs-material[imaging]>=9.5",
+    "model-bakery>=1.17",
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "responses>=0.25",
+]
+
 [tool.bandit]
 exclude_dirs = [".venv", "venv", "tests"]
 
 [tool.ruff]
 line-length = 120
 exclude = ["src/*/migrations", "src/manage.py"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
