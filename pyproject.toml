@@ -2,7 +2,7 @@
 name = "SpokaneTech"
 version = "0.1.0"
 description = "Home of SpokaneTech.org, an online hub for Spokane's tech events and groups."
-maitainers = [
+maintainers = [
     { name = "Organizers", email = "organizers@spokanetech.org"}
 ]
 requires-python = ">=3.12"
