@@ -49,6 +49,14 @@ exclude_dirs = [".venv", "venv", "tests"]
 line-length = 120
 exclude = ["src/*/migrations", "src/manage.py"]
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "spokanetech.settings"
+addopts = "-vv --reuse-db"
+markers = [
+  "integration",
+  "eventbrite",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
