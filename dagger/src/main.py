@@ -174,19 +174,18 @@ class SpokaneTech:
                 "-vv",
                 "--config-file",
                 "pyproject.toml",
-                "-k",
-                "not integration",
                 "src",
             ],
             ctr,
         )
 
     @function
-    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
+    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File) -> str:
         """
         Runs all the liners.
         Pass `--verbose` to not summarize linter output.
         """
+        verbose = False
         # Run all the linters
         async with TaskGroup() as tg:
             tasks = [

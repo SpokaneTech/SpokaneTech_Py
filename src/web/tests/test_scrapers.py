@@ -116,8 +116,16 @@ class TestMeetupEventScraper(TestCase):
         }
 
 
-@pytest.mark.integration
+@pytest.mark.eventbrite
 class TestEventbriteScraper(TestCase):
+    """
+    The Eventbrite API requires a (free) API token,
+    rather than requiring that each contributer maintain their own token,
+    theses tests are not included in by default.
+
+    To run them, set the `EVENTBRITE_API_TOKEN` envrionment variable.
+    """
+
     def test_scraper(self):
         scraper = scrapers.EventbriteScraper()
         result = scraper.scrape("72020528223")
