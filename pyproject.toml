@@ -13,6 +13,7 @@ dependencies = [
     "crispy-bootstrap5>=2024.2",
     "discord.py>=2.3.2",
     "Django>=5.0.1",
+    "django-azure-communication-email>=1.1.0",
     "django-celery-beat>=2.6.0",
     "django-celery-results>=2.5.1",
     "django-crispy-forms>=2.1",
