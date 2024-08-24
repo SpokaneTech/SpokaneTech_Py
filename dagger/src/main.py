@@ -65,12 +65,10 @@ class SpokaneTech:
     def prod(self) -> dagger.Container:
         """
         A production-ready container.
-
-        Used to deploy to Fly.io.
         """
         return (
             self.base_container()
-            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in Fly.io prod.
+            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in prod.
             .with_exec(GUNICORN_CMD)
         )
 
@@ -176,19 +174,18 @@ class SpokaneTech:
                 "-vv",
                 "--config-file",
                 "pyproject.toml",
-                "-k",
-                "not integration",
                 "src",
             ],
             ctr,
         )
 
     @function
-    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
+    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File) -> str:
         """
         Runs all the liners.
         Pass `--verbose` to not summarize linter output.
         """
+        verbose = False
         # Run all the linters
         async with TaskGroup() as tg:
             tasks = [

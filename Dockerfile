@@ -27,10 +27,10 @@ RUN curl -SL https://github.com/DarthSim/overmind/releases/download/v2.5.1/overm
     && chmod +x overmind-v2.5.1-linux-amd64 \
     && mv overmind-v2.5.1-linux-amd64 /usr/bin/overmind
 
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements.lock /tmp/requirements.lock
 RUN set -ex && \
     pip install --upgrade pip && \
-    pip install -r /tmp/requirements.txt && \
+    pip install -r /tmp/requirements.lock && \
     rm -rf /root/.cache/
 COPY . /code
 

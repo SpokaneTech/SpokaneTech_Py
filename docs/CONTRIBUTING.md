@@ -45,7 +45,7 @@ Create a virtual environment and install dependencies:
 cd SpokaneTech_Py
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt -r requirements/dev.txt
+pip install -r requirements.dev.lock
 ```
 
 `python-dotenv` will automatically load values in the `.env` file when Django's `manage.py` is used. Create a `.env` file from the template (**note: `.env` should never be checked in to source control!**):
@@ -86,7 +86,7 @@ Generated using <a href="https://linux.die.net/man/1/script" target="_blank">scr
 ```bash linenums="1" hl_lines="1 2 3 15 16 17 30 36"
 $ python -m venv venv
 $ source venv/bin/activate
-(venv) $ pip install -r requirements.txt -r requirements/dev.txt
+(venv) $ pip install -r requirements.dev.lock
 Collecting asgiref==3.7.2
   Using cached asgiref-3.7.2-py3-none-any.whl (24 kB)
 Collecting celery[redis]==5.3.6
@@ -145,13 +145,13 @@ To run Dagger locally you will need:
 
 To run all linters at once:
 ```shell
-dagger call --src src --req requirements.txt \
-    all-linters --pyproject pyproject.toml --dev-req requirements/dev.txt
+dagger call --src src --req requirements.dev.lock \
+    all-linters --pyproject pyproject.toml --dev-req requirements.dev.lock
 ```
 
 To spin up a dev environment use:
 ```shell
-dagger call --src src --req requirements.txt \
+dagger call --src src --req requirements.dev.lock \
     dev --run as-service up
 ```
 
@@ -176,13 +176,13 @@ dagger functions
 Then, to call the functions use:
 
 ```shell
-dagger call --src src --req requirements.txt FUNCTION-NAME FUNCTION-ARGS
+dagger call --src src --req requirements.lock FUNCTION-NAME FUNCTION-ARGS
 ```
 
 To gather more information about a function, you can pass the `--help` arg to it:
 
 ```shell
-$ dagger call --src src --req requirements.txt test --help
+$ dagger call --src src --req requirements.dev.lock test --help
 Run tests using Pytest.
 
 Usage:
@@ -212,7 +212,7 @@ be chained on that will act on that container. For example, the following
 command transforms the development container into a service, and starts it.
 
 ```shell
-dagger call --src src --req requirements.txt dev --run \
+dagger call --src src --req requirements.dev.lock dev --run \
     as-service up
 ```
 </details>
