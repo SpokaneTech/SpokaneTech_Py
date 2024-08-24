@@ -1,3 +1,5 @@
+from typing import Any
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -33,7 +35,16 @@ class TechGroupForm(forms.ModelForm):
 
 
 class SuggestEventForm(forms.ModelForm):
-    date_time = forms.DateTimeField(widget=DateTimePickerInput)
+    date_time = forms.DateTimeField(
+        widget=DateTimePickerInput,
+        label="Start",
+    )
+    end_time = forms.DateTimeField(
+        widget=DateTimePickerInput,
+        label="End",
+    )
+
+    instance: models.Event
 
     class Meta:
         model = models.Event
@@ -41,7 +52,7 @@ class SuggestEventForm(forms.ModelForm):
             "name",
             "description",
             "date_time",
-            "duration",
+            "end_time",
             "location",
             "url",
             "external_id",
@@ -54,6 +65,18 @@ class SuggestEventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_class = "container-xs"
         self.helper.add_input(Submit("suggest", "Suggest", css_class="float-end"))
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean()
+        start = cleaned_data["date_time"]
+        end = cleaned_data["end_time"]
+        if start > end:
+            self.add_error("date_time", "Start time is after end time.")
+        return cleaned_data
+
+    def save(self, commit: bool = True) -> Any:
+        self.instance.duration = self.cleaned_data["end_time"] - self.cleaned_data["date_time"]
+        return super().save(commit)
 
 
 class EventForm(SuggestEventForm):
