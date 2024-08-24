@@ -1,9 +1,9 @@
 import datetime
+import zoneinfo
 from typing import Any
 
 import freezegun
 import pytest
-import zoneinfo
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -11,6 +11,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+
 from web.models import Event, TechGroup
 
 
@@ -104,8 +105,8 @@ class TestCreateEvent(TestCase):
                 "name": "Event",
                 "description": "",
                 "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
                 "approved_at": "",
-                "duration": "",
                 "location": "",
                 "url": "",
                 "external_id": "",
@@ -146,8 +147,8 @@ class TestUpdateEvent(TestCase):
                 "name": object.name,
                 "description": "",
                 "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
                 "approved_at": "2024-04-08T07:00",
-                "duration": "",
                 "location": "",
                 "url": "",
                 "external_id": "",
@@ -179,8 +180,8 @@ class TestUpdateEvent(TestCase):
                 "name": object.name,
                 "description": "",
                 "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
                 "approved_at": "",
-                "duration": "",
                 "location": "",
                 "url": "",
                 "external_id": "",
