@@ -14,10 +14,21 @@ asgiref==3.8.1
     #   django
 attrs==24.2.0
     # via aiohttp
+azure-common==1.1.28
+    # via azure-communication-email
+azure-communication-email==1.0.0
+    # via django-azure-communication-email
 azure-core==1.30.2
     # via
+    #   azure-identity
+    #   azure-mgmt-core
     #   azure-storage-blob
     #   django-storages
+    #   msrest
+azure-identity==1.15.0
+    # via django-azure-communication-email
+azure-mgmt-core==1.4.0
+    # via azure-communication-email
 azure-storage-blob==12.23.0b1
     # via django-storages
 beautifulsoup4==4.13.0b2
@@ -35,6 +46,7 @@ celery==5.5.0b2
     #   sentry-sdk
 certifi==2024.7.4
     # via
+    #   msrest
     #   requests
     #   sentry-sdk
 cffi==1.17.0
@@ -58,7 +70,11 @@ crispy-bootstrap5==2024.2
 cron-descriptor==1.4.3
     # via django-celery-beat
 cryptography==43.0.0
-    # via azure-storage-blob
+    # via
+    #   azure-identity
+    #   azure-storage-blob
+    #   msal
+    #   pyjwt
 discord-py==2.4.0
     # via spokanetech (pyproject.toml)
 dj-database-url==2.2.0
@@ -68,6 +84,7 @@ django==5.0.8
     #   spokanetech (pyproject.toml)
     #   crispy-bootstrap5
     #   dj-database-url
+    #   django-azure-communication-email
     #   django-celery-beat
     #   django-celery-results
     #   django-crispy-forms
@@ -78,6 +95,8 @@ django==5.0.8
     #   django-timezone-field
     #   djangorestframework
     #   sentry-sdk
+django-azure-communication-email==1.1.0
+    # via spokanetech (pyproject.toml)
 django-celery-beat==2.6.0
     # via spokanetech (pyproject.toml)
 django-celery-results==2.5.1
@@ -123,7 +142,9 @@ idna==3.7
     #   requests
     #   yarl
 isodate==0.6.1
-    # via azure-storage-blob
+    # via
+    #   azure-storage-blob
+    #   msrest
 jinja2==3.1.4
     # via django-handyhelpers
 kombu==5.4.0
@@ -136,12 +157,24 @@ markupsafe==2.1.5
     # via
     #   django-handyhelpers
     #   jinja2
+msal==1.30.0
+    # via
+    #   azure-identity
+    #   msal-extensions
+msal-extensions==1.2.0
+    # via azure-identity
+msrest==0.7.1
+    # via azure-communication-email
 multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
+oauthlib==3.2.2
+    # via requests-oauthlib
 packaging==24.1
     # via gunicorn
+portalocker==2.10.1
+    # via msal-extensions
 prometheus-client==0.20.0
     # via flower
 prompt-toolkit==3.0.47
@@ -152,6 +185,8 @@ psycopg-binary==3.2.1
     # via psycopg
 pycparser==2.22
     # via cffi
+pyjwt==2.9.0
+    # via msal
 python-crontab==3.2.0
     # via django-celery-beat
 python-dateutil==2.9.0.post0
@@ -169,6 +204,11 @@ requests==2.32.3
     # via
     #   azure-core
     #   eventbrite
+    #   msal
+    #   msrest
+    #   requests-oauthlib
+requests-oauthlib==2.0.0
+    # via msrest
 sentry-sdk==2.13.0
     # via spokanetech (pyproject.toml)
 setuptools==72.2.0

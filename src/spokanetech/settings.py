@@ -23,6 +23,10 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+ADMINS = [
+    ("Organizers", "organizers@spokanetech.org"),
+]
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -288,3 +292,12 @@ DEBUG_TOOLBAR_CONFIG = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# Email
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "DoNotReply@spokanetech.org")
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+if USE_AZURE:
+    EMAIL_BACKEND = "django_azure_communication_email.EmailBackend"
+    AZURE_COMMUNICATION_CONNECTION_STRING = os.environ["AZURE_COMMUNICATION_CONNECTION_STRING"]
