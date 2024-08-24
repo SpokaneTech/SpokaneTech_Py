@@ -1,9 +1,9 @@
 import datetime
+import zoneinfo
 from typing import Any
 
 import freezegun
 import pytest
-import zoneinfo
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -11,6 +11,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+
 from web.models import Event, TechGroup
 
 
@@ -59,7 +60,7 @@ def test_get_tech_group(client: Client):
 def test_set_timezone_and_timezone_middleware(client: Client):
     # Arrange
     date_time = datetime.datetime.fromisoformat("2024-03-19T01:00:00Z")
-    baker.make("web.Event", date_time=date_time)
+    baker.make("web.Event", date_time=date_time, approved_at=date_time)
 
     # Act
     client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
@@ -78,7 +79,7 @@ class TestEventDetailModal(TestCase):
 
     def setUp(self):
         super(TestEventDetailModal, self).setUp()
-        self.object = baker.make("web.Event")
+        self.object = baker.make("web.Event", approved_at=timezone.localtime())
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
@@ -95,16 +96,38 @@ class TestEventDetailModal(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-class TestUpdateEvent(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
+class TestCreateEvent(TestCase):
+    def test_suggest_event_redirects_and_sets_unapproved(self):
+        # Act
+        response = self.client.post(
+            reverse("web:add_event"),
+            {
+                "name": "Event",
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
 
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:list_events")
+
+        actual = Event.all.get()
+        assert actual.approved_at is None
+
+
+class TestUpdateEvent(TestCase):
     def test_update_event_sets_right_date_time(self):
         # Arrange
-        object: Event = baker.make(Event)
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
 
-        timezone = "America/Los_Angeles"
+        timezone_str = "America/Los_Angeles"
 
         user_cls = get_user_model()
         user = user_cls()
@@ -112,7 +135,7 @@ class TestUpdateEvent(TestCase):
         user.save()
 
         # set user TZ
-        self.client.post(reverse("web:set_timezone"), {"timezone": timezone})
+        self.client.post(reverse("web:set_timezone"), {"timezone": timezone_str})
         response = self.client.get(reverse("web:list_events"))
         assert response.status_code == 200
 
@@ -124,7 +147,8 @@ class TestUpdateEvent(TestCase):
                 "name": object.name,
                 "description": "",
                 "date_time": "2024-04-08T07:00",
-                "duration": "",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "2024-04-08T07:00",
                 "location": "",
                 "url": "",
                 "external_id": "",
@@ -136,7 +160,38 @@ class TestUpdateEvent(TestCase):
         assert response.status_code == 302
 
         object.refresh_from_db()
-        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=zoneinfo.ZoneInfo(timezone))
+        tz_zoneinfo = zoneinfo.ZoneInfo(timezone_str)
+        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=tz_zoneinfo)
+
+    def test_update_event_remove_approved_at_redirects_to_list(self):
+        # Arrange
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
+
+        user_cls = get_user_model()
+        user = user_cls()
+        user.is_staff = True  # type: ignore
+        user.save()
+
+        # Act
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("web:update_event", args=(object.pk,)),
+            {
+                "name": object.name,
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
+
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:list_events")
 
 
 class TestEventCalendarView(TestCase):
@@ -144,7 +199,7 @@ class TestEventCalendarView(TestCase):
 
     def setUp(self):
         super(TestEventCalendarView, self).setUp()
-        self.object = baker.make("web.Event")
+        self.object = baker.make("web.Event", approved_at=timezone.localtime())
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.referrer = reverse("web:index")
         self.now = timezone.now()
@@ -162,13 +217,15 @@ class TestEventCalendarView(TestCase):
 class TestEventListView(TestCase):
     def setUp(self):
         super().setUp()
+        now = timezone.localtime()
         self.tag = baker.make("web.Tag")
         self.group = baker.make("web.TechGroup")
         self.group.tags.set([self.tag])
         self.object = baker.make(
             "web.Event",
             group=self.group,
-            date_time=timezone.localtime() + datetime.timedelta(seconds=1),
+            date_time=now + datetime.timedelta(seconds=1),
+            approved_at=now,
         )
         self.url = reverse("web:list_events")
 
@@ -176,3 +233,9 @@ class TestEventListView(TestCase):
         response = self.client.get(self.url + f"?tags={self.tag.pk}")
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.object.name, response.content.decode("utf-8"))
+
+    def test_does_not_include_unapproved_events(self):
+        self.object.approved_at = None
+        self.object.save()
+        response = self.client.get(self.url + f"?tags={self.tag.pk}")
+        self.assertNotIn(self.object.name, response.content.decode("utf-8"))

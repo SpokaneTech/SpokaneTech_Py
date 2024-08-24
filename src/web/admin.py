@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
 
 from web.models import Event, EventbriteOrganization, Tag, TechGroup
 
@@ -20,6 +22,9 @@ class EventAdmin(admin.ModelAdmin):
     ]
     search_fields = ["id", "name", "duration", "location"]
     list_filter = ["group"]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Event]:
+        return Event.all.all()
 
 
 class TechGroupAdmin(admin.ModelAdmin):
