@@ -80,17 +80,9 @@ class SuggestEventForm(forms.ModelForm):
 
 
 class EventForm(SuggestEventForm):
-    date_time = forms.DateTimeField(widget=DateTimePickerInput)
-
     class Meta:
         model = models.Event
         fields = SuggestEventForm.Meta.fields + ["approved_at"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_class = "container-xs"
-        self.helper.add_input(Submit("save", "Save", css_class="float-end"))
 
 
 class ListEventsFilter(forms.Form):
