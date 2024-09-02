@@ -164,3 +164,5 @@ cython_debug/
 # MacOS
 .DS_Store
 .ruff_cache
+
+src/static
