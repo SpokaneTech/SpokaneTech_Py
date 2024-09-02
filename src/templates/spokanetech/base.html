@@ -17,6 +17,7 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />    
     <link rel="stylesheet" href="{% static 'spokanetech/css/index-styles.css' %}">
 
+    <link rel="stylesheet" href="{% static 'node_modules/tippy.js/dist/tippy.css' %}">
     <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/fades.min.css' %}">
     <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/marquee.min.css' %}">
     <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/blur_group.min.css' %}">
@@ -33,14 +34,14 @@
             </div>
             
             <ul class="menu">
-                <li><a href="https://discord.gg/wHrSJNgpnP" target="_blank" title="join us on Discord!"><i class="fa-brands fa-discord"></i></a></li>
-                <li><a href="" title="groups" hx-get="{% url 'web:get_techgroups' %}" hx-target="#body_main" hx-push-url="true">
+                <li><a href="https://discord.gg/wHrSJNgpnP" target="_blank" class="tippy-tooltip" data-tippy-content="Join us on Discord"><i class="fa-brands fa-discord"></i></a></li>
+                <li><a href="" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="View our tech groups">
                     <i class="fa-solid fa-user-group"></i></a>
                 </li>
-                <li><a href="" title="events" hx-get="{% url 'web:get_techevents' %}" hx-target="#body_main" hx-push-url="true">
+                <li><a href="" hx-get="{% url 'web:get_techevents' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="List upcoming events">
                     <i class="fa-solid fa-list-check"></i></a>
                 </li>
-                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar">
+                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar" class="tippy-tooltip" data-tippy-content="Calendar of events">
                   <i class="fa-solid fa-calendar-days"></i></a>
                 </li>
             </ul>
@@ -65,8 +66,10 @@
     <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/@popperjs/core/dist/umd/popper.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/tippy.js/dist/tippy-bundle.umd.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/fun-effects/dist/js/marquee.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/fun-effects/dist/js/background_icons.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/tippy.js/dist/tippy-bundle.umd.min.js' %}"></script>
 
     <script>   
         // Listen for the htmx:afterOnLoad event
@@ -77,6 +80,15 @@
           addMarqueeMouseListener();
         });
       </script>
+
+    <!-- Initialize Tippy.js -->
+    <script>
+        tippy('.tippy-tooltip', {
+            placement: 'bottom',
+            animation: 'fade',
+            arrow: true,
+        });
+    </script>
 
 </body>
 </html>
