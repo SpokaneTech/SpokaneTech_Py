@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db.models import Prefetch
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
@@ -162,6 +163,12 @@ class UpdateEvent(RequireStaffMixin, UpdateView):
 
 class DetailTechGroup(HtmxViewMixin, DetailView):
     model = TechGroup
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.queryset = TechGroup.objects.prefetch_related(
+            Prefetch("event_set", Event.objects.filter(date_time__gte=timezone.localtime()))
+        )
+        super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

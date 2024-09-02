@@ -32,4 +32,13 @@
         Edit <i class="fa-solid fa-pen-to-square"></i>
       </a>
     {% endif %}
+
+    {% with upcoming_events=object.event_set.all %}
+    {% if upcoming_events %}
+    <h2>Upcoming Events:</h2>
+        <div class="mw-100">
+          {% include "web/partials/event_list.htm" with queryset=upcoming_events %}
+        </div>
+    {% endif %}
+    {% endwith %}
 </div>
