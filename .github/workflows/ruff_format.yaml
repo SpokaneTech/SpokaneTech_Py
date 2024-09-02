@@ -15,5 +15,5 @@ jobs:
         uses: dagger/dagger-for-github@v5
         with:
           verb: call 
-          args: "--src src --req requirements.dev.lock format --pyproject pyproject.toml"
-          version: "0.10.2"
+          args: "linters format"
+          version: "0.12.6"

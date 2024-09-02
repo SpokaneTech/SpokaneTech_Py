@@ -41,6 +41,9 @@ dev = [
     "pytest>=8.0",
     "pytest-django>=4.8",
     "responses>=0.25",
+    "ruff>=0.6",
+    "uv>=0.4",
+    "bandit>=1.7",
 ]
 
 [tool.bandit]

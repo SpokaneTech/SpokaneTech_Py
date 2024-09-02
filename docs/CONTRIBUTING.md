@@ -145,14 +145,12 @@ To run Dagger locally you will need:
 
 To run all linters at once:
 ```shell
-dagger call --src src --req requirements.dev.lock \
-    all-linters --pyproject pyproject.toml --dev-req requirements.dev.lock
+dagger call linters all
 ```
 
 To spin up a dev environment use:
 ```shell
-dagger call --src src --req requirements.dev.lock \
-    dev --run as-service up
+dagger call up
 ```
 
 This command:
@@ -162,7 +160,7 @@ This command:
 - Tunnels the Django server to [localhost:8000]()
 
 The Postgres database is mounted as a cache volume, so its state will persist between runs. 
-To wipe the database, pass the `--fresh-database` flag to `dev`.
+To wipe the database, pass the `--fresh-database`.
 
 
 <details>
@@ -176,17 +174,17 @@ dagger functions
 Then, to call the functions use:
 
 ```shell
-dagger call --src src --req requirements.lock FUNCTION-NAME FUNCTION-ARGS
+dagger call FUNCTION-NAME FUNCTION-ARGS
 ```
 
 To gather more information about a function, you can pass the `--help` arg to it:
 
 ```shell
-$ dagger call --src src --req requirements.dev.lock test --help
+$ dagger call linters test --help
 Run tests using Pytest.
 
 Usage:
-  dagger call test [flags]
+  dagger call linters test [flags]
 
 Flags:
       --dev-req File     A file.
@@ -212,8 +210,7 @@ be chained on that will act on that container. For example, the following
 command transforms the development container into a service, and starts it.
 
 ```shell
-dagger call --src src --req requirements.dev.lock dev --run \
-    as-service up
+dagger call up
 ```
 </details>
 
