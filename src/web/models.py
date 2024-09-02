@@ -97,7 +97,6 @@ class Event(HandyHelperBaseModel):
     approved_at = models.DateTimeField(blank=True, null=True)
     image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
 
-
     objects = ApprovedEventManager.from_queryset(EventQuerySet)()
     all = EventQuerySet.as_manager()
 
