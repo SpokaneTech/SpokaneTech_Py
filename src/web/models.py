@@ -32,7 +32,7 @@ class TechGroup(HandyHelperBaseModel):
         help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
     )
     tags = models.ManyToManyField(Tag, blank=True)
-    image = models.ImageField(upload_to="techgoups/", blank=True, null=True)
+    image = models.ImageField(upload_to="techgroups/", blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
