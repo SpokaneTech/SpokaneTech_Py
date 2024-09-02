@@ -38,4 +38,65 @@ Build dropdown navigations in a sidebar. This is intented to be used with the ha
         </ul>
     </li>
     {% endfor %}
+    {% if user.is_authenticated %}
+        <li class="sidebar-item">
+            <a class="sidebar-link collapsed" data-bs-target="#account-dropdown" data-bs-toggle="collapse"
+                aria-expanded="false"><span class="pe-2">
+                    <i class="fa-solid fa-user"></i>
+                </span>
+                Account
+            </a>
+            <ul id="account-dropdown" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                {% url 'account_email' as email_url %}
+                {% url 'socialaccount_connections' as socialaccount_url %}
+                {% if email_url or socialaccount_url %}
+                    <li class="sidebar-link">
+                        <a href="{% if email_url %}{{ email_url }}{% else %}{{ socialaccount_url }}{% endif %}"
+                            class="sidebar-link ms-4">Manage Account</a>
+                    </li>
+                {% endif %}
+                {% url 'account_change_password' as change_password_url %}
+                {% if change_password_url %}
+                    <li class="sidebar-link">
+                        <a class="sidebar-link ms-4"
+                           href="{% url 'account_change_password' %}">Change Password</a>
+                    </li>
+                {% endif %}
+                {% url 'socialaccount_connections' as connections_url %}
+                {% if connections_url %}
+                    <li class="sidebar-link">
+                        <a class="sidebar-link ms-4"
+                           href="{{ connections_url }}">Third-Party Accounts</a>
+                    </li>
+                {% endif %}
+                {% url 'mfa_index' as mfa_index_url %}
+                {% if mfa_index_url %}
+                    <li class="sidebar-link">
+                        <a class="sidebar-link ms-4"
+                           href="{{ mfa_index_url }}">Two-Factor Authentication</a>
+                    </li>
+                {% endif %}
+                {% url 'usersessions_list' as usersessions_list_url %}
+                {% if usersessions_list_url %}
+                    <li class="sidebar-link">
+                        <a class="sidebar-link ms-4"
+                           href="{{ usersessions_list_url }}">Sessions</a>
+                    </li>
+                {% endif %}
+                <li class="sidebar-link" >
+                    <a class="sidebar-link ms-4" href="{% url 'account_logout' %}">Sign Out</a>
+                </li>
+            </ul>
+        </li>
+    {% else %}
+        <li class="sidebar-item mt-3" style="padding: .25rem 1.625rem;">
+            <a href="{% url 'account_login' %}" class="btn btn-outline-light w-100">Sign In</a>
+        </li>
+        {% url 'account_signup' as signup_url %}
+        {% if signup_url %}
+            <li class="sidebar-item" style="padding: .25rem 1.625rem;">
+                <a href="{{ signup_url }}" class="btn btn-primary w-100">Sign Up</a>
+            </li>
+        {% endif %}
+    {% endif %}
 </ul>
