@@ -15,5 +15,5 @@ jobs:
         uses: dagger/dagger-for-github@v5
         with:
           verb: call 
-          args: "linters check_django"
+          args: "linters check-django"
           version: "0.12.6"
