@@ -176,6 +176,8 @@ oauthlib==3.2.2
     # via requests-oauthlib
 packaging==24.1
     # via gunicorn
+pillow==10.4.0
+    # via spokanetech (pyproject.toml)
 portalocker==2.10.1
     # via msal-extensions
 prometheus-client==0.20.0

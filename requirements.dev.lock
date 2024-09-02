@@ -242,6 +242,7 @@ pbr==6.1.0
     # via stevedore
 pillow==10.4.0
     # via
+    #   spokanetech (pyproject.toml)
     #   cairosvg
     #   mkdocs-material
 platformdirs==4.2.2
