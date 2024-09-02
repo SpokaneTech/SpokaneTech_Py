@@ -84,6 +84,7 @@ django==5.0.8
     #   spokanetech (pyproject.toml)
     #   crispy-bootstrap5
     #   dj-database-url
+    #   django-allauth
     #   django-azure-communication-email
     #   django-celery-beat
     #   django-celery-results
@@ -95,6 +96,8 @@ django==5.0.8
     #   django-timezone-field
     #   djangorestframework
     #   sentry-sdk
+django-allauth==64.2.0
+    # via spokanetech (pyproject.toml)
 django-azure-communication-email==1.1.0
     # via spokanetech (pyproject.toml)
 django-celery-beat==2.6.0
@@ -186,7 +189,9 @@ psycopg-binary==3.2.1
 pycparser==2.22
     # via cffi
 pyjwt==2.9.0
-    # via msal
+    # via
+    #   django-allauth
+    #   msal
 python-crontab==3.2.0
     # via django-celery-beat
 python-dateutil==2.9.0.post0
@@ -203,12 +208,15 @@ redis==5.1.0b7
 requests==2.32.3
     # via
     #   azure-core
+    #   django-allauth
     #   eventbrite
     #   msal
     #   msrest
     #   requests-oauthlib
 requests-oauthlib==2.0.0
-    # via msrest
+    # via
+    #   django-allauth
+    #   msrest
 sentry-sdk==2.13.0
     # via spokanetech (pyproject.toml)
 setuptools==72.2.0
