@@ -56,6 +56,7 @@ class SuggestEventForm(forms.ModelForm):
             "location",
             "url",
             "external_id",
+            "image",
             "group",
             "tags",
         ]

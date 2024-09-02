@@ -1,6 +1,6 @@
 {% load web_extras markdownify %}
 <div class="max-w-content">
-  <h1 class="mb-3 text-primary">
+  <h1 class="mb-3">
     {{ object }}
   </h1>
 
@@ -8,6 +8,13 @@
     {% include 'spokanetech/partials/human_readable_datetime.htm' with object=object only %}
   </div>
 
+  {% if object.image %}
+  <div class="max-w-100">
+    <img class="w-100 rounded" src="{{ object.image.url }}" />
+  </div>
+  {% endif %}
+
+  {% if object.group %}
   <div class="mb-3 card fit-content">
     <div class="card-body">
       <div class="card-title my-0">
@@ -15,6 +22,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
   <p>
     <h2>Description</h2>
