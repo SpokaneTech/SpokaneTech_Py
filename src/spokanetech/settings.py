@@ -13,15 +13,22 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+import environ
 import dj_database_url
 import sentry_sdk
-from dotenv import load_dotenv
 
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from an env file
+ENV_PATH = os.environ.get("ENV_PATH", f"{BASE_DIR.parent}/envs/.env")
+env = environ.Env()
+if os.path.exists(ENV_PATH):
+  print(f"Loading ENV vars from {ENV_PATH}")
+  environ.Env.read_env(ENV_PATH)
+else:
+  print("NO ENV_PATH found!")
 
 ADMINS = [
     ("Organizers", "organizers@spokanetech.org"),
@@ -30,7 +37,8 @@ ADMINS = [
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-IS_DEVELOPMENT = os.environ.get("SPOKANE_TECH_DEV", "false") == "true"
+IS_DEVELOPMENT = env.bool("SPOKANE_TECH_DEV", default=False)
+
 if IS_DEVELOPMENT:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = "django-insecure-t9*!4^fdn*=pmz4%8u_we!88e!8@_!drx0)u_@6$@!nx$4svjp"  # nosec: Development-only key.
@@ -46,12 +54,15 @@ if IS_DEVELOPMENT:
     ]
 else:
     try:
-        SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+        SECRET_KEY = env.str("DJANGO_SECRET_KEY")
     except KeyError as e:
         raise KeyError(f"{e}: If running in development, set 'SPOKANE_TECH_DEV' to any value.") from e
 
     DEBUG = False
-    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "spokanetech.org,spokanetech-py.fly.dev").split(",")
+    ALLOWED_HOSTS = env.str(
+      "ALLOWED_HOSTS",
+      default="spokanetech.org,spokanetech-py.fly.dev"
+    ).split(",")
     CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
     # SSL Options
@@ -63,7 +74,7 @@ else:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-    if sentry_dsn := os.environ.get("SENTRY_DSN"):
+    if sentry_dsn := env.str("SENTRY_DSN"):
         sentry_sdk.init(
             dsn=sentry_dsn,
             traces_sample_rate=1.0,
@@ -182,7 +193,7 @@ STATICFILES_DIRS = [
 ]
 
 # Storages
-USE_AZURE = os.environ["USE_AZURE"] == "true" if "USE_AZURE" in os.environ else not DEBUG
+USE_AZURE = env.bool("USE_AZURE") if env("USE_AZURE") != "" else not DEBUG
 if USE_AZURE:
     DEFAULT_FILE_STORAGE = "spokanetech.backend.AzureMediaStorage"
     STATICFILES_STORAGE = "spokanetech.backend.AzureStaticStorage"
@@ -191,11 +202,11 @@ if USE_AZURE:
     MEDIA_LOCATION = "media"
 
     AZURE_URL_EXPIRATION_SECS = None
-    AZURE_ACCOUNT_NAME = os.environ["AZURE_ACCOUNT_NAME"]
-    AZURE_ACCOUNT_KEY = os.environ["AZURE_ACCOUNT_KEY"]
-    AZURE_CUSTOM_DOMAIN = os.environ.get(
+    AZURE_ACCOUNT_NAME = env.str("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = env.str("AZURE_ACCOUNT_KEY")
+    AZURE_CUSTOM_DOMAIN = env.str(
         "AZURE_CDN_DOMAIN",
-        f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
+        default=f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
     )
     STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
     MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
@@ -219,7 +230,7 @@ PROJECT_VERSION = "0.0.1"
 
 # Celery
 try:
-    CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+    CELERY_BROKER_URL = env.str("CELERY_BROKER_URL")
     CELERY_ENABLED = True
 except KeyError:
     if IS_DEVELOPMENT:
@@ -227,7 +238,7 @@ except KeyError:
     else:
         raise
 
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", default="django-db")
 CELERY_RESULT_EXTENDED = True
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -239,11 +250,11 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
 # Discord
-DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+DISCORD_WEBHOOK_URL = env.str("DISCORD_WEBHOOK_URL")
 
 
 # Eventbrite
-EVENTBRITE_API_TOKEN = os.environ["EVENTBRITE_API_TOKEN"]
+EVENTBRITE_API_TOKEN = env.str("EVENTBRITE_API_TOKEN")
 
 
 # Markdownify
@@ -295,9 +306,9 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
 # Email
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "DoNotReply@spokanetech.org")
-SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="DoNotReply@spokanetech.org")
+SERVER_EMAIL = env.str("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 
 if USE_AZURE:
     EMAIL_BACKEND = "django_azure_communication_email.EmailBackend"
-    AZURE_COMMUNICATION_CONNECTION_STRING = os.environ["AZURE_COMMUNICATION_CONNECTION_STRING"]
+    AZURE_COMMUNICATION_CONNECTION_STRING = env.str("AZURE_COMMUNICATION_CONNECTION_STRING")
