@@ -166,3 +166,5 @@ cython_debug/
 .ruff_cache
 
 src/static
+staticroot
+media
