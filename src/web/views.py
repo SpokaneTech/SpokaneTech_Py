@@ -163,6 +163,10 @@ class UpdateEvent(RequireStaffMixin, UpdateView):
 class DetailTechGroup(HtmxViewMixin, DetailView):
     model = TechGroup
 
+    def __init__(self, **kwargs: Any) -> None:
+        self.queryset = TechGroup.objects.prefetch_related("event_set")
+        super().__init__(**kwargs)
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         user = self.request.user
