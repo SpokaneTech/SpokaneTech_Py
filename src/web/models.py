@@ -32,6 +32,7 @@ class TechGroup(HandyHelperBaseModel):
         help_text="Emojji or Font Awesome CSS icon class(es) to represent the group.",
     )
     tags = models.ManyToManyField(Tag, blank=True)
+    image = models.ImageField(upload_to="techgroups/", blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
@@ -94,6 +95,7 @@ class Event(HandyHelperBaseModel):
     group = models.ForeignKey(TechGroup, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
     approved_at = models.DateTimeField(blank=True, null=True)
+    image = models.ImageField(upload_to="tech_events/", blank=True, null=True)
 
     objects = ApprovedEventManager.from_queryset(EventQuerySet)()
     all = EventQuerySet.as_manager()
