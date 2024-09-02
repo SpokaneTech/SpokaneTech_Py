@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='techgroup',
             name='image',
-            field=models.ImageField(blank=True, null=True, upload_to='techgoups/'),
+            field=models.ImageField(blank=True, null=True, upload_to='techgroups/'),
         ),
     ]
