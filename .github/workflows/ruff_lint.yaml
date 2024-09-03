@@ -15,5 +15,5 @@ jobs:
         uses: dagger/dagger-for-github@v5
         with:
           verb: call 
-          args: "--src src --req requirements.txt lint --pyproject pyproject.toml"
-          version: "0.10.2"
+          args: "linters check"
+          version: "0.12.6"

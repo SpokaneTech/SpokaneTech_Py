@@ -62,6 +62,11 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*.dump
+src/static/node_modules
+src/staticfiles
+src/staticroot
+src/media
 
 # Flask stuff:
 instance/
@@ -164,7 +169,3 @@ cython_debug/
 # MacOS
 .DS_Store
 .ruff_cache
-
-src/static
-staticroot
-media

@@ -87,7 +87,7 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
             filtered_event_containers = [event for event in events if self._filter_event_tag(event)]
             event_urls = [event_container["href"] for event_container in filtered_event_containers]
 
-        return event_urls
+        return [url for url in event_urls if self._filter_repeating_events(url)]
 
     def _parse_event_urls_from_state(self, apollo_state: dict) -> list[str]:
         events = self._parse_events_json(apollo_state)
@@ -103,6 +103,12 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         tz = zoneinfo.ZoneInfo(tz)
         event_datetime = datetime.strptime(time, "%a, %b %d, %Y, %I:%M %p").astimezone(tz)
         return event_datetime > self._now
+
+    def _filter_repeating_events(self, url: str) -> bool:
+        # For repeating events, future ones (i.e. not the next one)
+        # have alphanumeric event urls. Whereas on-off events,
+        # previous and next repeating events have numeric event urls.
+        return bool(re.search(r"events/(\d*)/", url))
 
 
 class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):

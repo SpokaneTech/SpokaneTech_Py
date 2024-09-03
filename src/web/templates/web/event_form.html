@@ -1,0 +1,7 @@
+{% extends 'spokanetech/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>{% if object %}Edit Event{% elif request.user.is_staff %}Add Event{% else %}Suggest Event{% endif %}</h1>
+{% crispy form form.helper %}
+{% endblock content %}

@@ -1,3 +1,5 @@
+from typing import Any
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -32,18 +34,56 @@ class TechGroupForm(forms.ModelForm):
         self.helper.add_input(Submit("save", "Save", css_class="float-end"))
 
 
-class EventForm(forms.ModelForm):
-    date_time = forms.DateTimeField(widget=DateTimePickerInput)
+class SuggestEventForm(forms.ModelForm):
+    date_time = forms.DateTimeField(
+        widget=DateTimePickerInput,
+        label="Start",
+    )
+    end_time = forms.DateTimeField(
+        widget=DateTimePickerInput,
+        label="End",
+    )
+
+    instance: models.Event
 
     class Meta:
         model = models.Event
-        fields = "__all__"
+        fields = [
+            "name",
+            "description",
+            "date_time",
+            "end_time",
+            "location",
+            "url",
+            "external_id",
+            "image",
+            "group",
+            "tags",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_class = "container-xs"
-        self.helper.add_input(Submit("save", "Save", css_class="float-end"))
+        self.helper.add_input(Submit("suggest", "Suggest", css_class="float-end"))
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean()
+        start = cleaned_data["date_time"]
+        end = cleaned_data["end_time"]
+        if start > end:
+            self.add_error("date_time", "Start time is after end time.")
+        return cleaned_data
+
+    def save(self, commit: bool = True) -> Any:
+        self.instance.duration = self.cleaned_data["end_time"] - self.cleaned_data["date_time"]
+        return super().save(commit)
+
+
+class EventForm(SuggestEventForm):
+    class Meta:
+        model = models.Event
+        fields = SuggestEventForm.Meta.fields + ["approved_at"]
 
 
 class ListEventsFilter(forms.Form):

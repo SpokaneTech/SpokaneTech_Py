@@ -9,8 +9,8 @@
 <div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 1s;">
     {% for row in queryset %}
     <div class="list-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="true">
-        <div class="title">{{ row.name }}</div>
-        <div class="description">{{ row.description|truncatewords_html:30 }}</div>
+        <div class="title">{{ row.icon|safe }}</div>
+        <div class="description">{{ row.name }}</div>
         <div class="footer">
             {% if row.homepage %}
             <a href="{{ row.homepage }}" target="_blank">{{ row.homepage }}</a>

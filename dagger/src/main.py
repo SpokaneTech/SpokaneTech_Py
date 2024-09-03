@@ -1,19 +1,37 @@
-import sys
-from asyncio import CancelledError, TaskGroup
 from time import time
+from typing import Annotated
 
 import dagger
-from dagger import dag, function, object_type
+from dagger import dag, function, object_type, DefaultPath, Ignore
+from linters import Linter
 
-PYTHON_VERSION = "3.11-slim-bullseye"
+PYTHON_VERSION = "3.12-slim-bullseye"
 GUNICORN_CMD = ["gunicorn", "--chdir", "./src", "--bind", ":8000", "--workers", "2", "spokanetech.wsgi"]
 
 
 @object_type
 class SpokaneTech:
     src: dagger.Directory
-    req: dagger.File
+    is_dev: bool
 
+    def __init__(
+        self,
+        src: Annotated[
+            dagger.Directory,
+            DefaultPath("/"),
+            Ignore([".venv", "*.sqlite3", ".env*", ".vscode", "DS_Store", "*.dump", ".dagger"]),
+        ],
+        is_dev: bool = True,
+    ):
+        self.src = src
+        self.is_dev = is_dev
+        self.pyproject = self.src.file("pyproject.toml")
+        if self.is_dev:
+            self.lockfile = self.src.file("requirements.dev.lock")
+        else:
+            self.lockfile = self.src.file("requirements.lock")
+
+    @function
     def base_container(self) -> dagger.Container:
         """
         The base container that all other containers are built off of.
@@ -27,13 +45,17 @@ class SpokaneTech:
             .with_env_variable("DJANGO_SETTINGS_MODULE", "spokanetech.settings")
             .with_(env_variables())
             .with_exposed_port(8000)
-            .with_file("/tmp/requirements.txt", self.req)
+            .with_file("/tmp/requirements.lock", self.lockfile)
             .with_exec(["pip", "install", "--upgrade", "pip"])
-            .with_exec(["pip", "install", "-r", "/tmp/requirements.txt"])
+            .with_exec(["pip", "install", "-r", "/tmp/requirements.lock"])
             .with_exec(["rm", "-rf", "/root/.cache"])
-            .with_directory("/code/src", self.src)
+            .with_directory("/code", self.src)
             .with_workdir("/code")
         )
+
+    @function
+    def linters(self) -> Linter:
+        return Linter(ctr=self.base_container())  # type: ignore
 
     @function
     async def dev(self, run: bool = False, fresh_database: bool = False) -> dagger.Container:
@@ -62,15 +84,20 @@ class SpokaneTech:
         return ctr
 
     @function
+    async def up(self, fresh_database: bool = False) -> dagger.Service:
+        """
+        Convenience wrapper around `dagger call dev --run as-service up`
+        """
+        return (await self.dev(run=True, fresh_database=fresh_database)).as_service()
+
+    @function
     def prod(self) -> dagger.Container:
         """
         A production-ready container.
-
-        Used to deploy to Fly.io.
         """
         return (
             self.base_container()
-            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in Fly.io prod.
+            .with_(env_variables(SPOKANE_TECH_DEV=""))  # Override other envrionment variables in prod.
             .with_exec(GUNICORN_CMD)
         )
 
@@ -123,110 +150,8 @@ class SpokaneTech:
             .as_service()
         )
 
-    async def run_linter(self, cmd: list[str], ctr: dagger.Container) -> str:
-        """
-        Helper function to run linters.
-        """
-        try:
-            return f"Command {' '.join(cmd)} passed!\n{await ctr.with_exec(cmd).stdout()}"
-        except dagger.ExecError as e:
-            # The ExecError exposes the
-            raise LinterError(exec_error=e)
-
     @function
-    async def lint(self, pyproject: dagger.File) -> str:
-        """
-        Lint using ruff.
-        """
-        ctr = self.base_container().with_exec(["pip", "install", "ruff"]).with_file("pyproject.toml", pyproject)
-        return await self.run_linter(["ruff", "check"], ctr)
-
-    @function
-    async def format(self, pyproject: dagger.File) -> str:
-        """
-        Check if the code is formatted correctly.
-        """
-        ctr = self.base_container().with_exec(["pip", "install", "ruff"]).with_file("pyproject.toml", pyproject)
-        return await self.run_linter(["ruff", "format", "--check"], ctr)
-
-    @function
-    async def bandit(self, pyproject: dagger.File) -> str:
-        """
-        Check for security issues using Bandit.
-        """
-        ctr = self.base_container().with_exec(["pip", "install", "bandit"]).with_file("pyproject.toml", pyproject)
-        return await self.run_linter(["bandit", "-c", "pyproject.toml", "-r", "src"], ctr)
-
-    @function
-    async def test(self, pyproject: dagger.File, dev_req: dagger.File) -> str:
-        """
-        Run tests using Pytest.
-        """
-        ctr = (
-            self.base_container()
-            .with_env_variable("CELERY_BROKER_URL", "noop")
-            .without_env_variable("DATABASE_URL")  # Use default sqlite
-            .with_file("dev_req.txt", dev_req)
-            .with_exec(["pip", "install", "-r", "dev_req.txt"])
-            .with_file("pyproject.toml", pyproject)
-        )
-        return await self.run_linter(
-            [
-                "pytest",
-                "-vv",
-                "--config-file",
-                "pyproject.toml",
-                "-k",
-                "not integration",
-                "src",
-            ],
-            ctr,
-        )
-
-    @function
-    async def all_linters(self, pyproject: dagger.File, dev_req: dagger.File, verbose: bool = False) -> str:
-        """
-        Runs all the liners.
-        Pass `--verbose` to not summarize linter output.
-        """
-        # Run all the linters
-        async with TaskGroup() as tg:
-            tasks = [
-                tg.create_task(self.lint(pyproject)),
-                tg.create_task(self.format(pyproject)),
-                tg.create_task(self.bandit(pyproject)),
-                tg.create_task(self.test(pyproject, dev_req)),
-            ]
-
-        # Color Codes
-        RESET = "\u001b[0m"
-        RED = "\u001b[31m"
-        GREEN = "\u001b[32m"
-        PASS = f"{GREEN}PASSED!{RESET} "
-        FAIL = f"{RED}FAILED!{RESET} "
-
-        # Format the results nicely
-        passed = ""
-        failed = ""
-        for task in tasks:
-            try:
-                # Task Passed
-                result = task.result()
-                if not verbose:
-                    result = result.splitlines()[0]  # Just grab the first line
-                passed += f"{PASS}{result}\n"
-            except LinterError as e:
-                # Task failed
-                failed += f"{FAIL}Command `{' '.join(e.exec_error.command)}` failed with exit code {e.exec_error.exit_code}.\n"
-                if verbose:
-                    failed += f"stdout:\n{e.exec_error.stdout}\nstderr:\n{e.exec_error.stderr}\n"
-        if failed:
-            print(f"{passed}\n{failed}")
-            sys.exit(1)
-        return f"{passed}\n{failed}"
-
-    @function
-    def docs(self, mkdocs: dagger.File) -> dagger.Service:
+    def docs(self) -> dagger.Service:
         """
         Run the documentation server locally, without needing to
         install cairo.
@@ -252,10 +177,10 @@ class SpokaneTech:
                 ]
             )
             .with_exposed_port(8000)
-            .with_file("/req.txt", self.req)
+            .with_file("/req.txt", self.lockfile)
             .with_exec(["pip", "install", "-r", "req.txt"])
-            .with_directory("/docs", self.src)
-            .with_file("mkdocs.yaml", mkdocs)
+            .with_directory("/docs", self.src.directory("docs"))
+            .with_file("mkdocs.yaml", self.src.file("mkdocs.yml"))
             .with_exec(["mkdocs", "serve", "-a", "0.0.0.0:8000", "--no-livereload"])
             .as_service()
         )
@@ -284,13 +209,3 @@ def env_variables(**kwargs):
         return ctr
 
     return _env_vars
-
-
-class LinterError(CancelledError):
-    exec_error: dagger.ExecError
-
-    def __init__(self, exec_error):
-        self.exec_error = exec_error
-
-    def __str__(self):
-        return str(self.exec_error)

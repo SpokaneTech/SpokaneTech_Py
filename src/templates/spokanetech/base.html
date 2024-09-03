@@ -38,7 +38,7 @@
                 <li><a href="" hx-get="{% url 'web:get_techgroups' display='list' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="View our tech groups">
                     <i class="fa-solid fa-user-group"></i></a>
                 </li>
-                <li><a href="" hx-get="{% url 'web:get_techevents' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="List upcoming events">
+                <li><a href="" hx-get="{% url 'web:get_techevents' display='list' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="List upcoming events">
                     <i class="fa-solid fa-list-check"></i></a>
                 </li>
                 <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar" class="tippy-tooltip" data-tippy-content="Calendar of events">

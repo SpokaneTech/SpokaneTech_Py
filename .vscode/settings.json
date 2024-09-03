@@ -1,4 +1,7 @@
 {
+  // editor
+  "editor.rulers": [80, 120],
+  // python
   "[python]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",

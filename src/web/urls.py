@@ -5,11 +5,10 @@ from web import views
 app_name = "web"
 
 urlpatterns = [
-    path("set_timezone/", views.set_timezone, name="set_timezone"),
     path("event_calendar/<int:year>/<int:month>/", views.EventCalendarView.as_view(), name="event_calendar"),
 
     # handyhelpers overrides
-    path("filter_list_view", views.FilterListView.as_view(), name="filter_list_view"),
+    # path("filter_list_view", views.FilterListView.as_view(), name="filter_list_view"),
     
     path("", views.GetIndexContent.as_view(), name="default"),
     path("index/", views.GetIndexContent.as_view(), name="index"),

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import dj_database_url
 import sentry_sdk
+from django.urls import reverse_lazy
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,6 +23,10 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+ADMINS = [
+    ("Organizers", "organizers@spokanetech.org"),
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -50,7 +55,7 @@ else:
         raise KeyError(f"{e}: If running in development, set 'SPOKANE_TECH_DEV' to any value.") from e
 
     DEBUG = False
-    ALLOWED_HOSTS = ["spokanetech.org", "spokanetech-py.fly.dev"]
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "spokanetech.org,spokanetech-py.fly.dev").split(",")
     CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
     # SSL Options
@@ -89,6 +94,10 @@ INSTALLED_APPS = [
     "markdownify.apps.MarkdownifyConfig",
     "handyhelpers",
     "web",
+    # django-allauth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 if DEBUG:
@@ -102,7 +111,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "web.middleware.TimezoneMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 if DEBUG:
@@ -159,13 +168,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+LOGIN_REDIRECT_URL = reverse_lazy("web:index")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Los_Angeles"
 
 USE_I18N = True
 
@@ -202,6 +218,8 @@ if USE_AZURE:
     MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
     MEDIA_UPLOAD_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}"
 else:
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "media/"
 
@@ -291,3 +309,14 @@ MARKDOWNIFY = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# Email
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "DoNotReply@spokanetech.org")
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+if USE_AZURE:
+    EMAIL_BACKEND = "django_azure_communication_email.EmailBackend"
+    AZURE_COMMUNICATION_CONNECTION_STRING = os.environ["AZURE_COMMUNICATION_CONNECTION_STRING"]
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

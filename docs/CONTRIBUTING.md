@@ -45,8 +45,10 @@ Create a virtual environment and install dependencies:
 cd SpokaneTech_Py
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt -r requirements/dev.txt
+pip install -r requirements.dev.lock
 ```
+
+> Note: to add a new dependency see [Adding Dependencies](#adding-dependencies).
 
 `python-dotenv` will automatically load values in the `.env` file when Django's `manage.py` is used. Create a `.env` file from the template (**note: `.env` should never be checked in to source control!**):
 
@@ -86,7 +88,7 @@ Generated using <a href="https://linux.die.net/man/1/script" target="_blank">scr
 ```bash linenums="1" hl_lines="1 2 3 15 16 17 30 36"
 $ python -m venv venv
 $ source venv/bin/activate
-(venv) $ pip install -r requirements.txt -r requirements/dev.txt
+(venv) $ pip install -r requirements.dev.lock
 Collecting asgiref==3.7.2
   Using cached asgiref-3.7.2-py3-none-any.whl (24 kB)
 Collecting celery[redis]==5.3.6
@@ -132,6 +134,23 @@ Quit the server with CONTROL-C.
 
 </details>
 
+### Adding Dependencies
+
+The lock files are generated using [`uv`](https://github.com/astral-sh/uv);
+which is included in the development requirements. To add a file use:
+
+```shell
+uv add [--dev] SOME-DEP
+uv pip compile pyproject.toml --extra dev -o requirements.dev.lock --prerelease=allow
+uv pip compile pyproject.toml -o requirements.lock --prerelease=allow
+```
+
+Then make sure to sync the virtual environment with the new lock files.
+
+```shell
+uv pip sync requirements.dev.lock
+```
+
 ### Dagger
 
 [Dagger](https://dagger.io/) is used for continuous integration and 
@@ -145,14 +164,12 @@ To run Dagger locally you will need:
 
 To run all linters at once:
 ```shell
-dagger call --src src --req requirements.txt \
-    all-linters --pyproject pyproject.toml --dev-req requirements/dev.txt
+dagger call linters all
 ```
 
 To spin up a dev environment use:
 ```shell
-dagger call --src src --req requirements.txt \
-    dev --run as-service up
+dagger call up
 ```
 
 This command:
@@ -162,7 +179,7 @@ This command:
 - Tunnels the Django server to [localhost:8000]()
 
 The Postgres database is mounted as a cache volume, so its state will persist between runs. 
-To wipe the database, pass the `--fresh-database` flag to `dev`.
+To wipe the database, pass the `--fresh-database`.
 
 
 <details>
@@ -176,17 +193,17 @@ dagger functions
 Then, to call the functions use:
 
 ```shell
-dagger call --src src --req requirements.txt FUNCTION-NAME FUNCTION-ARGS
+dagger call FUNCTION-NAME FUNCTION-ARGS
 ```
 
 To gather more information about a function, you can pass the `--help` arg to it:
 
 ```shell
-$ dagger call --src src --req requirements.txt test --help
+$ dagger call linters test --help
 Run tests using Pytest.
 
 Usage:
-  dagger call test [flags]
+  dagger call linters test [flags]
 
 Flags:
       --dev-req File     A file.
@@ -212,8 +229,7 @@ be chained on that will act on that container. For example, the following
 command transforms the development container into a service, and starts it.
 
 ```shell
-dagger call --src src --req requirements.txt dev --run \
-    as-service up
+dagger call up
 ```
 </details>
 
