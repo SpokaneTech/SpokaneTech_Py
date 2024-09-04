@@ -1,12 +1,7 @@
 <section class="about">
-<h1 class="fade-in-blur" style="--fade-duration: .5s;">Our Tech Groups</h1>
+<h1 class="fade-in-blur" style="--fade-duration: 0.5s;">Our Tech Groups</h1>
 
-<div hx-get="{% url 'web:get_techgroups' display=display %}?name__icontains=6" 
-    hx-target="#body_main" hx-push-url="true">
-    click here to filter!
-</div>
-
-<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 1s;">
+<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.75s;">
     {% for row in queryset %}
     <div class="list-card" hx-get="{% url 'web:get_techgroup' row.pk %}" hx-target="#body_main" hx-push-url="true">
         <div class="title">{{ row.icon|safe }}</div>

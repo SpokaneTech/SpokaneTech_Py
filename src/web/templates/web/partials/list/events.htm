@@ -1,21 +1,18 @@
 <section class="about">
-<h1 class="fade-in-blur" style="--fade-duration: .5s;">Upcoming Events</h1>
+<h1 class="fade-in-blur" style="--fade-duration: 0.5s;">Upcoming Events</h1>
 
-<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 1s;">
+<div class="list-card-container blur-group-container fade-in-blur" style="--fade-duration: 0.75s;">
     {% for row in queryset %}
     <div class="list-card" hx-get="{% url 'web:get_techevent' row.pk %}" hx-target="#body_main" hx-push-url="true">
         <div class="title">{{ row.name }}</div>
         <div class="tag-container">
             {% for tag in row.tags.all %}
-            <span class="tag">{{ tag }}</span>
+            <small><span class="tag">{{ tag }}</span></small>
             {% endfor %}
         </div>
-        <div class="description">
-            {{ row.description|truncatewords_html:30 }}
-        </div>
         <div class="split-footer">
-            <div class="footer-left">{% if row.group %}<a href="{{ row.group.get_absolute_url }}">{{ row.group.name }}</a>{% endif %}</div>
-            <div class="footer-right">{% if row.url %}<a href="{{ row.url }}" target="_blank">RSVP</a>{% endif %}</div>
+            <div class="footer-left">{% if row.group %}{{ row.group.name }}{% endif %}</div>
+            <div class="footer-right">{% if row.date_time %}{{ row.date_time }}{% endif %}</div>
         </div>
     </div>
     {% endfor %}

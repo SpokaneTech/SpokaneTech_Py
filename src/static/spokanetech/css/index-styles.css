@@ -1,7 +1,6 @@
 :root {
-    --gradient-color: linear-gradient(352deg, rgba(2, 0, 36, 1) 0%, rgba(0, 212, 255, 1) 0%, rgba(10, 99, 189) 13%, rgba(14, 55, 163, 1) 35%, rgba(20, 9, 121, 1) 68%);
     --light: #fff;
-    --dark: #000;
+    --dark: #111;
     --gunmetal: hsla(197, 36%, 15%, 1);
     --keppel: hsla(169, 59%, 45%, 1);
     --persian-green: hsla(171, 58%, 40%, 1);
@@ -305,10 +304,10 @@ footer .copyright {
   }
 
   .list-card {
-    background-color: rgba(255, 255, 255, 0.2);;
+    background-color: rgba(255, 255, 255, 0.2);
     border-radius: 0.5rem;
     box-shadow: 0rem 0.25rem 1rem -0.25rem var(--light, rgb(255, 255, 255));
-    padding: 1rem;
+    padding: 20px;
     width: 400px; /* Fixed width */
     height: 150px; /* Fixed height */
     text-align: center;
@@ -324,8 +323,8 @@ footer .copyright {
     font-size: 2.5rem;
 }
 .list-card .description {
-    font-size: 1.1rem;
     font-weight: bold;
+    font-size: 1.1rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
@@ -335,7 +334,7 @@ footer .copyright {
 }
 
 .tag {
-    font-size: .75rem;
+    font-size: .7rem;
     margin-left: .5rem;
     margin-right: .5rem;
     padding: .25rem .5rem;
@@ -361,9 +360,10 @@ footer .copyright {
     justify-content: space-between; /* Two columns, left and right justified */
     align-items: center;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: .25rem;
     font-size: .75rem;
-    color: var(--accent-color);
+    /* color: var(--accent-color); */
+    color: var(--light);
     text-decoration: none !important;
 }
 .footer-left {
@@ -387,6 +387,10 @@ footer .copyright {
 .list-card:hover .description {
     color: var(--accent, hsla(169, 59%, 45%, 1));
 }
+.list-card:hover .split-footer {
+    color: var(--accent, hsla(169, 59%, 45%, 1));
+}
+
 
 .detail h1 {
     font-size: 2.5rem;
