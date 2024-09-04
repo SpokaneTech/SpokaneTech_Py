@@ -194,7 +194,8 @@ class EventCalendarView(CalendarView):
     title = "Spokane Tech Event Calendar"
     event_model = Event
     event_model_date_field = "date_time"
-    event_detail_url = "web:get_event_information"
+    event_detail_url = "web:techevent_modal"
+    template_name = "web/partials/custom/calendar.htm"
 
 
 class FilterListView(View):
