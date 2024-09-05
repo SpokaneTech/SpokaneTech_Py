@@ -13,6 +13,7 @@ dependencies = [
     "crispy-bootstrap5>=2024.2",
     "discord.py>=2.3.2",
     "Django>=5.0.1",
+    "django-allauth[socialaccount]>=64.2.0",
     "django-azure-communication-email>=1.1.0",
     "django-celery-beat>=2.6.0",
     "django-celery-results>=2.5.1",
@@ -30,6 +31,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "sentry-sdk[celery,django]>=2.1.1",
     "sqlparse>=0.4.4",
+    "pillow>=10.4.0",
 ]
 
 [project.optional-dependencies]

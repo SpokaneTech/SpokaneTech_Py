@@ -101,6 +101,7 @@ django==5.0.8
     #   spokanetech (pyproject.toml)
     #   crispy-bootstrap5
     #   dj-database-url
+    #   django-allauth
     #   django-azure-communication-email
     #   django-celery-beat
     #   django-celery-results
@@ -114,6 +115,8 @@ django==5.0.8
     #   djangorestframework
     #   model-bakery
     #   sentry-sdk
+django-allauth==64.2.0
+    # via spokanetech (pyproject.toml)
 django-azure-communication-email==1.1.0
     # via spokanetech (pyproject.toml)
 django-celery-beat==2.6.0
@@ -239,6 +242,7 @@ pbr==6.1.0
     # via stevedore
 pillow==10.4.0
     # via
+    #   spokanetech (pyproject.toml)
     #   cairosvg
     #   mkdocs-material
 platformdirs==4.2.2
@@ -262,7 +266,9 @@ pygments==2.18.0
     #   mkdocs-material
     #   rich
 pyjwt==2.9.0
-    # via msal
+    # via
+    #   django-allauth
+    #   msal
 pymdown-extensions==10.9
     # via mkdocs-material
 pytest==8.3.2
@@ -301,6 +307,7 @@ regex==2024.7.24
 requests==2.32.3
     # via
     #   azure-core
+    #   django-allauth
     #   eventbrite
     #   mkdocs-material
     #   msal
@@ -308,7 +315,9 @@ requests==2.32.3
     #   requests-oauthlib
     #   responses
 requests-oauthlib==2.0.0
-    # via msrest
+    # via
+    #   django-allauth
+    #   msrest
 responses==0.25.3
     # via spokanetech (pyproject.toml)
 rich==13.8.0

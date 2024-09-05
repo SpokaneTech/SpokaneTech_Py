@@ -2,7 +2,7 @@ import sys
 from asyncio import CancelledError, TaskGroup
 
 import dagger
-from dagger import object_type, function
+from dagger import function, object_type
 
 
 @object_type
@@ -18,6 +18,13 @@ class Linter:
         except dagger.ExecError as e:
             # The ExecError exposes the
             raise LinterError(exec_error=e)
+
+    @function
+    async def check_django(self) -> str:
+        """
+        Run Django system checks.
+        """
+        return await self.run_linter(["src/manage.py", "check"])
 
     @function
     async def check(self) -> str:
@@ -68,6 +75,7 @@ class Linter:
         # Run all the linters
         async with TaskGroup() as tg:
             tasks = [
+                tg.create_task(self.check_django()),
                 tg.create_task(self.check()),
                 tg.create_task(self.format()),
                 tg.create_task(self.bandit()),

@@ -48,6 +48,8 @@ source venv/bin/activate
 pip install -r requirements.dev.lock
 ```
 
+> Note: to add a new dependency see [Adding Dependencies](#adding-dependencies).
+
 `python-dotenv` will automatically load values in the `.env` file when Django's `manage.py` is used. Create a `.env` file from the template (**note: `.env` should never be checked in to source control!**):
 
 ```shell
@@ -131,6 +133,23 @@ Quit the server with CONTROL-C.
 ```
 
 </details>
+
+### Adding Dependencies
+
+The lock files are generated using [`uv`](https://github.com/astral-sh/uv);
+which is included in the development requirements. To add a file use:
+
+```shell
+uv add [--dev] SOME-DEP
+uv pip compile pyproject.toml --extra dev -o requirements.dev.lock --prerelease=allow
+uv pip compile pyproject.toml -o requirements.lock --prerelease=allow
+```
+
+Then make sure to sync the virtual environment with the new lock files.
+
+```shell
+uv pip sync requirements.dev.lock
+```
 
 ### Dagger
 

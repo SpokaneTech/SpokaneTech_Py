@@ -16,6 +16,7 @@ from pathlib import Path
 import environ
 import dj_database_url
 import sentry_sdk
+from django.urls import reverse_lazy
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -100,6 +101,10 @@ INSTALLED_APPS = [
     "markdownify.apps.MarkdownifyConfig",
     "handyhelpers",
     "web",
+    # django-allauth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 if DEBUG:
@@ -113,7 +118,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "web.middleware.TimezoneMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 if DEBUG:
@@ -169,6 +174,13 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+LOGIN_REDIRECT_URL = reverse_lazy("web:index")
 
 
 # Internationalization
@@ -312,3 +324,5 @@ SERVER_EMAIL = env.str("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 if USE_AZURE:
     EMAIL_BACKEND = "django_azure_communication_email.EmailBackend"
     AZURE_COMMUNICATION_CONNECTION_STRING = env.str("AZURE_COMMUNICATION_CONNECTION_STRING")
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
