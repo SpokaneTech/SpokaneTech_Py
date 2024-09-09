@@ -12,6 +12,10 @@ asgiref==3.8.1
     # via
     #   spokanetech (pyproject.toml)
     #   django
+async-timeout==4.0.3
+    # via
+    #   aiohttp
+    #   redis
 attrs==24.2.0
     # via aiohttp
 azure-common==1.1.28
@@ -129,6 +133,8 @@ django-crispy-forms==2.3
     #   crispy-bootstrap5
 django-debug-toolbar==4.4.6
     # via spokanetech (pyproject.toml)
+django-environ==0.11.2
+    # via spokanetech (pyproject.toml)
 django-filter==24.3
     # via djangorestframework-filters
 django-handyhelpers==0.3.26
@@ -149,6 +155,8 @@ drf-dynamic-fields==0.4.0
     # via django-handyhelpers
 eventbrite==3.3.5
     # via spokanetech (pyproject.toml)
+exceptiongroup==1.2.2
+    # via pytest
 flower==2.0.1
     # via spokanetech (pyproject.toml)
 freezegun==1.5.1
@@ -349,10 +357,13 @@ tinycss2==1.2.1
     #   bleach
     #   cairosvg
     #   cssselect2
+tomli==2.0.1
+    # via pytest
 tornado==6.4.1
     # via flower
 typing-extensions==4.12.2
     # via
+    #   asgiref
     #   azure-core
     #   azure-storage-blob
     #   beautifulsoup4

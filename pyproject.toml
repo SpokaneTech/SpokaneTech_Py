@@ -37,6 +37,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "django-debug-toolbar>=4.3",
+    "django-environ>=0.11.2",
     "freezegun>=1.4",
     "mkdocs>=1.6",
     "mkdocs-material[imaging]>=9.5",
