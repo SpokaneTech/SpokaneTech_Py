@@ -1,12 +1,13 @@
 import pathlib
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import freezegun
-import responses
 import pytest
+import responses
 from django.test import TestCase
+
 from web import models, scrapers
-from zoneinfo import ZoneInfo
 
 
 class TestMeetupHomepageScraper(TestCase):
@@ -126,9 +127,9 @@ class TestEventbriteScraper(TestCase):
     To run them, set the `EVENTBRITE_API_TOKEN` envrionment variable.
     """
 
-    def test_scraper(self):
+    def test_scraper_organization_id(self):
         scraper = scrapers.EventbriteScraper()
-        result = scraper.scrape("72020528223")
+        result = scraper.scrape("https://www.eventbrite.com/o/inch360-72020528223")
         actual: models.Event = result[0][0]
         assert actual.name == "Spring Cyber - Training Series"
         assert actual.description and actual.description.startswith(
@@ -139,3 +140,8 @@ class TestEventbriteScraper(TestCase):
         assert actual.location == "2818 North Sullivan Road #Suite 100, Spokane Valley, WA 99216"
         assert actual.url == "https://www.eventbrite.com/e/spring-cyber-training-series-tickets-860181354587"
         assert actual.external_id == "860181354587"
+
+    def test_scraper_event_series_id(self):
+        scraper = scrapers.EventbriteScraper()
+        result = scraper.scrape("https://www.eventbrite.com/e/cda-machine-learners-ai-ml-club-tickets-640757311367")
+        assert len(result) > 1

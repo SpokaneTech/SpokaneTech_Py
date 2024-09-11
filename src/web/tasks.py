@@ -18,8 +18,8 @@ def scrape_events_from_meetup():
 def scrape_events_from_eventbrite():
     """Scrape upcoming events from Eventbrite."""
     events_scraper = scrapers.EventbriteScraper()
-    meetup_service = services.EventbriteService(events_scraper)
-    meetup_service.save_events()
+    eventbrite_service = services.EventbriteService(events_scraper)
+    eventbrite_service.save_events()
 
 
 @shared_task()

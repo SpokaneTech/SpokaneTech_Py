@@ -57,7 +57,7 @@ class EventbriteService:
         now = timezone.localtime()
         for eventbrite_organization in models.EventbriteOrganization.objects.prefetch_related("tech_group"):
             tech_group = eventbrite_organization.tech_group
-            events_and_tags = self.events_scraper.scrape(eventbrite_organization.eventbrite_id)
+            events_and_tags = self.events_scraper.scrape(eventbrite_organization.url)
             for event, _ in events_and_tags:
                 event.group = tech_group
                 event.approved_at = now
