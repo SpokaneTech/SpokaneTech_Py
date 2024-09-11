@@ -115,4 +115,3 @@ class Event(HandyHelperBaseModel):
 class EventbriteOrganization(models.Model):
     tech_group = models.ForeignKey(TechGroup, on_delete=models.CASCADE)
     url = models.URLField()
-    eventbrite_id = models.CharField(max_length=256)

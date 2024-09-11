@@ -3,13 +3,14 @@ import json
 import pathlib
 import re
 import urllib.parse
+import zoneinfo
 from datetime import datetime, timedelta
-from typing import Any, Protocol, TypeAlias, TypeVar
+from typing import Any, Callable, Protocol, TypeAlias, TypeVar
 
 import eventbrite.access_methods
 import requests
-import zoneinfo
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 from django.conf import settings
 from django.utils import timezone
 from eventbrite import Eventbrite
@@ -26,11 +27,16 @@ def get_venue(self, id, **data):
 
 
 def get_event_description(self, id, **data):
-    return self.get("/events/{0}/description//".format(id), data=data)
+    return self.get("/events/{0}/description/".format(id), data=data)
+
+
+def get_events_for_series(self, id, **data):
+    return self.get("/series/{0}/events/".format(id), data=data)
 
 
 setattr(eventbrite.access_methods.AccessMethodsMixin, "get_venue", get_venue)
 setattr(eventbrite.access_methods.AccessMethodsMixin, "get_event_description", get_event_description)
+setattr(eventbrite.access_methods.AccessMethodsMixin, "get_events_for_series", get_events_for_series)
 
 
 class Scraper(Protocol[ST]):
@@ -174,7 +180,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         return datetime.fromisoformat(soup.find_all("time")[0]["datetime"])
 
     def _parse_duration(self, soup: BeautifulSoup) -> timedelta:
-        time: Tag = soup.find_all("time")[0]
+        time = soup.find_all("time")[0]
         matches = self.DURATION_PATTERN.findall(time.text)
         if not matches:
             raise ValueError("Could not find duration from:", time.text)
@@ -201,17 +207,53 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
 
 
 class EventbriteScraper(Scraper[list[EventScraperResult]]):
+    ORGANIZATION_ID_PATTERN = re.compile(r"/o/[A-z-]+(\d+)")
+    EVENT_SERIES_ID_PATTERN = re.compile(r"/e/[A-z-]+(\d+)")
+
     def __init__(self, api_token: str | None = None):
         self.client = Eventbrite(api_token or settings.EVENTBRITE_API_TOKEN)
         self._location_by_venue_id: dict[str, str] = {}
 
-    def scrape(self, organization_id: str) -> list[EventScraperResult]:
-        response = self.client.get_organizer_events(
-            organization_id,
-            status="live",
-        )
-        events_and_tags = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
+    def scrape(self, url: str) -> list[EventScraperResult]:
+        request_func, id = self.get_request_func(url)
+        request_func = functools.partial(request_func, id)
+        events = self.paginate_all(request_func, "events")
+        events_and_tags = [self.map_to_event(eventbrite_event) for eventbrite_event in events]
         return events_and_tags
+
+    def get_request_func(self, url: str) -> tuple[Callable[..., Any], int]:
+        """Parse the API request function and ID from the URL."""
+        if matches := self.ORGANIZATION_ID_PATTERN.findall(url):
+            organization_id = matches[0]
+            return (functools.partial(self.client.get_organizer_events, status="live"), organization_id)
+        elif matches := self.EVENT_SERIES_ID_PATTERN.findall(url):
+            event_series_id = matches[0]
+            return (self.client.get_events_for_series, event_series_id)  # type: ignore
+        else:
+            raise ValueError(f"invalid Eventbrite url: {url}")
+
+    def paginate_all(self, request_func: Callable[..., Any], key: str) -> list:
+        """Iterate through all the pages of the request."""
+        response = request_func()
+        self.check_response(response)
+        result = response[key]
+        if getattr(response, "is_paginated", False):
+            while response["pagination"]["has_more_items"]:
+                continuation = response["pagination"]["continuation"]
+                response = request_func(continuation=continuation)
+                self.check_response(response)
+                result = result + response[key]
+        return result
+
+    def check_response(self, response: Any) -> None:
+        status_code: int = getattr(response, "status_code", 0)
+        if not status_code:
+            status_code = response["status_code"]
+
+        if status_code >= 400:
+            raise ValueError(
+                f"Evenbrite scrape error: [{status_code}] {response["error"]}: {response["error_description"]}"
+            )
 
     def map_to_event(self, eventbrite_event: dict) -> tuple[models.Event, list[models.Tag]]:
         name = eventbrite_event["name"]["text"]

@@ -13,11 +13,28 @@ services:
     image: spokanetech:latest
     build:
       context: .
+    command: [
+      "python",
+      "-m",
+      "celery",
+      "--workdir",
+      "./src",
+      "-A",
+      "spokanetech.celery",
+      "worker",
+      "-B",
+      "-l",
+      "INFO",
+      "--events"
+    ]
     container_name: worker
     ports:
       - "5555:5555"
     env_file:
       - .env
+    environment:
+      SPOKANE_TECH_DEV: false
+      CELERY_BROKER_URL: "redis://redis:6379/0"
 
   redis:
     image: redis:7.2
