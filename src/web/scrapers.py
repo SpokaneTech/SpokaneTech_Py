@@ -235,11 +235,13 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
     def paginate_all(self, request_func: Callable[..., Any], key: str) -> list:
         """Iterate through all the pages of the request."""
         response = request_func()
+        self.check_response(response)
         result = response[key]
         if getattr(response, "is_paginated", False):
             while response["pagination"]["has_more_items"]:
                 continuation = response["pagination"]["continuation"]
                 response = request_func(continuation=continuation)
+                self.check_response(response)
                 result = result + response[key]
         return result
 
