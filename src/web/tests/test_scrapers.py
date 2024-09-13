@@ -1,12 +1,13 @@
 import pathlib
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import freezegun
-import responses
 import pytest
+import responses
 from django.test import TestCase
+
 from web import models, scrapers
-from zoneinfo import ZoneInfo
 
 
 class TestMeetupHomepageScraper(TestCase):
@@ -59,16 +60,26 @@ class TestMeetupHomepageScraper(TestCase):
 class TestMeetupEventScraper(TestCase):
     @responses.activate
     def test_scraper_with_json(self):
-        fin = open(pathlib.Path(__file__).parent / "data" / "meetup-with-json.html")
-        body = fin.read()
-        fin.close()
+        # Arrange
+        with open(pathlib.Path(__file__).parent / "data" / "meetup-with-json.html") as fin:
+            body = fin.read()
         responses.get(
             "https://www.meetup.com/python-spokane/events/298213205/",
             body=body,
         )
 
+        with open(pathlib.Path(__file__).parent / "data" / "meetup-image.jpeg", "rb") as fin:
+            body = fin.read()
+        responses.get(
+            "https://secure.meetupstatic.com/photos/event/1/0/a/e/highres_519844270.jpeg",
+            body=body,
+        )
+
+        # Act
         scraper = scrapers.MeetupEventScraper()
-        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        actual, actual_tags, actual_image_result = scraper.scrape(
+            "https://www.meetup.com/python-spokane/events/298213205/"
+        )
 
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
@@ -77,6 +88,7 @@ class TestMeetupEventScraper(TestCase):
         assert actual.location == "1720 W 4th Ave Unit B, Spokane, WA"
         assert actual.url == "https://www.meetup.com/python-spokane/events/298213205/"
         assert actual.external_id == "298213205"
+
         assert len(actual_tags) == 5
         assert {t.value for t in actual_tags} == {
             "Linux",
@@ -86,8 +98,13 @@ class TestMeetupEventScraper(TestCase):
             "Agile and Scrum",
         }
 
+        assert actual_image_result
+        assert actual_image_result[0] == "highres_519844270.jpeg"
+        assert len(actual_image_result[1]) > 0
+
     @responses.activate
     def test_scraper_without_json(self):
+        # Arrange
         fin = open(pathlib.Path(__file__).parent / "data" / "meetup-without-json.html")
         body = fin.read()
         fin.close()
@@ -96,9 +113,20 @@ class TestMeetupEventScraper(TestCase):
             body=body,
         )
 
-        scraper = scrapers.MeetupEventScraper()
-        actual, actual_tags = scraper.scrape("https://www.meetup.com/python-spokane/events/298213205/")
+        with open(pathlib.Path(__file__).parent / "data" / "meetup-image.webp", "rb") as fin:
+            body = fin.read()
+        responses.get(
+            "https://secure.meetupstatic.com/photos/event/1/0/a/e/600_519844270.webp?w=750",
+            body=body,
+        )
 
+        # Act
+        scraper = scrapers.MeetupEventScraper()
+        actual, actual_tags, actual_image_result = scraper.scrape(
+            "https://www.meetup.com/python-spokane/events/298213205/"
+        )
+
+        # Assert
         assert actual.name == "Dagger with Spokane Tech 🚀"
         assert actual.description and actual.description.startswith("Join us for our monthly SPUG meetup!")
         assert actual.date_time == datetime(2024, 3, 19, 18, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
@@ -114,6 +142,10 @@ class TestMeetupEventScraper(TestCase):
             "Python Web Development",
             "Agile and Scrum",
         }
+
+        assert actual_image_result
+        assert actual_image_result[0] == "600_519844270.webp"
+        assert len(actual_image_result[1]) > 0
 
 
 @pytest.mark.eventbrite

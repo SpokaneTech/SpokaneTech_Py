@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Protocol
 
+from django.core.files.base import ContentFile
 from django.forms.models import model_to_dict
 from django.utils import timezone
 
@@ -24,13 +25,15 @@ class MeetupService:
         for tech_group in models.TechGroup.objects.filter(homepage__icontains="meetup.com"):
             event_urls = self.homepage_scraper.scrape(tech_group.homepage)  # type: ignore
             for event_url in event_urls:  # TODO: parallelize (with async?)
-                event, tags = self.event_scraper.scrape(event_url)
+                event, tags, image_result = self.event_scraper.scrape(event_url)
                 event.group = tech_group
                 event.approved_at = now
                 defaults = model_to_dict(event, exclude=["id"])
                 defaults["group"] = tech_group
 
                 del defaults["tags"]  # Can't apply Many-to-Many relationship untill after the event has been saved.
+                del defaults["image"]
+
                 new_event, _ = models.Event.objects.update_or_create(
                     external_id=event.external_id,
                     defaults=defaults,
@@ -38,6 +41,19 @@ class MeetupService:
                 for tag in tags:
                     tag, _ = models.Tag.objects.get_or_create(value=tag)
                     new_event.tags.add(tag)
+
+                if image_result is not None:
+                    image_name, image = image_result
+
+                    # If images are the same, don't re-upload
+                    has_existing_image = bool(new_event.image)
+                    if has_existing_image:
+                        existing_image = new_event.image.read()
+                        if existing_image == image:
+                            continue
+
+                    file = ContentFile(image, name=image_name)
+                    new_event.image.save(image_name, file)
 
 
 class EventbriteService:
@@ -58,7 +74,7 @@ class EventbriteService:
         for eventbrite_organization in models.EventbriteOrganization.objects.prefetch_related("tech_group"):
             tech_group = eventbrite_organization.tech_group
             events_and_tags = self.events_scraper.scrape(eventbrite_organization.eventbrite_id)
-            for event, _ in events_and_tags:
+            for event, _, _ in events_and_tags:
                 event.group = tech_group
                 event.approved_at = now
                 defaults = model_to_dict(event, exclude=["id"])
