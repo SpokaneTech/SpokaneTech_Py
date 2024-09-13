@@ -27,7 +27,7 @@ def get_venue(self, id, **data):
 
 
 def get_event_description(self, id, **data):
-    return self.get("/events/{0}/description//".format(id), data=data)
+    return self.get("/events/{0}/description/".format(id), data=data)
 
 
 setattr(eventbrite.access_methods.AccessMethodsMixin, "get_venue", get_venue)
@@ -44,7 +44,19 @@ ImageResult: TypeAlias = tuple[str, bytes]
 EventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag], ImageResult | None]
 
 
-class MeetupScraperMixin:
+class ScraperMixin:
+    def _get_image(self, image_url: str) -> ImageResult:
+        image_name = self._parse_image_name(image_url)
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        image = response.content
+        return image_name, image
+
+    def _parse_image_name(self, image_url: str) -> str:
+        return image_url.rsplit("/", maxsplit=1)[-1].split("?", maxsplit=1)[0]
+
+
+class MeetupScraperMixin(ScraperMixin):
     """Common Meetup scraping functionality."""
 
     def _parse_apollo_state(self, soup: BeautifulSoup) -> dict:
@@ -177,14 +189,14 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         return description
 
     def _parse_date_time(self, soup: BeautifulSoup) -> datetime:
-        time: Tag | None = soup.find_next("time")  # type: ignore
+        time: Tag | None = soup.find("time")  # type: ignore
         if not time:
             raise ValueError("could not find time")
         dt: str = time["datetime"]  # type: ignore
         return datetime.fromisoformat(dt)
 
     def _parse_duration(self, soup: BeautifulSoup) -> timedelta:
-        time: Tag | None = soup.find_next("time")  # type: ignore
+        time: Tag | None = soup.find("time")  # type: ignore
         if not time:
             raise ValueError("could not find time")
         matches = self.DURATION_PATTERN.findall(time.text)
@@ -221,15 +233,8 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         src: str = img["src"]  # type: ignore
         return src
 
-    def _get_image(self, image_url: str) -> ImageResult:
-        image_name = image_url.rsplit("/", maxsplit=1)[-1].split("?", maxsplit=1)[0]
-        response = requests.get(image_url, timeout=10)
-        response.raise_for_status()
-        image = response.content
-        return image_name, image
 
-
-class EventbriteScraper(Scraper[list[EventScraperResult]]):
+class EventbriteScraper(ScraperMixin, Scraper[list[EventScraperResult]]):
     def __init__(self, api_token: str | None = None):
         self.client = Eventbrite(api_token or settings.EVENTBRITE_API_TOKEN)
         self._location_by_venue_id: dict[str, str] = {}
@@ -238,9 +243,10 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         response = self.client.get_organizer_events(
             organization_id,
             status="live",
+            expand="logo",
         )
-        events_and_tags = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
-        return events_and_tags
+        results = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
+        return results
 
     def map_to_event(self, eventbrite_event: dict) -> EventScraperResult:
         name = eventbrite_event["name"]["text"]
@@ -258,6 +264,16 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         except requests.RequestException:
             # short description
             description = eventbrite_event["description"]["html"]
+
+        try:
+            image_url = eventbrite_event["logo"]["original"]["url"]
+            image_result = self._get_image(image_url)
+        except (KeyError, requests.HTTPError):
+            try:
+                image_url = eventbrite_event["logo"]["url"]
+                image_result = self._get_image(image_url)
+            except KeyError:
+                image_result = None
 
         event = models.Event(
             name=name,
@@ -278,7 +294,7 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         # if subcategory_name:
         #     tags.append(models.Tag(value=subcategory_name))
 
-        return event, [], None
+        return event, [], image_result
 
     @functools.lru_cache
     def _get_venue_location(self, venue_id: str) -> str:

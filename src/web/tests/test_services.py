@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.utils import timezone
+
 from web import models, scrapers, services
 
 
@@ -32,6 +33,10 @@ class MockMeetupEventScraper(scrapers.Scraper[scrapers.EventScraperResult]):
                     models.Tag(value="Agile and Scrum"),
                     models.Tag(value="Python Web Development"),
                 ],
+                (
+                    "image_name",
+                    b"image.png",
+                ),
             )
 
         return (
@@ -48,6 +53,10 @@ class MockMeetupEventScraper(scrapers.Scraper[scrapers.EventScraperResult]):
                 models.Tag(value="Agile and Scrum"),
                 models.Tag(value="Python Web Development"),
             ],
+            (
+                "image_name",
+                b"image.png",
+            ),
         )
 
 
@@ -75,6 +84,30 @@ class TestMeetupService(TestCase):
         assert event.name == "Intro to Dagger"
         assert event.description == "Super cool intro to Dagger CI/CD!"
         assert event.external_id == MockMeetupEventScraper.EXTERNAL_ID
+        assert "image_name" in event.image.name
+
+    def test_image_is_not_reuploaded_when_contents_are_same(self):
+        # Arrange
+        models.TechGroup.objects.create(
+            name="Spokane Python User Group",
+            homepage="https://www.meetup.com/Python-Spokane/",
+        )
+
+        meetup_service = services.MeetupService(
+            MockMeetupHomepageScraper(),
+            MockMeetupEventScraper(),
+        )
+
+        # Act
+        meetup_service.save_events()
+        event1 = models.Event.objects.get()
+
+        meetup_service.save_events()
+        event2 = models.Event.objects.get()
+
+        # Assert
+        assert event1.pk == event2.pk
+        assert event1.image.name == event2.image.name
 
     def test_manually_applied_tags_are_not_overriden(self):
         # Arrange

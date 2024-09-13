@@ -7,7 +7,27 @@ import pytest
 import responses
 from django.test import TestCase
 
-from web import models, scrapers
+from web import scrapers
+
+BASE_DATA_DIR = pathlib.Path(__file__).parent / "data"
+
+
+def mock_response(
+    url: str,
+    filepath: pathlib.Path,
+) -> None:
+    with open(filepath) as fin:
+        body = fin.read()
+    responses.get(url, body=body)
+
+
+def mock_image_response(
+    url: str,
+    filepath: pathlib.Path,
+) -> None:
+    with open(filepath, "rb") as fin:
+        body = fin.read()
+    responses.get(url, body=body)
 
 
 class TestMeetupHomepageScraper(TestCase):
@@ -105,19 +125,13 @@ class TestMeetupEventScraper(TestCase):
     @responses.activate
     def test_scraper_without_json(self):
         # Arrange
-        fin = open(pathlib.Path(__file__).parent / "data" / "meetup-without-json.html")
-        body = fin.read()
-        fin.close()
-        responses.get(
+        mock_response(
             "https://www.meetup.com/python-spokane/events/298213205/",
-            body=body,
+            BASE_DATA_DIR / "meetup-without-json.html",
         )
-
-        with open(pathlib.Path(__file__).parent / "data" / "meetup-image.webp", "rb") as fin:
-            body = fin.read()
-        responses.get(
+        mock_image_response(
             "https://secure.meetupstatic.com/photos/event/1/0/a/e/600_519844270.webp?w=750",
-            body=body,
+            BASE_DATA_DIR / "meetup-image.webp",
         )
 
         # Act
@@ -158,16 +172,50 @@ class TestEventbriteScraper(TestCase):
     To run them, set the `EVENTBRITE_API_TOKEN` envrionment variable.
     """
 
+    @responses.activate
     def test_scraper(self):
-        scraper = scrapers.EventbriteScraper()
-        result = scraper.scrape("72020528223")
-        actual: models.Event = result[0][0]
-        assert actual.name == "Spring Cyber - Training Series"
-        assert actual.description and actual.description.startswith(
-            "<div>Deep Dive into Pen Testing with white hacker Casey Davis"
+        # Arrange
+        mock_response(
+            "https://www.eventbriteapi.com/v3/organizers/72020528223/events/",
+            BASE_DATA_DIR / "eventbrite" / "organizer_events.json",
         )
-        assert actual.date_time == datetime(2024, 5, 23, 16, 0, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
-        assert actual.duration == timedelta(hours=1, minutes=30)
-        assert actual.location == "2818 North Sullivan Road #Suite 100, Spokane Valley, WA 99216"
-        assert actual.url == "https://www.eventbrite.com/e/spring-cyber-training-series-tickets-860181354587"
-        assert actual.external_id == "860181354587"
+        mock_response(
+            "https://www.eventbriteapi.com/v3/venues/214450569/?expand=none",
+            BASE_DATA_DIR / "eventbrite" / "event_venue.json",
+        )
+        mock_response(
+            "https://www.eventbriteapi.com/v3/events/909447069667/description/",
+            BASE_DATA_DIR / "eventbrite" / "event_description.json",
+        )
+        mock_image_response(
+            "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F843746309%2F530357704049%2F1%2Foriginal.20240906-164727?auto=format%2Ccompress&q=75&sharp=10&s=09370c02bd3ab62907337f2e1ca8a61d",
+            BASE_DATA_DIR / "eventbrite" / "event_image.jpg",
+        )
+
+        # Act
+        scraper = scrapers.EventbriteScraper()
+        organization_id = "72020528223"
+        result = scraper.scrape(organization_id)
+
+        # Assert
+        event, tags, image_result = result[0]
+        assert event.name == "3rd Annual - INCH360 Regional Cybersecurity Conference"
+        assert event.description
+        assert event.description.startswith("<div>Full Day of Panels, Speakers and Vendors on Cybersecurity,")
+        assert event.date_time == datetime(2024, 10, 2, 8, 30, 0, tzinfo=ZoneInfo("America/Los_Angeles"))
+        assert event.duration == timedelta(hours=7, minutes=30)
+        assert event.location == "702 East Desmet Avenue, Spokane, WA 99202"
+        assert (
+            event.url
+            == "https://www.eventbrite.com/e/3rd-annual-inch360-regional-cybersecurity-conference-tickets-909447069667"
+        )
+        assert event.external_id == "909447069667"
+
+        assert not tags
+
+        assert image_result
+        assert (
+            image_result[0]
+            == "https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F843746309%2F530357704049%2F1%2Foriginal.20240906-164727"
+        )
+        assert len(image_result[1]) > 0

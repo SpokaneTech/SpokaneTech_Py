@@ -1,0 +1,25 @@
+{
+  "address": {
+    "address_1": "702 East Desmet Avenue",
+    "address_2": "",
+    "city": "Spokane",
+    "region": "WA",
+    "postal_code": "99202",
+    "country": "US",
+    "latitude": "47.6672448",
+    "longitude": "-117.3999126",
+    "localized_address_display": "702 East Desmet Avenue, Spokane, WA 99202",
+    "localized_area_display": "Spokane, WA",
+    "localized_multi_line_address_display": [
+      "702 East Desmet Avenue",
+      "Spokane, WA 99202"
+    ]
+  },
+  "resource_uri": "https://www.eventbriteapi.com/v3/venues/214450569/",
+  "id": "214450569",
+  "age_restriction": null,
+  "capacity": null,
+  "name": "John J. Hemmingson Center",
+  "latitude": "47.6672448",
+  "longitude": "-117.3999126"
+}
