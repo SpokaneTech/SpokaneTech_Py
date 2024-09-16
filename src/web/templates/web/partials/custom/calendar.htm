@@ -1,5 +1,10 @@
     
-<div id="calendar-wrapper">
+<section class="about">
+    <h1 class="fade-in-blur mb-2" style="--fade-duration: 0.3s;">{{ title }}</h1>
+    <h4 class="text-primary fade-in-blur" style="--fade-duration: 0.4s;">{{ month_name }} {{ year }}</h1>
+</section>    
+
+<div id="calendar-wrapper" class="calendar-container">
     <style>
         .calendar-table {
             box-shadow: 0rem 0.25rem 1rem -0.25rem var(--accent-color);
@@ -57,10 +62,6 @@
     </style>  
 
     <div class="container-fluid fade-in-blur" style="--fade-duration: .5s;">
-        <div class="h2 mt-5 text-primary text-center fw-bold">{{ title }}</div>
-        <div class="h4 mb-3 text-secondary text-center">{{ month_name }} {{ year }}</div>
-    </div>
-    <div class="container-fluid fade-in-blur" style="--fade-duration: .75s;">
         <div class="text-end nav-links">
             <a 
             {% if use_htmx %}

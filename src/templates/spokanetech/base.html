@@ -23,7 +23,8 @@
     <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/blur_group.min.css' %}">
     <link rel="stylesheet" href="{% static 'node_modules/fun-effects/dist/css/background_icons.min.css' %}">
     
-    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script type="text/javascript" src="{% static 'node_modules/htmx.org/dist/htmx.min.js' %}"></script>
+
 
 </head>
 <body>
@@ -41,8 +42,11 @@
                 <li><a href="" hx-get="{% url 'web:get_techevents' display='list' %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="List upcoming events">
                     <i class="fa-solid fa-list-check"></i></a>
                 </li>
-                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" title="calendar" class="tippy-tooltip" data-tippy-content="Calendar of events">
+                <li><a hx-get="{% url 'web:event_calendar' year=0 month=0 %}" hx-target="#body_main" hx-push-url="true" class="tippy-tooltip" data-tippy-content="Calendar of events">
                   <i class="fa-solid fa-calendar-days"></i></a>
+                </li>
+                <li><a href="" class="tippy-tooltip" data-tippy-content="Log in or sign up">
+                    <i class="fa-solid fa-right-to-bracket"></i></a>
                 </li>
             </ul>
         </nav>

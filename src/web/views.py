@@ -12,7 +12,7 @@ from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from handyhelpers.mixins.view_mixins import HtmxViewMixin, FilterByQueryParamsMixin
-from handyhelpers.views.calendar import CalendarView
+from handyhelpers.views.calendar import HtmxCalendarView 
 from handyhelpers.views.gui import (
     HandyHelperIndexView,
     HandyHelperListPlusFilterView,
@@ -189,13 +189,15 @@ class UpdateTechGroup(RequireStaffMixin, UpdateView):
     form_class = forms.TechGroupForm
 
 
-class EventCalendarView(CalendarView):
+class EventCalendarView(HtmxCalendarView):
     """Render a monthly calendar view of events"""
     title = "Spokane Tech Event Calendar"
     event_model = Event
     event_model_date_field = "date_time"
     event_detail_url = "web:techevent_modal"
-    template_name = "web/partials/custom/calendar.htm"
+    # template_name = "web/partials/custom/calendar.htm"
+    htmx_template_name = "web/partials/custom/calendar.htm"
+    template_name = "web/full/custom/calendar.html"
 
 
 class FilterListView(View):

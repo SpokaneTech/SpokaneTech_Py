@@ -459,3 +459,12 @@ footer .copyright {
 .btn-close {
     filter: invert(100%);
 }
+
+
+.calendar-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3rem;
+    padding: 3rem;
+  }
