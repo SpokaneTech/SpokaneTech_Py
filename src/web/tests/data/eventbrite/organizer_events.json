@@ -1,0 +1,83 @@
+{
+  "pagination": {
+    "object_count": 1,
+    "page_number": 1,
+    "page_size": 50,
+    "page_count": 1,
+    "has_more_items": false
+  },
+  "events": [
+    {
+      "name": {
+        "text": "3rd Annual - INCH360 Regional Cybersecurity Conference",
+        "html": "3rd Annual - INCH360 Regional Cybersecurity Conference"
+      },
+      "description": {
+        "text": "Full Day of Panels, Speakers and Vendors on Cybersecurity, AI and Compliance. FREE with pre-registration - space limited  - Oct 2, 2024",
+        "html": "Full Day of Panels, Speakers and Vendors on Cybersecurity, AI and Compliance. FREE with pre-registration - space limited  - Oct 2, 2024"
+      },
+      "url": "https://www.eventbrite.com/e/3rd-annual-inch360-regional-cybersecurity-conference-tickets-909447069667",
+      "start": {
+        "timezone": "America/Los_Angeles",
+        "local": "2024-10-02T08:30:00",
+        "utc": "2024-10-02T15:30:00Z"
+      },
+      "end": {
+        "timezone": "America/Los_Angeles",
+        "local": "2024-10-02T16:00:00",
+        "utc": "2024-10-02T23:00:00Z"
+      },
+      "organization_id": "1773924472233",
+      "created": "2024-05-19T22:29:10Z",
+      "changed": "2024-09-06T16:49:53Z",
+      "published": "2024-05-20T20:03:26Z",
+      "capacity": null,
+      "capacity_is_custom": null,
+      "status": "live",
+      "currency": "USD",
+      "listed": true,
+      "shareable": true,
+      "online_event": false,
+      "tx_time_limit": 1200,
+      "hide_start_date": false,
+      "hide_end_date": false,
+      "locale": "en_US",
+      "is_locked": false,
+      "privacy_setting": "unlocked",
+      "is_series": false,
+      "is_series_parent": false,
+      "inventory_type": "limited",
+      "is_reserved_seating": false,
+      "show_pick_a_seat": false,
+      "show_seatmap_thumbnail": false,
+      "show_colors_in_seatmap_thumbnail": false,
+      "source": "auto_create",
+      "is_free": true,
+      "version": null,
+      "summary": "Full Day of Panels, Speakers and Vendors on Cybersecurity, AI and Compliance. FREE with pre-registration - space limited  - Oct 2, 2024",
+      "facebook_event_id": null,
+      "logo_id": "843746309",
+      "organizer_id": "72020528223",
+      "venue_id": "214450569",
+      "category_id": "102",
+      "subcategory_id": "2004",
+      "format_id": "2",
+      "id": "909447069667",
+      "resource_uri": "https://www.eventbriteapi.com/v3/events/909447069667/",
+      "is_externally_ticketed": false,
+      "logo": {
+        "crop_mask": null,
+        "original": {
+          "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F843746309%2F530357704049%2F1%2Foriginal.20240906-164727?auto=format%2Ccompress&q=75&sharp=10&s=09370c02bd3ab62907337f2e1ca8a61d",
+          "width": 6912,
+          "height": 3456
+        },
+        "id": "843746309",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F843746309%2F530357704049%2F1%2Foriginal.20240906-164727?h=200&w=450&auto=format%2Ccompress&q=75&sharp=10&s=4b5f5340dcfe0cc78bec9f19b08f45f7",
+        "aspect_ratio": "2",
+        "edge_color": "#516c79",
+        "edge_color_set": true
+      }
+    }
+  ]
+}
