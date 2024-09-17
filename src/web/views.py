@@ -1,9 +1,10 @@
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Prefetch
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
@@ -20,8 +21,15 @@ from handyhelpers.views.gui import (
 )
 from handyhelpers.views.htmx import BuildBootstrapModalView, BuildModelSidebarNav
 
-from web import forms
+from web import forms, tasks
 from web.models import Event, TechGroup
+
+
+@require_http_methods(["POST"])
+@user_passes_test(lambda user: user.is_authenticated and user.is_staff)
+def scrape(request: HttpRequest) -> HttpResponse:
+    result = tasks.scrape.enqueue()
+    return JsonResponse({"result": result.id})
 
 
 @require_http_methods(["POST"])

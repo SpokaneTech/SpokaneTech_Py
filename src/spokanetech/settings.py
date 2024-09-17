@@ -84,6 +84,8 @@ INSTALLED_APPS = [
     "storages",
     "django_celery_results",
     "django_celery_beat",
+    "django_tasks",
+    "django_tasks.backends.database",
     "django_filters",
     "crispy_forms",
     "crispy_bootstrap5",
@@ -137,13 +139,17 @@ WSGI_APPLICATION = "spokanetech.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default="sqlite:///db.sqlite3",
-        conn_max_age=600,
-        conn_health_checks=True,
-    ),
-}
+default_db = dj_database_url.config(
+    default="sqlite:///db.sqlite3",
+    conn_max_age=600,
+    conn_health_checks=True,
+)
+
+# Required by django_tasks
+default_db.setdefault("OPTIONS", {})
+default_db["OPTIONS"]["transaction_mode"] = "EXCLUSIVE"  # type: ignore
+
+DATABASES = {"default": default_db}
 
 
 # Password validation
@@ -227,6 +233,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PROJECT_NAME = "Spokane Tech"
 PROJECT_DESCRIPTION = """Community resource for all things tech in the Spokane and CDA area"""
 PROJECT_VERSION = "0.0.1"
+
+
+# Tasks
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.database.DatabaseBackend",
+    },
+}
 
 
 # Celery

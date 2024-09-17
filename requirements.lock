@@ -93,6 +93,8 @@ django==5.0.8
     #   django-handyhelpers
     #   django-markdownify
     #   django-storages
+    #   django-stubs-ext
+    #   django-tasks
     #   django-timezone-field
     #   djangorestframework
     #   sentry-sdk
@@ -115,6 +117,10 @@ django-handyhelpers==0.3.26
 django-markdownify==0.9.5
     # via spokanetech (pyproject.toml)
 django-storages==1.14.4
+    # via spokanetech (pyproject.toml)
+django-stubs-ext==5.0.4
+    # via django-tasks
+django-tasks==0.4.0
     # via spokanetech (pyproject.toml)
 django-timezone-field==7.0
     # via django-celery-beat
@@ -246,6 +252,8 @@ typing-extensions==4.12.2
     #   azure-storage-blob
     #   beautifulsoup4
     #   dj-database-url
+    #   django-stubs-ext
+    #   django-tasks
     #   psycopg
 tzdata==2024.1
     # via

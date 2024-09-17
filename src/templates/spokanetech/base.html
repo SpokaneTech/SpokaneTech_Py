@@ -11,6 +11,14 @@
 {% endblock favicon %}
 
 {% block app_javascript %}
+<script>
+  document.body.addEventListener('htmx:afterRequest', function(event) {
+    if (event.detail.pathInfo.requestPath === "{% url 'web:scrape' %}") {
+      console.log(event.detail.xhr.responseText);  // Logs the response from the server
+    }
+  });
+</script>
+
 {% comment %}
 <script>
   const TIMEZONE_ID = "TIMEZONE_ID"

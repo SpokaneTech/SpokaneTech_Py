@@ -31,6 +31,7 @@ dependencies = [
     "sentry-sdk[celery,django]>=2.1.1",
     "sqlparse>=0.4.4",
     "pillow>=10.4.0",
+    "django-tasks",
 ]
 
 [project.optional-dependencies]

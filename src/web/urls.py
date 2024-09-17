@@ -7,6 +7,7 @@ app_name = "web"
 urlpatterns = [
     path("", views.Index.as_view(), name="index"),
     path("set_timezone/", views.set_timezone, name="set_timezone"),
+    path("scrape/", views.scrape, name="scrape"),
     path("events", views.ListEvents.as_view(), name="list_events"),
     path("groups", views.ListTechGroup.as_view(), name="list_tech_groups"),
     path("groups/add", views.CreateTechGroup.as_view(), name="add_tech_group"),

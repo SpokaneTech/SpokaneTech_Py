@@ -29,6 +29,16 @@
           <i class="fa-regular fa-sun"></i>
         </a>
       </li>
+      <li class="nav-item mx-2">
+        <a href="#" class="nav-link" title="Trigger scraping events"
+          hx-post="{% url 'web:scrape' %}"
+          hx-swap="none"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          htmx:afterRequest
+        >
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </a>
+      </li>
     </ul>
   </div>
 </nav>

@@ -16,6 +16,17 @@
       "justMyCode": false
     },
     {
+      "name": "django: tasks",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "manage",
+      "args": ["db_worker", "-v", "3"],
+      "cwd": "${workspaceFolder}/src",
+      "console": "internalConsole",
+      "django": true,
+      "justMyCode": false
+    },
+    {
       "name": "celery",
       "type": "debugpy",
       "request": "launch",
