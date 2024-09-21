@@ -6,15 +6,16 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView
-from handyhelpers.views.calendar import HtmxCalendarView 
-from handyhelpers.views.htmx import (ModelDetailBootstrapModalView, 
-    HtmxOptionView, 
-    HtmxOptionDetailView, 
-    HtmxOptionMultiFilterView)
+from handyhelpers.views.calendar import HtmxCalendarView
+from handyhelpers.views.htmx import (
+    ModelDetailBootstrapModalView,
+    HtmxOptionView,
+    HtmxOptionDetailView,
+    HtmxOptionMultiFilterView,
+)
 
 from web import forms
 from web.models import Event, TechGroup
-
 
 
 class CanEditMixin:
@@ -86,6 +87,7 @@ class UpdateTechGroup(RequireStaffMixin, UpdateView):
 
 class EventCalendarView(HtmxCalendarView):
     """Render a monthly calendar view of events"""
+
     title = "Spokane Tech Event Calendar"
     event_model = Event
     event_model_date_field = "date_time"
@@ -96,25 +98,29 @@ class EventCalendarView(HtmxCalendarView):
 
 class GetAboutContent(HtmxOptionView):
     """Render the 'about' page"""
-    htmx_template_name = "web/partials/custom/about.htm" 
+
+    htmx_template_name = "web/partials/custom/about.htm"
     template_name = "web/full/custom/about.html"
 
 
 class GetIndexContent(HtmxOptionView):
     """Render the index page"""
-    htmx_template_name = "web/partials/custom/index.htm" 
+
+    htmx_template_name = "web/partials/custom/index.htm"
     template_name = "web/full/custom/index.html"
 
 
 class GetTechEvent(HtmxOptionDetailView):
     """Get details of an Event instance"""
+
     model = Event
-    htmx_template_name = "web/partials/detail/event.htm" 
+    htmx_template_name = "web/partials/detail/event.htm"
     template_name = "web/full/detail/event.html"
 
 
 class GetTechEvents(HtmxOptionMultiFilterView):
     """Get a list of Event entries"""
+
     template_name = "web/full/list/events.html"
     htmx_index_template_name = "web/partials/marquee/event_cards.htm"
     htmx_list_template_name = "web/partials/list/events.htm"
@@ -123,6 +129,7 @@ class GetTechEvents(HtmxOptionMultiFilterView):
 
 class GetTechEventModal(ModelDetailBootstrapModalView):
     """Get details of an Event instance and display in a modal"""
+
     modal_button_submit = None
     modal_title = "Event Info"
     modal_template = "web/partials/modal/event_information.htm"
@@ -130,14 +137,16 @@ class GetTechEventModal(ModelDetailBootstrapModalView):
 
 
 class GetTechGroup(HtmxOptionDetailView):
-    """Get details of a TechGroup instance """
+    """Get details of a TechGroup instance"""
+
     model = TechGroup
-    htmx_template_name = "web/partials/detail/group.htm" 
+    htmx_template_name = "web/partials/detail/group.htm"
     template_name = "web/full/detail/group.html"
 
 
 class GetTechGroups(HtmxOptionMultiFilterView):
     """Get a list of TechGroup entries"""
+
     template_name = "web/full/list/groups.html"
     htmx_index_template_name = "web/partials/marquee/group_cards.htm"
     htmx_list_template_name = "web/partials/list/groups.htm"
@@ -146,6 +155,7 @@ class GetTechGroups(HtmxOptionMultiFilterView):
 
 class GetTechGroupModal(ModelDetailBootstrapModalView):
     """get details of a TechGroup instance and display in a modal"""
+
     modal_button_submit = None
     modal_title = "Group Info"
     modal_template = "web/partials/modal/group_information.htm"
