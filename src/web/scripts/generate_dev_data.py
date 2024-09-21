@@ -1,4 +1,4 @@
-from web.models import Event, Tag, TechGroup
+from web.models import TechGroup
 
 
 

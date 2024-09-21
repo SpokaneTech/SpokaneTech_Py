@@ -2,27 +2,14 @@ from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models import Prefetch
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
-from django.template import loader
-from django.urls import reverse, reverse_lazy
+from django.http import HttpRequest
+from django.urls import reverse
 from django.utils import timezone
-from django.views import View
-from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
-from handyhelpers.mixins.view_mixins import HtmxViewMixin, FilterByQueryParamsMixin
+from django.views.generic import CreateView, UpdateView
 from handyhelpers.views.calendar import HtmxCalendarView 
-from handyhelpers.views.gui import (
-    HandyHelperIndexView,
-    HandyHelperListPlusFilterView,
-    HandyHelperListView,
-)
 from handyhelpers.views.htmx import (ModelDetailBootstrapModalView, 
-    BuildBootstrapModalView,
     HtmxOptionView, 
     HtmxOptionDetailView, 
-    HtmxOptionMultiView,
     HtmxOptionMultiFilterView)
 
 from web import forms
