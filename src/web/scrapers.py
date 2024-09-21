@@ -3,13 +3,14 @@ import json
 import pathlib
 import re
 import urllib.parse
+import zoneinfo
 from datetime import datetime, timedelta
 from typing import Any, Protocol, TypeAlias, TypeVar
 
 import eventbrite.access_methods
 import requests
-import zoneinfo
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 from django.conf import settings
 from django.utils import timezone
 from eventbrite import Eventbrite
@@ -26,7 +27,7 @@ def get_venue(self, id, **data):
 
 
 def get_event_description(self, id, **data):
-    return self.get("/events/{0}/description//".format(id), data=data)
+    return self.get("/events/{0}/description/".format(id), data=data)
 
 
 setattr(eventbrite.access_methods.AccessMethodsMixin, "get_venue", get_venue)
@@ -39,10 +40,23 @@ class Scraper(Protocol[ST]):
         ...
 
 
-EventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag]]
+ImageResult: TypeAlias = tuple[str, bytes]
+EventScraperResult: TypeAlias = tuple[models.Event, list[models.Tag], ImageResult | None]
 
 
-class MeetupScraperMixin:
+class ScraperMixin:
+    def _get_image(self, image_url: str) -> ImageResult:
+        image_name = self._parse_image_name(image_url)
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        image = response.content
+        return image_name, image
+
+    def _parse_image_name(self, image_url: str) -> str:
+        return image_url.rsplit("/", maxsplit=1)[-1].split("?", maxsplit=1)[0]
+
+
+class MeetupScraperMixin(ScraperMixin):
     """Common Meetup scraping functionality."""
 
     def _parse_apollo_state(self, soup: BeautifulSoup) -> dict:
@@ -84,8 +98,8 @@ class MeetupHomepageScraper(MeetupScraperMixin, Scraper[list[str]]):
         else:
             upcoming_section = soup.find_all(id="upcoming-section")[0]
             events = upcoming_section.find_all_next(id=re.compile(r"event-card-"))
-            filtered_event_containers = [event for event in events if self._filter_event_tag(event)]
-            event_urls = [event_container["href"] for event_container in filtered_event_containers]
+            filtered_event_containers: list[Tag] = [event for event in events if self._filter_event_tag(event)]  # type: ignore
+            event_urls: list[str] = [event_container["href"] for event_container in filtered_event_containers]  # type: ignore
 
         return [url for url in event_urls if self._filter_repeating_events(url)]
 
@@ -136,6 +150,8 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
             external_id = event_json["id"]
+            event_photo = event_json["featuredEventPhoto"]["__ref"]
+            image_url = apollo_state[event_photo].get("highResUrl", apollo_state[event_photo]["baseUrl"])
         except KeyError:
             name = self._parse_name(soup)
             description = self._parse_description(soup)
@@ -143,20 +159,22 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
             duration = self._parse_duration(soup)
             location = self._parse_location(soup)
             external_id = self._parse_external_id(url)
+            image_url = self._parse_image(soup)
+
+        if image_url:
+            image_result = self._get_image(image_url)
 
         tags = self._parse_tags(soup)
-        return (
-            models.Event(
-                name=name,
-                description=description,
-                date_time=date_time,
-                duration=duration,
-                location=location,
-                external_id=external_id,
-                url=url,
-            ),
-            tags,
+        event = models.Event(
+            name=name,
+            description=description,
+            date_time=date_time,
+            duration=duration,
+            location=location,
+            external_id=external_id,
+            url=url,
         )
+        return (event, tags, image_result)
 
     def _parse_name(self, soup: BeautifulSoup) -> str:
         name: str = soup.find_all("h1")[0].text
@@ -171,10 +189,16 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         return description
 
     def _parse_date_time(self, soup: BeautifulSoup) -> datetime:
-        return datetime.fromisoformat(soup.find_all("time")[0]["datetime"])
+        time: Tag | None = soup.find("time")  # type: ignore
+        if not time:
+            raise ValueError("could not find time")
+        dt: str = time["datetime"]  # type: ignore
+        return datetime.fromisoformat(dt)
 
     def _parse_duration(self, soup: BeautifulSoup) -> timedelta:
-        time: Tag = soup.find_all("time")[0]
+        time: Tag | None = soup.find("time")  # type: ignore
+        if not time:
+            raise ValueError("could not find time")
         matches = self.DURATION_PATTERN.findall(time.text)
         if not matches:
             raise ValueError("Could not find duration from:", time.text)
@@ -199,8 +223,18 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         tags = [re.sub(r"\s+", " ", t.text) for t in tags]  # Some tags have newlines & extra spaces
         return [models.Tag(value=t) for t in tags]
 
+    def _parse_image(self, soup: BeautifulSoup) -> str | None:
+        picture = soup.find(attrs={"data-testid": "event-description-image"})
+        if not picture:
+            return None
+        img: Tag | None = picture.find("img")  # type: ignore
+        if not img:
+            return None
+        src: str = img["src"]  # type: ignore
+        return src
 
-class EventbriteScraper(Scraper[list[EventScraperResult]]):
+
+class EventbriteScraper(ScraperMixin, Scraper[list[EventScraperResult]]):
     def __init__(self, api_token: str | None = None):
         self.client = Eventbrite(api_token or settings.EVENTBRITE_API_TOKEN)
         self._location_by_venue_id: dict[str, str] = {}
@@ -209,11 +243,12 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         response = self.client.get_organizer_events(
             organization_id,
             status="live",
+            expand="logo",
         )
-        events_and_tags = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
-        return events_and_tags
+        results = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
+        return results
 
-    def map_to_event(self, eventbrite_event: dict) -> tuple[models.Event, list[models.Tag]]:
+    def map_to_event(self, eventbrite_event: dict) -> EventScraperResult:
         name = eventbrite_event["name"]["text"]
         start = datetime.fromisoformat(eventbrite_event["start"]["utc"])
         end = datetime.fromisoformat(eventbrite_event["end"]["utc"])
@@ -229,6 +264,16 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         except requests.RequestException:
             # short description
             description = eventbrite_event["description"]["html"]
+
+        try:
+            image_url = eventbrite_event["logo"]["original"]["url"]
+            image_result = self._get_image(image_url)
+        except (KeyError, requests.HTTPError):
+            try:
+                image_url = eventbrite_event["logo"]["url"]
+                image_result = self._get_image(image_url)
+            except KeyError:
+                image_result = None
 
         event = models.Event(
             name=name,
@@ -249,7 +294,7 @@ class EventbriteScraper(Scraper[list[EventScraperResult]]):
         # if subcategory_name:
         #     tags.append(models.Tag(value=subcategory_name))
 
-        return event, []
+        return event, [], image_result
 
     @functools.lru_cache
     def _get_venue_location(self, venue_id: str) -> str:
