@@ -12,6 +12,10 @@ asgiref==3.8.1
     # via
     #   spokanetech (pyproject.toml)
     #   django
+async-timeout==4.0.3
+    # via
+    #   aiohttp
+    #   redis
 attrs==24.2.0
     # via aiohttp
 azure-common==1.1.28
@@ -110,7 +114,7 @@ django-crispy-forms==2.3
     #   crispy-bootstrap5
 django-filter==24.3
     # via djangorestframework-filters
-django-handyhelpers==0.3.26
+django-handyhelpers==0.3.28
     # via spokanetech (pyproject.toml)
 django-markdownify==0.9.5
     # via spokanetech (pyproject.toml)
@@ -242,6 +246,7 @@ tornado==6.4.1
     # via flower
 typing-extensions==4.12.2
     # via
+    #   asgiref
     #   azure-core
     #   azure-storage-blob
     #   beautifulsoup4
