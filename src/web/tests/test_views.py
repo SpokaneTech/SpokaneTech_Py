@@ -15,102 +15,100 @@ from model_bakery import baker
 from web.models import Event, TechGroup
 
 
-# class TestCreateEvent(TestCase):
-#     def test_suggest_event_redirects_and_sets_unapproved(self):
-#         # Act
-#         response = self.client.post(
-#             reverse("web:add_event"),
-#             {
-#                 "name": "Event",
-#                 "description": "",
-#                 "date_time": "2024-04-08T07:00",
-#                 "end_time": "2024-04-08T08:00",
-#                 "approved_at": "",
-#                 "location": "",
-#                 "url": "",
-#                 "external_id": "",
-#                 "group": "",
-#             },
-#         )
+class TestCreateEvent(TestCase):
+    def test_suggest_event_redirects_and_sets_unapproved(self):
+        # Act
+        response = self.client.post(
+            reverse("web:add_event"),
+            {
+                "name": "Event",
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
 
-#         # Assert
-#         assert response.status_code == 302
-#         assert response.url == reverse("web:list_events")
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:get_events")
 
-#         actual = Event.all.get()
-#         assert actual.approved_at is None
+        actual = Event.all.get()
+        assert actual.approved_at is None
 
 
-# class TestUpdateEvent(TestCase):
-#     def test_update_event_sets_right_date_time(self):
-#         # Arrange
-#         object: Event = baker.make(Event, approved_at=timezone.localtime())
+class TestUpdateEvent(TestCase):
+    def test_update_event_sets_right_date_time(self):
+        # Arrange
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
 
-#         timezone_str = "America/Los_Angeles"
+        timezone_str = "America/Los_Angeles"
 
-#         user_cls = get_user_model()
-#         user = user_cls()
-#         user.is_staff = True  # type: ignore
-#         user.save()
+        user_cls = get_user_model()
+        user = user_cls()
+        user.is_staff = True  # type: ignore
+        user.save()
 
-#         # set user TZ
-#         self.client.post(reverse("web:set_timezone"), {"timezone": timezone_str})
-#         response = self.client.get(reverse("web:list_events"))
-#         assert response.status_code == 200
+        response = self.client.get(reverse("web:get_events"))
+        assert response.status_code == 200
 
-#         # Act
-#         self.client.force_login(user)
-#         response = self.client.post(
-#             reverse("web:update_event", args=(object.pk,)),
-#             {
-#                 "name": object.name,
-#                 "description": "",
-#                 "date_time": "2024-04-08T07:00",
-#                 "end_time": "2024-04-08T08:00",
-#                 "approved_at": "2024-04-08T07:00",
-#                 "location": "",
-#                 "url": "",
-#                 "external_id": "",
-#                 "group": "",
-#             },
-#         )
+        # Act
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("web:update_event", args=(object.pk,)),
+            {
+                "name": object.name,
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "2024-04-08T07:00",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
 
-#         # Assert
-#         assert response.status_code == 302
+        # Assert
+        assert response.status_code == 302
 
-#         object.refresh_from_db()
-#         tz_zoneinfo = zoneinfo.ZoneInfo(timezone_str)
-#         assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=tz_zoneinfo)
+        object.refresh_from_db()
+        tz_zoneinfo = zoneinfo.ZoneInfo(timezone_str)
+        assert object.date_time == datetime.datetime(2024, 4, 8, 7, tzinfo=tz_zoneinfo)
 
-#     def test_update_event_remove_approved_at_redirects_to_list(self):
-#         # Arrange
-#         object: Event = baker.make(Event, approved_at=timezone.localtime())
+    def test_update_event_remove_approved_at_redirects_to_list(self):
+        # Arrange
+        object: Event = baker.make(Event, approved_at=timezone.localtime())
 
-#         user_cls = get_user_model()
-#         user = user_cls()
-#         user.is_staff = True  # type: ignore
-#         user.save()
+        user_cls = get_user_model()
+        user = user_cls()
+        user.is_staff = True  # type: ignore
+        user.save()
 
-#         # Act
-#         self.client.force_login(user)
-#         response = self.client.post(
-#             reverse("web:update_event", args=(object.pk,)),
-#             {
-#                 "name": object.name,
-#                 "description": "",
-#                 "date_time": "2024-04-08T07:00",
-#                 "end_time": "2024-04-08T08:00",
-#                 "approved_at": "",
-#                 "location": "",
-#                 "url": "",
-#                 "external_id": "",
-#                 "group": "",
-#             },
-#         )
+        # Act
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("web:update_event", args=(object.pk,)),
+            {
+                "name": object.name,
+                "description": "",
+                "date_time": "2024-04-08T07:00",
+                "end_time": "2024-04-08T08:00",
+                "approved_at": "",
+                "location": "",
+                "url": "",
+                "external_id": "",
+                "group": "",
+            },
+        )
 
-#         # Assert
-#         assert response.status_code == 302
-#         assert response.url == reverse("web:list_events")
+        # Assert
+        assert response.status_code == 302
+        assert response.url == reverse("web:get_events")
 
 
 class TestIndexView(TestCase):
@@ -178,7 +176,7 @@ class TestGetTechEventView(TestCase):
         super(TestGetTechEventView, self).setUp()
         self.instance = baker.make("web.Event", approved_at=timezone.localtime())
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
-        self.url = reverse("web:get_techevent", kwargs={"pk": self.instance.pk})
+        self.url = reverse("web:get_event", kwargs={"pk": self.instance.pk})
 
     def test_get(self):
         """verify call to GetTechEvent view with a non-htmx call"""
@@ -202,14 +200,14 @@ class TestGetTechEventsView(TestCase):
 
     def test_get(self):
         """verify call to GetTechEvents view with a non-htmx call"""
-        url = reverse("web:get_techevents")
+        url = reverse("web:get_events")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/full/list/events.html")
 
     def test_get_htmx_index(self):
         """verify call to GetTechEvents view with a htmx call"""
-        url = reverse("web:get_techevents", kwargs={"display": "index"})
+        url = reverse("web:get_events", kwargs={"display": "index"})
         response = self.client.get(url, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/marquee/event_cards.htm")
@@ -217,7 +215,7 @@ class TestGetTechEventsView(TestCase):
 
     def test_get_htmx_list(self):
         """verify call to GetTechEvents view with a htmx call"""
-        url = reverse("web:get_techevents", kwargs={"display": "list"})
+        url = reverse("web:get_events", kwargs={"display": "list"})
         response = self.client.get(url, **self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "web/partials/list/events.htm")

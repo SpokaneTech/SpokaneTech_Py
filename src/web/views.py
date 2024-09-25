@@ -59,7 +59,7 @@ class CreateEvent(CreateView):
                 "code of conduct.</a>",
                 extra_tags="safe",
             )
-            return reverse("web:list_events")
+            return reverse("web:get_events")
         return super().get_success_url()
 
 
@@ -71,7 +71,7 @@ class UpdateEvent(RequireStaffMixin, UpdateView):
 
     def get_success_url(self) -> str:
         if self.object.approved_at is None:
-            return reverse("web:list_events")
+            return reverse("web:get_events")
         return super().get_success_url()
 
 
