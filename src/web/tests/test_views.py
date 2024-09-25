@@ -2,17 +2,13 @@ import datetime
 import zoneinfo
 from typing import Any
 
-import freezegun
-import pytest
-from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
 
-from web.models import Event, TechGroup
+from web.models import Event
 
 
 class TestCreateEvent(TestCase):
