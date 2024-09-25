@@ -1,7 +1,0 @@
-{% extends 'spokanetech/base.html' %}
-{% load crispy_forms_tags %}
-
-{% block content %}
-{% if object %}<h1>Edit Tech Group</h1>{% else %}<h1>Add Tech Group</h1>{% endif %}
-{% crispy form form.helper %}
-{% endblock content %}

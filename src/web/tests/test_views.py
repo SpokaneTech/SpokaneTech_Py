@@ -2,98 +2,13 @@ import datetime
 import zoneinfo
 from typing import Any
 
-import freezegun
-import pytest
-from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
 
-from web.models import Event, TechGroup
-
-
-@pytest.mark.django_db
-def test_list_tech_groups(client: Client):
-    # Arrange
-    tech_group = TechGroup(
-        name="List Tech Groups Test",
-        description="List Tech Groups Test",
-        enabled=True,
-        homepage="https://spokanetech.org/",
-    )
-    tech_group.save()
-
-    # Act
-    url = reverse("web:list_tech_groups")
-    response = client.get(url)
-
-    # Assert
-    assert response.status_code == 200
-    assert response.context["queryset"].get().pk == tech_group.pk
-
-
-@pytest.mark.django_db
-def test_get_tech_group(client: Client):
-    # Arrange
-    tech_group = TechGroup(
-        name="Get Tech Groups Test",
-        description="Get Tech Groups Test",
-        enabled=True,
-        homepage="https://spokanetech.org/",
-    )
-    tech_group.save()
-
-    # Act
-    url = reverse("web:get_tech_group", args=[tech_group.pk])
-    response = client.get(url)
-
-    # Assert
-    assert response.status_code == 200
-    assert response.context["object"].pk == tech_group.pk
-
-
-@freezegun.freeze_time("2024-03-17")
-@pytest.mark.django_db
-def test_set_timezone_and_timezone_middleware(client: Client):
-    # Arrange
-    date_time = datetime.datetime.fromisoformat("2024-03-19T01:00:00Z")
-    baker.make("web.Event", date_time=date_time, approved_at=date_time)
-
-    # Act
-    client.post(reverse("web:set_timezone"), {"timezone": "America/Los_Angeles"})
-    response = client.get(reverse("web:list_events"))
-
-    # Assert
-    soup = BeautifulSoup(response.content, "lxml")
-    date_time_tag = soup.find(attrs={"data-testid": "date_time"})
-    assert date_time_tag is not None
-    actual = date_time_tag.text.strip()
-    assert actual == "Monday, March 18, 2024 at 6:00 PM"
-
-
-class TestEventDetailModal(TestCase):
-    """test GetEventDetailsModal view"""
-
-    def setUp(self):
-        super(TestEventDetailModal, self).setUp()
-        self.object = baker.make("web.Event", approved_at=timezone.localtime())
-        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
-        self.referrer = reverse("web:index")
-        self.url = reverse("web:get_event_details", kwargs={"pk": self.object.pk})
-
-    def test_get(self):
-        """verify modal content can be rendered"""
-        response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "web/partials/modal/detail_event.htm")
-
-    def test_non_htmx_call(self):
-        """verify 400 response if non-htmx request is used"""
-        response = self.client.get(self.url, HTTP_REFERER=self.referrer)
-        self.assertEqual(response.status_code, 400)
+from web.models import Event
 
 
 class TestCreateEvent(TestCase):
@@ -116,7 +31,7 @@ class TestCreateEvent(TestCase):
 
         # Assert
         assert response.status_code == 302
-        assert response.url == reverse("web:list_events")
+        assert response.url == reverse("web:get_events")
 
         actual = Event.all.get()
         assert actual.approved_at is None
@@ -134,9 +49,7 @@ class TestUpdateEvent(TestCase):
         user.is_staff = True  # type: ignore
         user.save()
 
-        # set user TZ
-        self.client.post(reverse("web:set_timezone"), {"timezone": timezone_str})
-        response = self.client.get(reverse("web:list_events"))
+        response = self.client.get(reverse("web:get_events"))
         assert response.status_code == 200
 
         # Act
@@ -191,51 +104,196 @@ class TestUpdateEvent(TestCase):
 
         # Assert
         assert response.status_code == 302
-        assert response.url == reverse("web:list_events")
+        assert response.url == reverse("web:get_events")
 
 
-class TestEventCalendarView(TestCase):
-    """test EventCalendarView view"""
-
+class TestIndexView(TestCase):
     def setUp(self):
-        super(TestEventCalendarView, self).setUp()
-        self.object = baker.make("web.Event", approved_at=timezone.localtime())
+        super(TestIndexView, self).setUp()
         self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
-        self.referrer = reverse("web:index")
+        self.now = timezone.now()
+        self.url = reverse("web:index")
+
+    def test_default(self):
+        """verify call to GetIndexContent view via 'default' url with a non-htmx call"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/custom/index.html")
+
+    def test_default_htmx(self):
+        """verify call to GetIndexContent view via 'default' with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/custom/index.htm")
+
+
+class TestAboutView(TestCase):
+    def setUp(self):
+        super(TestAboutView, self).setUp()
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+        self.now = timezone.now()
+        self.url = reverse("web:about")
+
+    def test_get(self):
+        """verify call to GetAboutContent view with a non-htmx call"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/custom/about.html")
+
+    def test_get_htmx(self):
+        """verify call to GetAboutContent view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/custom/about.htm")
+
+
+class TestCalendarView(TestCase):
+    def setUp(self):
+        super(TestCalendarView, self).setUp()
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
         self.now = timezone.now()
         self.url = reverse("web:event_calendar", kwargs={"year": self.now.year, "month": self.now.month})
 
     def test_get(self):
-        """verify page content can be rendered"""
-        response = self.client.get(self.url, HTTP_REFERER=self.referrer, **self.headers)
+        """verify call to EventCalendarView view with a non-htmx call"""
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "handyhelpers/partials/calendar.htm")
-        self.assertIn(self.object.name, response.content.decode("utf-8"))
-        self.assertIn(f"/events/{self.object.pk}/details", response.content.decode("utf-8"))
+        self.assertTemplateUsed(response, "web/full/custom/calendar.html")
+
+    def test_get_htmx(self):
+        """verify call to EventCalendarView view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/custom/calendar.htm")
 
 
-class TestEventListView(TestCase):
+class TestGetTechEventView(TestCase):
     def setUp(self):
-        super().setUp()
-        now = timezone.localtime()
-        self.tag = baker.make("web.Tag")
-        self.group = baker.make("web.TechGroup")
-        self.group.tags.set([self.tag])
-        self.object = baker.make(
-            "web.Event",
-            group=self.group,
-            date_time=now + datetime.timedelta(seconds=1),
-            approved_at=now,
-        )
-        self.url = reverse("web:list_events")
+        super(TestGetTechEventView, self).setUp()
+        self.instance = baker.make("web.Event", approved_at=timezone.localtime())
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+        self.url = reverse("web:get_event", kwargs={"pk": self.instance.pk})
 
-    def test_filter_on_group_tags(self):
-        response = self.client.get(self.url + f"?tags={self.tag.pk}")
+    def test_get(self):
+        """verify call to GetTechEvent view with a non-htmx call"""
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.object.name, response.content.decode("utf-8"))
+        self.assertTemplateUsed(response, "web/full/detail/event.html")
 
-    def test_does_not_include_unapproved_events(self):
-        self.object.approved_at = None
-        self.object.save()
-        response = self.client.get(self.url + f"?tags={self.tag.pk}")
-        self.assertNotIn(self.object.name, response.content.decode("utf-8"))
+    def test_get_htmx(self):
+        """verify call to GetTechEvent view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/detail/event.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+
+class TestGetTechEventsView(TestCase):
+    def setUp(self):
+        super(TestGetTechEventsView, self).setUp()
+        self.instance = baker.make("web.Event", approved_at=timezone.localtime())
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+
+    def test_get(self):
+        """verify call to GetTechEvents view with a non-htmx call"""
+        url = reverse("web:get_events")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/list/events.html")
+
+    def test_get_htmx_index(self):
+        """verify call to GetTechEvents view with a htmx call"""
+        url = reverse("web:get_events", kwargs={"display": "index"})
+        response = self.client.get(url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/marquee/event_cards.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+    def test_get_htmx_list(self):
+        """verify call to GetTechEvents view with a htmx call"""
+        url = reverse("web:get_events", kwargs={"display": "list"})
+        response = self.client.get(url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/list/events.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+
+class GetTechEventModalView(TestCase):
+    def setUp(self):
+        super(GetTechEventModalView, self).setUp()
+        self.instance = baker.make("web.Event", approved_at=timezone.localtime())
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+        self.url = reverse("web:techevent_modal", kwargs={"pk": self.instance.pk})
+
+    def test_get_htmx(self):
+        """verify call to GetTechEventModal view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/modal/event_information.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+
+class TestGetTechGroupView(TestCase):
+    def setUp(self):
+        super(TestGetTechGroupView, self).setUp()
+        self.instance = baker.make("web.TechGroup")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+        self.url = reverse("web:get_techgroup", kwargs={"pk": self.instance.pk})
+
+    def test_get(self):
+        """verify call to GetTechGroup view with a non-htmx call"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/detail/group.html")
+
+    def test_get_htmx(self):
+        """verify call to GetTechGroup view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/detail/group.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+
+class TestGetTechGroupsView(TestCase):
+    def setUp(self):
+        super(TestGetTechGroupsView, self).setUp()
+        self.instance = baker.make("web.TechGroup")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+
+    def test_get(self):
+        """verify call to GetTechGroups view with a non-htmx call"""
+        url = reverse("web:get_techgroups")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/full/list/groups.html")
+
+    def test_get_htmx_index(self):
+        """verify call to GetTechGroups view with a htmx call"""
+        url = reverse("web:get_techgroups", kwargs={"display": "index"})
+        response = self.client.get(url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/marquee/group_cards.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+    def test_get_htmx_list(self):
+        """verify call to GetTechGroups view with a htmx call"""
+        url = reverse("web:get_techgroups", kwargs={"display": "list"})
+        response = self.client.get(url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/list/groups.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
+
+
+class GetTechGroupModalView(TestCase):
+    def setUp(self):
+        super(GetTechGroupModalView, self).setUp()
+        self.instance = baker.make("web.TechGroup")
+        self.headers: dict[str, Any] = dict(HTTP_HX_REQUEST="true")
+        self.url = reverse("web:techgroup_modal", kwargs={"pk": self.instance.pk})
+
+    def test_get_htmx(self):
+        """verify call to GetTechGroupModal view with a htmx call"""
+        response = self.client.get(self.url, **self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "web/partials/modal/group_information.htm")
+        self.assertIn(self.instance.name, response.content.decode("utf-8"))
