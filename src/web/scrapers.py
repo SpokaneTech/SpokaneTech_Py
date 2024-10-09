@@ -248,6 +248,8 @@ class EventbriteScraper(ScraperMixin, Scraper[list[EventScraperResult]]):
             status="live",
             expand="logo",
         )
+        if not str(response.status_code).startswith("2"):
+            raise ValueError(response.status_code, response.reason)
         results = [self.map_to_event(eventbrite_event) for eventbrite_event in response["events"]]
         return results
 
