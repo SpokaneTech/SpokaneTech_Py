@@ -150,15 +150,18 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
             location_data = apollo_state[event_json["venue"]["__ref"]]
             location = f"{location_data['address']}, {location_data['city']}, {location_data['state']}"
             external_id = event_json["id"]
-            event_photo = event_json["featuredEventPhoto"]["__ref"]
-            image_url = apollo_state[event_photo].get("highResUrl", apollo_state[event_photo]["baseUrl"])
-        except KeyError:
+        except (TypeError, KeyError):
             name = self._parse_name(soup)
             description = self._parse_description(soup)
             date_time = self._parse_date_time(soup)
             duration = self._parse_duration(soup)
             location = self._parse_location(soup)
             external_id = self._parse_external_id(url)
+
+        try:
+            event_photo = event_json["featuredEventPhoto"]["__ref"]
+            image_url = apollo_state[event_photo].get("highResUrl", apollo_state[event_photo]["baseUrl"])
+        except (TypeError, KeyError):
             image_url = self._parse_image(soup)
 
         if image_url:
