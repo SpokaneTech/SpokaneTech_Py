@@ -164,6 +164,7 @@ class MeetupEventScraper(MeetupScraperMixin, Scraper[EventScraperResult]):
         except (TypeError, KeyError):
             image_url = self._parse_image(soup)
 
+        image_result = None
         if image_url:
             image_result = self._get_image(image_url)
 
