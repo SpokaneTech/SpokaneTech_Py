@@ -41,7 +41,10 @@ class TechGroup(HandyHelperBaseModel):
         return self.name
 
     def get_absolute_url(self) -> str:
-        return reverse("web:get_tech_group", kwargs={"pk": self.pk})
+        return reverse("web:get_techgroup", kwargs={"pk": self.pk})
+
+    # def get_htmx_detail_url(self) -> str:
+    #     return reverse("web:get_techgroup", kwargs={"pk": self.pk})
 
 
 class EventQuerySet(models.QuerySet):
@@ -110,6 +113,9 @@ class Event(HandyHelperBaseModel):
 
     def get_absolute_url(self) -> str:
         return reverse("web:get_event", kwargs={"pk": self.pk})
+
+    # def get_htmx_detail_url(self) -> str:
+    #     return reverse("web:detail_event", kwargs={"pk": self.pk})
 
 
 class EventbriteOrganization(models.Model):

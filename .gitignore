@@ -25,6 +25,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+yarn.lock
+package-lock.json
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -61,7 +63,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 *.dump
+src/static/node_modules
 src/staticfiles
+src/staticroot
 src/media
 
 # Flask stuff:
