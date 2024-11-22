@@ -212,18 +212,20 @@ class BuildSidebar(BuildModelSidebarNav):
 
     template_name = "spokanetech/htmx/build_sidebar.htm"
 
-    menu_item_list = [
-        {
-            "queryset": Event.objects.filter(date_time__gte=timezone.localtime()).order_by("date_time"),
-            "list_all_url": reverse_lazy("web:list_events"),
-            "icon": """<i class="fa-solid fa-calendar-day"></i>""",
-        },
-        {
-            "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
-            "list_all_url": reverse_lazy("web:list_tech_groups"),
-            "icon": """<i class="fa-solid fa-people-group"></i>""",
-        },
-    ]
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.menu_item_list = [
+            {
+                "queryset": Event.objects.filter(date_time__gte=timezone.localtime()).order_by("date_time"),
+                "list_all_url": reverse_lazy("web:list_events"),
+                "icon": """<i class="fa-solid fa-calendar-day"></i>""",
+            },
+            {
+                "queryset": TechGroup.objects.filter(enabled=True).order_by("name"),
+                "list_all_url": reverse_lazy("web:list_tech_groups"),
+                "icon": """<i class="fa-solid fa-people-group"></i>""",
+            },
+        ]
 
 
 class GetEventDetailsModal(BuildBootstrapModalView):
